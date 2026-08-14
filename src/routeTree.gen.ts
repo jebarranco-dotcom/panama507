@@ -10,11 +10,17 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ColaboradoresRouteImport } from './routes/colaboradores'
 import { Route as ApiPublicHooksRutinaDiariaRouteImport } from './routes/api/public/hooks/rutina-diaria'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ColaboradoresRoute = ColaboradoresRouteImport.update({
+  id: '/colaboradores',
+  path: '/colaboradores',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicHooksRutinaDiariaRoute =
@@ -26,27 +32,31 @@ const ApiPublicHooksRutinaDiariaRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/colaboradores': typeof ColaboradoresRoute
   '/api/public/hooks/rutina-diaria': typeof ApiPublicHooksRutinaDiariaRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/colaboradores': typeof ColaboradoresRoute
   '/api/public/hooks/rutina-diaria': typeof ApiPublicHooksRutinaDiariaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/colaboradores': typeof ColaboradoresRoute
   '/api/public/hooks/rutina-diaria': typeof ApiPublicHooksRutinaDiariaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/public/hooks/rutina-diaria'
+  fullPaths: '/' | '/colaboradores' | '/api/public/hooks/rutina-diaria'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/public/hooks/rutina-diaria'
-  id: '__root__' | '/' | '/api/public/hooks/rutina-diaria'
+  to: '/' | '/colaboradores' | '/api/public/hooks/rutina-diaria'
+  id: '__root__' | '/' | '/colaboradores' | '/api/public/hooks/rutina-diaria'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ColaboradoresRoute: typeof ColaboradoresRoute
   ApiPublicHooksRutinaDiariaRoute: typeof ApiPublicHooksRutinaDiariaRoute
 }
 
@@ -57,6 +67,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/colaboradores': {
+      id: '/colaboradores'
+      path: '/colaboradores'
+      fullPath: '/colaboradores'
+      preLoaderRoute: typeof ColaboradoresRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/hooks/rutina-diaria': {
@@ -71,6 +88,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ColaboradoresRoute: ColaboradoresRoute,
   ApiPublicHooksRutinaDiariaRoute: ApiPublicHooksRutinaDiariaRoute,
 }
 export const routeTree = rootRouteImport

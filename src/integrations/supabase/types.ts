@@ -14,7 +14,338 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      colaboradores: {
+        Row: {
+          activo: boolean
+          correo: string
+          created_at: string
+          id: string
+          leads_atendidos: number
+          leads_cerrados: number
+          nombre: string
+          publicaciones_asignadas: number
+          redes_asignadas: string[]
+          rol: string
+          telefono: string
+          whatsapp: string
+        }
+        Insert: {
+          activo?: boolean
+          correo?: string
+          created_at?: string
+          id?: string
+          leads_atendidos?: number
+          leads_cerrados?: number
+          nombre: string
+          publicaciones_asignadas?: number
+          redes_asignadas?: string[]
+          rol?: string
+          telefono?: string
+          whatsapp?: string
+        }
+        Update: {
+          activo?: boolean
+          correo?: string
+          created_at?: string
+          id?: string
+          leads_atendidos?: number
+          leads_cerrados?: number
+          nombre?: string
+          publicaciones_asignadas?: number
+          redes_asignadas?: string[]
+          rol?: string
+          telefono?: string
+          whatsapp?: string
+        }
+        Relationships: []
+      }
+      cuentas_sociales: {
+        Row: {
+          alcance_mensual: number
+          conectada: boolean
+          created_at: string
+          id: string
+          notas: string
+          red: string
+          seguidores: number
+          updated_at: string
+          usuario: string
+        }
+        Insert: {
+          alcance_mensual?: number
+          conectada?: boolean
+          created_at?: string
+          id?: string
+          notas?: string
+          red: string
+          seguidores?: number
+          updated_at?: string
+          usuario?: string
+        }
+        Update: {
+          alcance_mensual?: number
+          conectada?: boolean
+          created_at?: string
+          id?: string
+          notas?: string
+          red?: string
+          seguidores?: number
+          updated_at?: string
+          usuario?: string
+        }
+        Relationships: []
+      }
+      informes_diarios: {
+        Row: {
+          alcance_total: number
+          created_at: string
+          fecha: string
+          id: string
+          leads_nuevos: number
+          logros: string[]
+          mejor_red: string
+          mensajes_atendidos: number
+          mensajes_recibidos: number
+          publicaciones_programadas: number
+          publicaciones_publicadas: number
+          recomendaciones: string[]
+          resumen: string
+        }
+        Insert: {
+          alcance_total?: number
+          created_at?: string
+          fecha?: string
+          id?: string
+          leads_nuevos?: number
+          logros?: string[]
+          mejor_red?: string
+          mensajes_atendidos?: number
+          mensajes_recibidos?: number
+          publicaciones_programadas?: number
+          publicaciones_publicadas?: number
+          recomendaciones?: string[]
+          resumen?: string
+        }
+        Update: {
+          alcance_total?: number
+          created_at?: string
+          fecha?: string
+          id?: string
+          leads_nuevos?: number
+          logros?: string[]
+          mejor_red?: string
+          mensajes_atendidos?: number
+          mensajes_recibidos?: number
+          publicaciones_programadas?: number
+          publicaciones_publicadas?: number
+          recomendaciones?: string[]
+          resumen?: string
+        }
+        Relationships: []
+      }
+      mensajes: {
+        Row: {
+          colaborador_id: string | null
+          created_at: string
+          estado: string
+          id: string
+          intencion: string
+          mensaje: string
+          notas: string
+          prioridad: string
+          propiedad_id: string | null
+          proximo_seguimiento: string | null
+          red: string
+          remitente: string
+          respondido_at: string | null
+          respuesta: string | null
+          usuario_remitente: string
+        }
+        Insert: {
+          colaborador_id?: string | null
+          created_at?: string
+          estado?: string
+          id?: string
+          intencion?: string
+          mensaje?: string
+          notas?: string
+          prioridad?: string
+          propiedad_id?: string | null
+          proximo_seguimiento?: string | null
+          red?: string
+          remitente?: string
+          respondido_at?: string | null
+          respuesta?: string | null
+          usuario_remitente?: string
+        }
+        Update: {
+          colaborador_id?: string | null
+          created_at?: string
+          estado?: string
+          id?: string
+          intencion?: string
+          mensaje?: string
+          notas?: string
+          prioridad?: string
+          propiedad_id?: string | null
+          proximo_seguimiento?: string | null
+          red?: string
+          remitente?: string
+          respondido_at?: string | null
+          respuesta?: string | null
+          usuario_remitente?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mensajes_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "colaboradores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mensajes_propiedad_id_fkey"
+            columns: ["propiedad_id"]
+            isOneToOne: false
+            referencedRelation: "propiedades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      propiedades: {
+        Row: {
+          area_m2: number
+          banos: number
+          created_at: string
+          descripcion: string
+          destacada: boolean
+          estado: string
+          habitaciones: number
+          id: string
+          imagen_url: string | null
+          moneda: string
+          operacion: string
+          precio: number
+          tipo: string
+          titulo: string
+          ubicacion: string
+        }
+        Insert: {
+          area_m2?: number
+          banos?: number
+          created_at?: string
+          descripcion?: string
+          destacada?: boolean
+          estado?: string
+          habitaciones?: number
+          id?: string
+          imagen_url?: string | null
+          moneda?: string
+          operacion?: string
+          precio?: number
+          tipo?: string
+          titulo: string
+          ubicacion?: string
+        }
+        Update: {
+          area_m2?: number
+          banos?: number
+          created_at?: string
+          descripcion?: string
+          destacada?: boolean
+          estado?: string
+          habitaciones?: number
+          id?: string
+          imagen_url?: string | null
+          moneda?: string
+          operacion?: string
+          precio?: number
+          tipo?: string
+          titulo?: string
+          ubicacion?: string
+        }
+        Relationships: []
+      }
+      publicaciones: {
+        Row: {
+          alcance: number
+          clics: number
+          comentarios: number
+          copy: string
+          created_at: string
+          cta: string
+          estado: string
+          fecha_programada: string
+          formato: string
+          generado_por_ia: boolean
+          hashtags: string[]
+          hora_programada: string
+          id: string
+          idea_visual: string
+          leads: number
+          likes: number
+          pilar: string
+          propiedad_id: string | null
+          publicado_at: string | null
+          red: string
+          titular: string
+        }
+        Insert: {
+          alcance?: number
+          clics?: number
+          comentarios?: number
+          copy?: string
+          created_at?: string
+          cta?: string
+          estado?: string
+          fecha_programada?: string
+          formato?: string
+          generado_por_ia?: boolean
+          hashtags?: string[]
+          hora_programada?: string
+          id?: string
+          idea_visual?: string
+          leads?: number
+          likes?: number
+          pilar?: string
+          propiedad_id?: string | null
+          publicado_at?: string | null
+          red?: string
+          titular?: string
+        }
+        Update: {
+          alcance?: number
+          clics?: number
+          comentarios?: number
+          copy?: string
+          created_at?: string
+          cta?: string
+          estado?: string
+          fecha_programada?: string
+          formato?: string
+          generado_por_ia?: boolean
+          hashtags?: string[]
+          hora_programada?: string
+          id?: string
+          idea_visual?: string
+          leads?: number
+          likes?: number
+          pilar?: string
+          propiedad_id?: string | null
+          publicado_at?: string | null
+          red?: string
+          titular?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "publicaciones_propiedad_id_fkey"
+            columns: ["propiedad_id"]
+            isOneToOne: false
+            referencedRelation: "propiedades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

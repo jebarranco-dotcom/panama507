@@ -152,7 +152,7 @@ function Dashboard() {
                   name="Alcance"
                   stroke="var(--chart-1)"
                   strokeWidth={2.5}
-                  dot={false}
+                  dot={{ r: 3 }}
                 />
                 <Line
                   type="monotone"
@@ -160,7 +160,7 @@ function Dashboard() {
                   name="Leads"
                   stroke="var(--chart-3)"
                   strokeWidth={2.5}
-                  dot={false}
+                  dot={{ r: 3 }}
                 />
               </LineChart>
             </ResponsiveContainer>

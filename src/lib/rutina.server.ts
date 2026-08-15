@@ -10,10 +10,15 @@ import {
 } from "./ai-gateway.server";
 import { EMPRESA, PLAN_DIARIO, nombrePilar } from "./estrategia";
 
+/**
+ * Cliente de servidor con credenciales de servicio.
+ * Las tablas internas solo permiten acceso autenticado, por lo que la
+ * automatización (cron/webhook) debe usar la clave de servicio del servidor.
+ */
 export function crearClienteServidor() {
-  const key = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
+  const key = process.env["SUPABASE_SERVICE_ROLE_KEY"]!;
   return createClient<Database>(process.env["SUPABASE_URL"]!, key, {
-    auth: { persistSession: false },
+    auth: { persistSession: false, autoRefreshToken: false },
     global: {
       fetch: (input, init) => {
         const h = new Headers(init?.headers);

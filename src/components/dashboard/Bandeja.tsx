@@ -19,6 +19,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { sugerirRespuesta } from "@/lib/marketing.functions";
 import { colaboradoresQuery, mensajesQuery } from "@/lib/queries";
 
+type CambiosMensaje = {
+  estado?: string;
+  respuesta?: string;
+  respondido_at?: string;
+  colaborador_id?: string | null;
+  prioridad?: string;
+  notas?: string;
+  proximo_seguimiento?: string | null;
+};
+
 export function Bandeja() {
   const qc = useQueryClient();
   const { data: mensajes = [] } = useQuery(mensajesQuery);
@@ -38,7 +48,7 @@ export function Bandeja() {
       cambios,
     }: {
       id: string;
-      cambios: Record<string, unknown>;
+      cambios: CambiosMensaje;
     }) => {
       const { error } = await supabase.from("mensajes").update(cambios).eq("id", id);
       if (error) throw error;

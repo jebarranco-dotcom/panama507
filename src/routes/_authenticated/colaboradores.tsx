@@ -33,7 +33,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { REDES, type Red } from "@/lib/estrategia";
 import { colaboradoresQuery, mensajesQuery } from "@/lib/queries";
 
-export const Route = createFileRoute("/colaboradores")({
+export const Route = createFileRoute("/_authenticated/colaboradores")({
   head: () => ({
     meta: [
       { title: "Colaboradores | RENTELO FACIL" },

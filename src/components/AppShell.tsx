@@ -1,6 +1,8 @@
-import { Link } from "@tanstack/react-router";
-import { BarChart3, Building2, Users } from "lucide-react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { BarChart3, Building2, LogOut, Users } from "lucide-react";
 import type { ReactNode } from "react";
+
+import { supabase } from "@/integrations/supabase/client";
 
 const NAV = [
   { to: "/", label: "Dashboard", icon: BarChart3 },
@@ -18,6 +20,8 @@ export function AppShell({
   acciones?: ReactNode;
   children: ReactNode;
 }) {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-background">
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-r border-sidebar-border bg-sidebar px-4 py-6 md:flex">
@@ -50,11 +54,24 @@ export function AppShell({
           ))}
         </nav>
 
-        <div className="mt-auto rounded-xl border border-sidebar-border bg-sidebar-accent/40 p-3">
-          <p className="text-xs font-semibold text-sidebar-foreground">Automatización activa</p>
-          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-            Contenido, publicación e informe se ejecutan todos los días a las 8:00 a.m.
-          </p>
+        <div className="mt-auto space-y-3">
+          <div className="rounded-xl border border-sidebar-border bg-sidebar-accent/40 p-3">
+            <p className="text-xs font-semibold text-sidebar-foreground">Automatización activa</p>
+            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+              Contenido, publicación e informe se ejecutan todos los días a las 8:00 a.m.
+            </p>
+          </div>
+          <button
+            type="button"
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground/75 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+            onClick={async () => {
+              await supabase.auth.signOut();
+              await navigate({ to: "/auth" });
+            }}
+          >
+            <LogOut className="size-4" />
+            Cerrar sesión
+          </button>
         </div>
       </aside>
 

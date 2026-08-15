@@ -9,20 +9,32 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as ColaboradoresRouteImport } from './routes/colaboradores'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedColaboradoresRouteImport } from './routes/_authenticated/colaboradores'
 import { Route as ApiPublicHooksRutinaDiariaRouteImport } from './routes/api/public/hooks/rutina-diaria'
 
-const IndexRoute = IndexRouteImport.update({
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const ColaboradoresRoute = ColaboradoresRouteImport.update({
-  id: '/colaboradores',
-  path: '/colaboradores',
-  getParentRoute: () => rootRouteImport,
-} as any)
+const AuthenticatedColaboradoresRoute =
+  AuthenticatedColaboradoresRouteImport.update({
+    id: '/colaboradores',
+    path: '/colaboradores',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const ApiPublicHooksRutinaDiariaRoute =
   ApiPublicHooksRutinaDiariaRouteImport.update({
     id: '/api/public/hooks/rutina-diaria',
@@ -31,50 +43,75 @@ const ApiPublicHooksRutinaDiariaRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/colaboradores': typeof ColaboradoresRoute
+  '/': typeof AuthenticatedIndexRoute
+  '/auth': typeof AuthRoute
+  '/colaboradores': typeof AuthenticatedColaboradoresRoute
   '/api/public/hooks/rutina-diaria': typeof ApiPublicHooksRutinaDiariaRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/colaboradores': typeof ColaboradoresRoute
+  '/auth': typeof AuthRoute
+  '/colaboradores': typeof AuthenticatedColaboradoresRoute
+  '/': typeof AuthenticatedIndexRoute
   '/api/public/hooks/rutina-diaria': typeof ApiPublicHooksRutinaDiariaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/colaboradores': typeof ColaboradoresRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/_authenticated/colaboradores': typeof AuthenticatedColaboradoresRoute
+  '/_authenticated/': typeof AuthenticatedIndexRoute
   '/api/public/hooks/rutina-diaria': typeof ApiPublicHooksRutinaDiariaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/colaboradores' | '/api/public/hooks/rutina-diaria'
+  fullPaths:
+    '/' | '/auth' | '/colaboradores' | '/api/public/hooks/rutina-diaria'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/colaboradores' | '/api/public/hooks/rutina-diaria'
-  id: '__root__' | '/' | '/colaboradores' | '/api/public/hooks/rutina-diaria'
+  to: '/auth' | '/colaboradores' | '/' | '/api/public/hooks/rutina-diaria'
+  id:
+    | '__root__'
+    | '/_authenticated'
+    | '/auth'
+    | '/_authenticated/colaboradores'
+    | '/_authenticated/'
+    | '/api/public/hooks/rutina-diaria'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  ColaboradoresRoute: typeof ColaboradoresRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
   ApiPublicHooksRutinaDiariaRoute: typeof ApiPublicHooksRutinaDiariaRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/colaboradores': {
-      id: '/colaboradores'
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/': {
+      id: '/_authenticated/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/colaboradores': {
+      id: '/_authenticated/colaboradores'
       path: '/colaboradores'
       fullPath: '/colaboradores'
-      preLoaderRoute: typeof ColaboradoresRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedColaboradoresRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/api/public/hooks/rutina-diaria': {
       id: '/api/public/hooks/rutina-diaria'
@@ -86,9 +123,22 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedColaboradoresRoute: typeof AuthenticatedColaboradoresRoute
+  AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedColaboradoresRoute: AuthenticatedColaboradoresRoute,
+  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  ColaboradoresRoute: ColaboradoresRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
   ApiPublicHooksRutinaDiariaRoute: ApiPublicHooksRutinaDiariaRoute,
 }
 export const routeTree = rootRouteImport

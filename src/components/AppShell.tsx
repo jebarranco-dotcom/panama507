@@ -1,6 +1,8 @@
-import { Link } from "@tanstack/react-router";
-import { BarChart3, Building2, Users } from "lucide-react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { BarChart3, Building2, LogOut, Users } from "lucide-react";
 import type { ReactNode } from "react";
+
+import { supabase } from "@/integrations/supabase/client";
 
 const NAV = [
   { to: "/", label: "Dashboard", icon: BarChart3 },

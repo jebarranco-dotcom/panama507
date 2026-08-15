@@ -20,6 +20,8 @@ export function AppShell({
   acciones?: ReactNode;
   children: ReactNode;
 }) {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-background">
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-r border-sidebar-border bg-sidebar px-4 py-6 md:flex">

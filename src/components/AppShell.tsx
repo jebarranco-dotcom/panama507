@@ -50,11 +50,24 @@ export function AppShell({
           ))}
         </nav>
 
-        <div className="mt-auto rounded-xl border border-sidebar-border bg-sidebar-accent/40 p-3">
-          <p className="text-xs font-semibold text-sidebar-foreground">Automatización activa</p>
-          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-            Contenido, publicación e informe se ejecutan todos los días a las 8:00 a.m.
-          </p>
+        <div className="mt-auto space-y-3">
+          <div className="rounded-xl border border-sidebar-border bg-sidebar-accent/40 p-3">
+            <p className="text-xs font-semibold text-sidebar-foreground">Automatización activa</p>
+            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+              Contenido, publicación e informe se ejecutan todos los días a las 8:00 a.m.
+            </p>
+          </div>
+          <button
+            type="button"
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground/75 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+            onClick={async () => {
+              await supabase.auth.signOut();
+              await navigate({ to: "/auth" });
+            }}
+          >
+            <LogOut className="size-4" />
+            Cerrar sesión
+          </button>
         </div>
       </aside>
 

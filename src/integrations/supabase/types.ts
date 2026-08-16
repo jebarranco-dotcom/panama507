@@ -19,6 +19,7 @@ export type Database = {
           activo: boolean
           correo: string
           created_at: string
+          empresa_id: string
           id: string
           leads_atendidos: number
           leads_cerrados: number
@@ -33,6 +34,7 @@ export type Database = {
           activo?: boolean
           correo?: string
           created_at?: string
+          empresa_id: string
           id?: string
           leads_atendidos?: number
           leads_cerrados?: number
@@ -47,6 +49,7 @@ export type Database = {
           activo?: boolean
           correo?: string
           created_at?: string
+          empresa_id?: string
           id?: string
           leads_atendidos?: number
           leads_cerrados?: number
@@ -57,13 +60,22 @@ export type Database = {
           telefono?: string
           whatsapp?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "colaboradores_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       cuentas_sociales: {
         Row: {
           alcance_mensual: number
           conectada: boolean
           created_at: string
+          empresa_id: string
           id: string
           notas: string
           red: string
@@ -75,6 +87,7 @@ export type Database = {
           alcance_mensual?: number
           conectada?: boolean
           created_at?: string
+          empresa_id: string
           id?: string
           notas?: string
           red: string
@@ -86,6 +99,7 @@ export type Database = {
           alcance_mensual?: number
           conectada?: boolean
           created_at?: string
+          empresa_id?: string
           id?: string
           notas?: string
           red?: string
@@ -93,12 +107,69 @@ export type Database = {
           updated_at?: string
           usuario?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "cuentas_sociales_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      empresas: {
+        Row: {
+          activa: boolean
+          color_acento: string
+          color_primario: string
+          created_at: string
+          giro: string
+          id: string
+          logo_url: string | null
+          nombre: string
+          slug: string
+          tono: string
+          updated_at: string
+          whatsapp: string
+          zonas: string
+        }
+        Insert: {
+          activa?: boolean
+          color_acento?: string
+          color_primario?: string
+          created_at?: string
+          giro?: string
+          id?: string
+          logo_url?: string | null
+          nombre: string
+          slug: string
+          tono?: string
+          updated_at?: string
+          whatsapp?: string
+          zonas?: string
+        }
+        Update: {
+          activa?: boolean
+          color_acento?: string
+          color_primario?: string
+          created_at?: string
+          giro?: string
+          id?: string
+          logo_url?: string | null
+          nombre?: string
+          slug?: string
+          tono?: string
+          updated_at?: string
+          whatsapp?: string
+          zonas?: string
+        }
         Relationships: []
       }
       informes_diarios: {
         Row: {
           alcance_total: number
           created_at: string
+          empresa_id: string
           fecha: string
           id: string
           leads_nuevos: number
@@ -114,6 +185,7 @@ export type Database = {
         Insert: {
           alcance_total?: number
           created_at?: string
+          empresa_id: string
           fecha?: string
           id?: string
           leads_nuevos?: number
@@ -129,6 +201,7 @@ export type Database = {
         Update: {
           alcance_total?: number
           created_at?: string
+          empresa_id?: string
           fecha?: string
           id?: string
           leads_nuevos?: number
@@ -141,12 +214,21 @@ export type Database = {
           recomendaciones?: string[]
           resumen?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "informes_diarios_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       mensajes: {
         Row: {
           colaborador_id: string | null
           created_at: string
+          empresa_id: string
           estado: string
           id: string
           intencion: string
@@ -164,6 +246,7 @@ export type Database = {
         Insert: {
           colaborador_id?: string | null
           created_at?: string
+          empresa_id: string
           estado?: string
           id?: string
           intencion?: string
@@ -181,6 +264,7 @@ export type Database = {
         Update: {
           colaborador_id?: string | null
           created_at?: string
+          empresa_id?: string
           estado?: string
           id?: string
           intencion?: string
@@ -204,6 +288,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "mensajes_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "mensajes_propiedad_id_fkey"
             columns: ["propiedad_id"]
             isOneToOne: false
@@ -219,6 +310,7 @@ export type Database = {
           created_at: string
           descripcion: string
           destacada: boolean
+          empresa_id: string
           estado: string
           habitaciones: number
           id: string
@@ -236,6 +328,7 @@ export type Database = {
           created_at?: string
           descripcion?: string
           destacada?: boolean
+          empresa_id: string
           estado?: string
           habitaciones?: number
           id?: string
@@ -253,6 +346,7 @@ export type Database = {
           created_at?: string
           descripcion?: string
           destacada?: boolean
+          empresa_id?: string
           estado?: string
           habitaciones?: number
           id?: string
@@ -264,7 +358,15 @@ export type Database = {
           titulo?: string
           ubicacion?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "propiedades_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       publicaciones: {
         Row: {
@@ -274,6 +376,7 @@ export type Database = {
           copy: string
           created_at: string
           cta: string
+          empresa_id: string
           estado: string
           fecha_programada: string
           formato: string
@@ -297,6 +400,7 @@ export type Database = {
           copy?: string
           created_at?: string
           cta?: string
+          empresa_id: string
           estado?: string
           fecha_programada?: string
           formato?: string
@@ -320,6 +424,7 @@ export type Database = {
           copy?: string
           created_at?: string
           cta?: string
+          empresa_id?: string
           estado?: string
           fecha_programada?: string
           formato?: string
@@ -337,6 +442,13 @@ export type Database = {
           titular?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "publicaciones_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "publicaciones_propiedad_id_fkey"
             columns: ["propiedad_id"]

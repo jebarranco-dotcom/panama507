@@ -17,6 +17,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { sugerirRespuesta } from "@/lib/marketing.functions";
+import { useEmpresa } from "@/lib/empresa";
 import { colaboradoresQuery, mensajesQuery } from "@/lib/queries";
 
 type CambiosMensaje = {
@@ -31,15 +32,16 @@ type CambiosMensaje = {
 
 export function Bandeja() {
   const qc = useQueryClient();
-  const { data: mensajes = [] } = useQuery(mensajesQuery);
-  const { data: equipo = [] } = useQuery(colaboradoresQuery);
+  const { empresaId } = useEmpresa();
+  const { data: mensajes = [] } = useQuery(mensajesQuery(empresaId));
+  const { data: equipo = [] } = useQuery(colaboradoresQuery(empresaId));
   const sugerir = useServerFn(sugerirRespuesta);
   const [borradores, setBorradores] = useState<Record<string, string>>({});
   const [cargando, setCargando] = useState<string | null>(null);
   const [filtro, setFiltro] = useState<string>("abiertos");
 
   const refrescar = () => {
-    void qc.invalidateQueries({ queryKey: ["mensajes"] });
+    void qc.invalidateQueries({ queryKey: ["mensajes", empresaId] });
   };
 
   const actualizar = useMutation({

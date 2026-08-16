@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { nombrePilar } from "@/lib/estrategia";
 import { generarContenido, publicarAhora } from "@/lib/marketing.functions";
+import { useEmpresa } from "@/lib/empresa";
 import { publicacionesQuery } from "@/lib/queries";
 
 function fechaLegible(iso: string) {
@@ -18,17 +19,18 @@ function fechaLegible(iso: string) {
 
 export function Contenido() {
   const qc = useQueryClient();
-  const { data: publicaciones = [] } = useQuery(publicacionesQuery);
+  const { empresaId } = useEmpresa();
+  const { data: publicaciones = [] } = useQuery(publicacionesQuery(empresaId));
   const generar = useServerFn(generarContenido);
   const publicar = useServerFn(publicarAhora);
 
   const refrescar = () => {
-    void qc.invalidateQueries({ queryKey: ["publicaciones"] });
-    void qc.invalidateQueries({ queryKey: ["informes"] });
+    void qc.invalidateQueries({ queryKey: ["publicaciones", empresaId] });
+    void qc.invalidateQueries({ queryKey: ["informes", empresaId] });
   };
 
   const generarMut = useMutation({
-    mutationFn: (fecha?: string) => generar({ data: { fecha } }),
+    mutationFn: (fecha?: string) => generar({ data: { fecha, empresaId } }),
     onSuccess: (r) => {
       toast.success(r.mensaje, { description: `${r.creadas} piezas para ${r.fecha}` });
       refrescar();
@@ -37,7 +39,7 @@ export function Contenido() {
   });
 
   const publicarMut = useMutation({
-    mutationFn: () => publicar(),
+    mutationFn: () => publicar({ data: { empresaId } }),
     onSuccess: (r) => {
       toast.success("Cola procesada", {
         description: `${r.publicadas} publicadas · ${r.enCola} en espera de conexión`,

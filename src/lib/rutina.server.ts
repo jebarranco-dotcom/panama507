@@ -8,7 +8,7 @@ import {
   parsearJson,
   requireGatewayKey,
 } from "./ai-gateway.server";
-import { EMPRESA, PLAN_DIARIO, nombrePilar } from "./estrategia";
+import { PLAN_DIARIO, nombrePilar } from "./estrategia";
 
 /**
  * Cliente de servidor con credenciales de servicio.
@@ -32,6 +32,40 @@ export function crearClienteServidor() {
   });
 }
 
+type Cliente = ReturnType<typeof crearClienteServidor>;
+
+type EmpresaFila = {
+  id: string;
+  nombre: string;
+  giro: string;
+  tono: string;
+  whatsapp: string;
+  zonas: string;
+};
+
+async function cargarEmpresa(supabase: Cliente, empresaId?: string): Promise<EmpresaFila> {
+  const consulta = supabase
+    .from("empresas")
+    .select("id, nombre, giro, tono, whatsapp, zonas")
+    .eq("activa", true);
+  const { data, error } = empresaId
+    ? await consulta.eq("id", empresaId).maybeSingle()
+    : await consulta.order("created_at").limit(1).maybeSingle();
+  if (error || !data) throw new Error("Empresa no encontrada");
+  return data as EmpresaFila;
+}
+
+export async function listarEmpresasActivas() {
+  const supabase = crearClienteServidor();
+  const { data, error } = await supabase
+    .from("empresas")
+    .select("id, nombre")
+    .eq("activa", true)
+    .order("created_at");
+  if (error) throw new Error(error.message);
+  return data ?? [];
+}
+
 function hoyISO(offsetDias = 0) {
   const d = new Date();
   d.setUTCDate(d.getUTCDate() + offsetDias);
@@ -48,11 +82,15 @@ async function pedirTexto(prompt: string, system: string) {
   return resultado.text;
 }
 
-const SYSTEM_CONTENIDO = `Eres el estratega de redes sociales de ${EMPRESA.nombre}, empresa de ${EMPRESA.giro} en Panamá.
-Escribes en español de Panamá con tono ${EMPRESA.tono}.
+function systemContenido(empresa: EmpresaFila) {
+  return `Eres el estratega de redes sociales de ${empresa.nombre}, empresa de ${empresa.giro}.
+Zonas donde opera: ${empresa.zonas || "Panamá"}.
+Escribes en español con tono ${empresa.tono || "cercano, profesional y directo"}.
 Reglas: copys listos para publicar, sin markdown, sin comillas alrededor del texto, emojis con moderación (máximo 3),
-llamados a la acción concretos hacia mensaje directo o WhatsApp, y nunca inventes precios distintos a los datos entregados.
+llamados a la acción concretos hacia mensaje directo o WhatsApp${empresa.whatsapp ? ` (${empresa.whatsapp})` : ""},
+y nunca inventes precios distintos a los datos entregados.
 Responde SIEMPRE únicamente con JSON válido, sin explicaciones ni bloques de código.`;
+}
 
 type PostGenerado = {
   red: string;
@@ -67,14 +105,16 @@ type PostGenerado = {
   propiedad_titulo?: string | null;
 };
 
-/** Genera y programa el contenido de un día para las 3 redes. */
-export async function generarContenidoDelDia(fecha?: string) {
+/** Genera y programa el contenido de un día para las 3 redes de una empresa. */
+export async function generarContenidoDelDia(fecha?: string, empresaId?: string) {
   const supabase = crearClienteServidor();
+  const empresa = await cargarEmpresa(supabase, empresaId);
   const dia = fecha ?? hoyISO();
 
   const { data: existentes } = await supabase
     .from("publicaciones")
     .select("id")
+    .eq("empresa_id", empresa.id)
     .eq("fecha_programada", dia);
   if (existentes && existentes.length > 0) {
     return { fecha: dia, creadas: 0, mensaje: "Ya existe contenido para esa fecha" };
@@ -83,12 +123,14 @@ export async function generarContenidoDelDia(fecha?: string) {
   const { data: propiedades } = await supabase
     .from("propiedades")
     .select("id, titulo, operacion, tipo, precio, moneda, habitaciones, banos, area_m2, ubicacion, descripcion")
+    .eq("empresa_id", empresa.id)
     .eq("estado", "disponible")
     .limit(12);
 
   const { data: recientes } = await supabase
     .from("publicaciones")
     .select("titular")
+    .eq("empresa_id", empresa.id)
     .order("fecha_programada", { ascending: false })
     .limit(12);
 
@@ -111,9 +153,9 @@ Devuelve un JSON con esta forma:
 {"publicaciones":[{"red":"instagram","hora_programada":"09:00","pilar":"propiedad_destacada","formato":"carrusel","titular":"...","copy":"...","hashtags":["#..."],"cta":"...","idea_visual":"...","propiedad_titulo":"título exacto del inventario o null"}]}
 
 Requisitos por publicación: titular de máximo 70 caracteres; copy de 400 a 700 caracteres con saltos de línea reales;
-entre 4 y 6 hashtags relevantes al mercado panameño; idea_visual describiendo tomas o diseño concreto.`;
+entre 4 y 6 hashtags relevantes al mercado local; idea_visual describiendo tomas o diseño concreto.`;
 
-  const texto = await pedirTexto(prompt, SYSTEM_CONTENIDO);
+  const texto = await pedirTexto(prompt, systemContenido(empresa));
   const parsed = parsearJson<{ publicaciones: PostGenerado[] }>(texto);
 
   const filas = (parsed.publicaciones ?? []).slice(0, 3).map((p, i) => {
@@ -122,6 +164,7 @@ entre 4 y 6 hashtags relevantes al mercado panameño; idea_visual describiendo t
       (x) => p.propiedad_titulo && x.titulo.toLowerCase() === p.propiedad_titulo.toLowerCase(),
     );
     return {
+      empresa_id: empresa.id,
       fecha_programada: dia,
       hora_programada: p.hora_programada || base.hora,
       red: p.red || base.red,
@@ -150,17 +193,22 @@ entre 4 y 6 hashtags relevantes al mercado panameño; idea_visual describiendo t
  * Publica las piezas cuya hora ya pasó. Mientras las redes no estén conectadas
  * la publicación queda registrada como enviada por la cola interna.
  */
-export async function publicarPendientes() {
+export async function publicarPendientes(empresaId?: string) {
   const supabase = crearClienteServidor();
+  const empresa = await cargarEmpresa(supabase, empresaId);
   const dia = hoyISO();
   const ahora = new Date().toISOString().slice(11, 16);
 
-  const { data: cuentas } = await supabase.from("cuentas_sociales").select("red, conectada");
+  const { data: cuentas } = await supabase
+    .from("cuentas_sociales")
+    .select("red, conectada")
+    .eq("empresa_id", empresa.id);
   const conectadas = new Set((cuentas ?? []).filter((c) => c.conectada).map((c) => c.red));
 
   const { data: pendientes } = await supabase
     .from("publicaciones")
     .select("id, red, hora_programada")
+    .eq("empresa_id", empresa.id)
     .eq("estado", "programado")
     .lte("fecha_programada", dia);
 
@@ -189,14 +237,17 @@ export async function redactarRespuesta(mensajeId: string) {
   const supabase = crearClienteServidor();
   const { data: mensaje, error } = await supabase
     .from("mensajes")
-    .select("id, red, remitente, mensaje, intencion, notas")
+    .select("id, red, remitente, mensaje, intencion, notas, empresa_id")
     .eq("id", mensajeId)
     .maybeSingle();
   if (error || !mensaje) throw new Error("Mensaje no encontrado");
 
+  const empresa = await cargarEmpresa(supabase, mensaje.empresa_id);
+
   const { data: propiedades } = await supabase
     .from("propiedades")
     .select("titulo, operacion, precio, moneda, habitaciones, banos, area_m2, ubicacion")
+    .eq("empresa_id", empresa.id)
     .eq("estado", "disponible")
     .limit(10);
 
@@ -210,25 +261,28 @@ Inventario disponible: ${JSON.stringify(propiedades ?? [])}
 Devuelve JSON: {"respuesta":"...","siguiente_paso":"...","prioridad":"alta|media|baja"}
 La respuesta debe tener máximo 400 caracteres, saludar por el nombre, resolver la duda con datos reales
 y cerrar proponiendo una visita o enviar la ficha por WhatsApp.`,
-    SYSTEM_CONTENIDO,
+    systemContenido(empresa),
   );
 
   return parsearJson<{ respuesta: string; siguiente_paso: string; prioridad: string }>(texto);
 }
 
 /** Genera (o regenera) el informe de trabajo del día. */
-export async function generarInformeDiario(fecha?: string) {
+export async function generarInformeDiario(fecha?: string, empresaId?: string) {
   const supabase = crearClienteServidor();
+  const empresa = await cargarEmpresa(supabase, empresaId);
   const dia = fecha ?? hoyISO();
 
   const { data: publicaciones } = await supabase
     .from("publicaciones")
     .select("red, pilar, titular, estado, alcance, likes, comentarios, clics, leads")
+    .eq("empresa_id", empresa.id)
     .eq("fecha_programada", dia);
 
   const { data: mensajes } = await supabase
     .from("mensajes")
     .select("red, estado, intencion, prioridad, created_at")
+    .eq("empresa_id", empresa.id)
     .gte("created_at", `${dia}T00:00:00Z`)
     .lte("created_at", `${dia}T23:59:59Z`);
 
@@ -246,18 +300,19 @@ export async function generarInformeDiario(fecha?: string) {
   const mejorRed = Object.entries(porRed).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "instagram";
 
   const texto = await pedirTexto(
-    `Genera el informe de trabajo del ${dia} para la gerencia.
+    `Genera el informe de trabajo del ${dia} para la gerencia de ${empresa.nombre}.
 
 Publicaciones del día: ${JSON.stringify(pubs)}
 Mensajes del día: ${JSON.stringify(msgs)}
 Alcance total: ${alcance}. Leads: ${leads}. Mensajes atendidos: ${atendidos} de ${msgs.length}.
 
 Devuelve JSON: {"resumen":"2 a 4 oraciones sobre lo realizado y su resultado","logros":["...","...","..."],"recomendaciones":["...","...","..."]}`,
-    SYSTEM_CONTENIDO,
+    systemContenido(empresa),
   );
   const ia = parsearJson<{ resumen: string; logros: string[]; recomendaciones: string[] }>(texto);
 
   const fila = {
+    empresa_id: empresa.id,
     fecha: dia,
     resumen: ia.resumen ?? "",
     publicaciones_publicadas: publicadas.length,
@@ -271,16 +326,40 @@ Devuelve JSON: {"resumen":"2 a 4 oraciones sobre lo realizado y su resultado","l
     recomendaciones: (ia.recomendaciones ?? []).slice(0, 6),
   };
 
-  const { error } = await supabase.from("informes_diarios").upsert(fila, { onConflict: "fecha" });
+  const { error } = await supabase
+    .from("informes_diarios")
+    .upsert(fila, { onConflict: "empresa_id,fecha" });
   if (error) throw new Error(error.message);
   return fila;
 }
 
-/** Rutina completa: contenido de mañana, publicación de lo vencido e informe de hoy. */
-export async function ejecutarRutinaDiaria() {
-  const contenidoHoy = await generarContenidoDelDia(hoyISO());
-  const contenidoManana = await generarContenidoDelDia(hoyISO(1));
-  const publicacion = await publicarPendientes();
-  const informe = await generarInformeDiario(hoyISO());
+/** Rutina completa de una empresa: contenido de hoy y mañana, cola e informe. */
+export async function ejecutarRutinaEmpresa(empresaId?: string) {
+  const contenidoHoy = await generarContenidoDelDia(hoyISO(), empresaId);
+  const contenidoManana = await generarContenidoDelDia(hoyISO(1), empresaId);
+  const publicacion = await publicarPendientes(empresaId);
+  const informe = await generarInformeDiario(hoyISO(), empresaId);
   return { contenidoHoy, contenidoManana, publicacion, informe };
+}
+
+/** Rutina diaria para todas las empresas activas (usada por el cron). */
+export async function ejecutarRutinaDiaria(empresaId?: string) {
+  if (empresaId) {
+    const resultado = await ejecutarRutinaEmpresa(empresaId);
+    return { empresas: [{ empresaId, ...resultado }] };
+  }
+  const empresas = await listarEmpresasActivas();
+  const resultados = [];
+  for (const e of empresas) {
+    try {
+      resultados.push({ empresaId: e.id, nombre: e.nombre, ...(await ejecutarRutinaEmpresa(e.id)) });
+    } catch (error) {
+      resultados.push({
+        empresaId: e.id,
+        nombre: e.nombre,
+        error: error instanceof Error ? error.message : "Error desconocido",
+      });
+    }
+  }
+  return { empresas: resultados };
 }

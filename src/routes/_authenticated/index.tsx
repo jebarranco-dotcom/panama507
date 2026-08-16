@@ -23,6 +23,7 @@ import { Conexiones } from "@/components/dashboard/Conexiones";
 import { Contenido } from "@/components/dashboard/Contenido";
 import { Informe } from "@/components/dashboard/Informe";
 import { Button } from "@/components/ui/button";
+import { useEmpresa } from "@/lib/empresa";
 import { correrRutina } from "@/lib/marketing.functions";
 import {
   cuentasQuery,
@@ -55,14 +56,15 @@ export const Route = createFileRoute("/_authenticated/")({
 
 function Dashboard() {
   const qc = useQueryClient();
-  const { data: publicaciones = [] } = useQuery(publicacionesQuery);
-  const { data: mensajes = [] } = useQuery(mensajesQuery);
-  const { data: cuentas = [] } = useQuery(cuentasQuery);
-  const { data: propiedades = [] } = useQuery(propiedadesQuery);
+  const { empresa, empresaId } = useEmpresa();
+  const { data: publicaciones = [] } = useQuery(publicacionesQuery(empresaId));
+  const { data: mensajes = [] } = useQuery(mensajesQuery(empresaId));
+  const { data: cuentas = [] } = useQuery(cuentasQuery(empresaId));
+  const { data: propiedades = [] } = useQuery(propiedadesQuery(empresaId));
   const rutina = useServerFn(correrRutina);
 
   const correr = useMutation({
-    mutationFn: () => rutina(),
+    mutationFn: () => rutina({ data: { empresaId } }),
     onSuccess: () => {
       toast.success("Rutina diaria ejecutada", {
         description: "Contenido generado, cola procesada e informe actualizado.",
@@ -107,7 +109,7 @@ function Dashboard() {
   return (
     <AppShell
       titulo="Dashboard"
-      descripcion="Automatización de contenido, captación y atención de clientes en Facebook, Instagram y TikTok."
+      descripcion={`${empresa.nombre}: automatización de contenido, captación y atención de clientes en Facebook, Instagram y TikTok.`}
       acciones={
         <Button onClick={() => correr.mutate()} disabled={correr.isPending}>
           {correr.isPending ? <Loader2 className="size-4 animate-spin" /> : <Zap className="size-4" />}

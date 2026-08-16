@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { PILARES, REDES } from "@/lib/estrategia";
+import { useEmpresa } from "@/lib/empresa";
 import { cuentasQuery } from "@/lib/queries";
 
 const REQUISITOS: Record<string, string> = {
@@ -17,7 +18,8 @@ const REQUISITOS: Record<string, string> = {
 
 export function Conexiones() {
   const qc = useQueryClient();
-  const { data: cuentas = [] } = useQuery(cuentasQuery);
+  const { empresaId } = useEmpresa();
+  const { data: cuentas = [] } = useQuery(cuentasQuery(empresaId));
 
   const alternar = useMutation({
     mutationFn: async ({ id, conectada }: { id: string; conectada: boolean }) => {
@@ -28,7 +30,7 @@ export function Conexiones() {
       if (error) throw error;
     },
     onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: ["cuentas_sociales"] });
+      void qc.invalidateQueries({ queryKey: ["cuentas_sociales", empresaId] });
       toast.success("Estado de conexión actualizado");
     },
     onError: (e: Error) => toast.error(e.message),

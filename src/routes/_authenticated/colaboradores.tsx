@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
 import { REDES, type Red } from "@/lib/estrategia";
+import { useEmpresa } from "@/lib/empresa";
 import { colaboradoresQuery, mensajesQuery } from "@/lib/queries";
 
 export const Route = createFileRoute("/_authenticated/colaboradores")({
@@ -58,8 +59,9 @@ const REDES_LISTA = Object.keys(REDES) as Red[];
 
 function ColaboradoresPage() {
   const qc = useQueryClient();
-  const { data: equipo = [], isLoading } = useQuery(colaboradoresQuery);
-  const { data: mensajes = [] } = useQuery(mensajesQuery);
+  const { empresa, empresaId } = useEmpresa();
+  const { data: equipo = [], isLoading } = useQuery(colaboradoresQuery(empresaId));
+  const { data: mensajes = [] } = useQuery(mensajesQuery(empresaId));
   const [abierto, setAbierto] = useState(false);
   const [form, setForm] = useState({
     nombre: "",
@@ -71,12 +73,13 @@ function ColaboradoresPage() {
   });
 
   const invalidar = () => {
-    void qc.invalidateQueries({ queryKey: ["colaboradores"] });
+    void qc.invalidateQueries({ queryKey: ["colaboradores", empresaId] });
   };
 
   const crear = useMutation({
     mutationFn: async () => {
       const { error } = await supabase.from("colaboradores").insert({
+        empresa_id: empresaId,
         nombre: form.nombre,
         rol: form.rol,
         correo: form.correo,
@@ -129,7 +132,7 @@ function ColaboradoresPage() {
   return (
     <AppShell
       titulo="Colaboradores"
-      descripcion="Equipo responsable del contenido, la atención de mensajes y el cierre de clientes."
+      descripcion={`Equipo de ${empresa.nombre} responsable del contenido, la atención de mensajes y el cierre de clientes.`}
       acciones={
         <Dialog open={abierto} onOpenChange={setAbierto}>
           <DialogTrigger asChild>

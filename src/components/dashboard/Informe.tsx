@@ -6,18 +6,20 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { generarInforme } from "@/lib/marketing.functions";
+import { useEmpresa } from "@/lib/empresa";
 import { informesQuery } from "@/lib/queries";
 
 export function Informe() {
   const qc = useQueryClient();
-  const { data: informes = [] } = useQuery(informesQuery);
+  const { empresaId } = useEmpresa();
+  const { data: informes = [] } = useQuery(informesQuery(empresaId));
   const generar = useServerFn(generarInforme);
 
   const mut = useMutation({
-    mutationFn: () => generar({ data: {} }),
+    mutationFn: () => generar({ data: { empresaId } }),
     onSuccess: () => {
       toast.success("Informe del día generado");
-      void qc.invalidateQueries({ queryKey: ["informes"] });
+      void qc.invalidateQueries({ queryKey: ["informes", empresaId] });
     },
     onError: (e: Error) => toast.error("No se pudo generar el informe", { description: e.message }),
   });

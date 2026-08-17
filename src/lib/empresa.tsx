@@ -68,8 +68,9 @@ export function EmpresaProvider({ children }: { children: ReactNode }) {
   if (error || !empresas || empresas.length === 0) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background px-6 text-center">
-        <p className="text-sm text-muted-foreground">
-          No se pudieron cargar las empresas registradas.
+        <p className="max-w-sm text-sm text-muted-foreground">
+          Tu cuenta todavía no tiene acceso a ninguna empresa. Pide al administrador que te
+          asigne a RENTELO FACIL o PANAMA REAL ESTATE.
         </p>
       </div>
     );

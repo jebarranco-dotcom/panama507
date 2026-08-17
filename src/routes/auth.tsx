@@ -61,7 +61,7 @@ function Acceso() {
             <Building2 className="size-5" />
           </div>
           <div className="leading-tight">
-            <p className="font-display text-base font-bold">RENTELO FACIL</p>
+            <p className="font-display text-base font-bold">Centro inmobiliario de redes</p>
             <p className="text-xs text-muted-foreground">Centro interno de redes sociales</p>
           </div>
         </div>
@@ -116,18 +116,19 @@ function Acceso() {
 }
 
 export const Route = createFileRoute("/auth")({
+  ssr: false,
   head: () => ({
     meta: [
-      { title: "Acceso interno | RENTELO FACIL" },
+      { title: "Acceso interno | Centro inmobiliario de redes" },
       {
         name: "description",
         content:
-          "Inicia sesión para administrar el calendario de contenido, la bandeja de mensajes y los informes diarios de RENTELO FACIL.",
+          "Inicia sesión para administrar el calendario de contenido, la bandeja de mensajes y los informes diarios de RENTELO FACIL y PANAMA REAL ESTATE.",
       },
-      { property: "og:title", content: "Acceso interno | RENTELO FACIL" },
+      { property: "og:title", content: "Acceso interno | Centro inmobiliario de redes" },
       {
         property: "og:description",
-        content: "Panel privado de gestión de redes sociales de RENTELO FACIL.",
+        content: "Panel privado de gestión de redes sociales inmobiliarias.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

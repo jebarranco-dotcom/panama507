@@ -2,12 +2,21 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { BarChart3, Building2, LogOut, Users } from "lucide-react";
 import type { ReactNode } from "react";
 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { useEmpresa } from "@/lib/empresa";
 
 const NAV = [
   { to: "/", label: "Dashboard", icon: BarChart3 },
   { to: "/colaboradores", label: "Colaboradores", icon: Users },
 ] as const;
+
 
 export function AppShell({
   titulo,

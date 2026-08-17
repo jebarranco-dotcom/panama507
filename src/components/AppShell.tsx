@@ -30,6 +30,7 @@ export function AppShell({
   children: ReactNode;
 }) {
   const navigate = useNavigate();
+  const { empresa, empresas, cambiarEmpresa } = useEmpresa();
 
   return (
     <div className="min-h-screen bg-background">
@@ -40,10 +41,26 @@ export function AppShell({
           </div>
           <div className="leading-tight">
             <p className="font-display text-sm font-bold tracking-tight text-sidebar-foreground">
-              RENTELO FACIL
+              {empresa.nombre}
             </p>
             <p className="text-xs text-muted-foreground">Centro de redes</p>
           </div>
+        </div>
+
+        <div className="mt-5 px-1">
+          <p className="mb-1.5 text-xs font-semibold text-muted-foreground">Empresa activa</p>
+          <Select value={empresa.id} onValueChange={cambiarEmpresa}>
+            <SelectTrigger className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {empresas.map((e) => (
+                <SelectItem key={e.id} value={e.id}>
+                  {e.nombre}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <nav className="mt-8 flex flex-col gap-1">
@@ -91,7 +108,23 @@ export function AppShell({
               <h1 className="font-display text-xl font-bold sm:text-2xl">{titulo}</h1>
               <p className="mt-0.5 text-sm text-muted-foreground">{descripcion}</p>
             </div>
-            {acciones ? <div className="flex flex-wrap gap-2">{acciones}</div> : null}
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="md:hidden">
+                <Select value={empresa.id} onValueChange={cambiarEmpresa}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {empresas.map((e) => (
+                      <SelectItem key={e.id} value={e.id}>
+                        {e.nombre}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {acciones}
+            </div>
           </div>
           <nav className="flex gap-1 border-t border-border px-4 py-2 md:hidden">
             {NAV.map(({ to, label, icon: Icon }) => (

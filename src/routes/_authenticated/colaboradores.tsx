@@ -37,13 +37,13 @@ import { colaboradoresQuery, mensajesQuery } from "@/lib/queries";
 export const Route = createFileRoute("/_authenticated/colaboradores")({
   head: () => ({
     meta: [
-      { title: "Colaboradores | RENTELO FACIL" },
+      { title: "Colaboradores | Centro inmobiliario de redes" },
       {
         name: "description",
         content:
-          "Equipo de RENTELO FACIL: asesores, community managers, redes asignadas y desempeño en leads atendidos y cerrados.",
+          "Equipo por empresa: asesores, community managers, redes asignadas y desempeño en leads atendidos y cerrados.",
       },
-      { property: "og:title", content: "Colaboradores | RENTELO FACIL" },
+      { property: "og:title", content: "Colaboradores | Centro inmobiliario de redes" },
       {
         property: "og:description",
         content: "Gestiona el equipo, sus redes asignadas y su desempeño en captación de clientes.",

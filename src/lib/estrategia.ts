@@ -1,9 +1,3 @@
-export const EMPRESA = {
-  nombre: "RENTELO FACIL",
-  giro: "Alquiler y venta de propiedades inmobiliarias",
-  tono: "cercano, profesional y directo, con lenguaje de Panamá y sin promesas exageradas",
-} as const;
-
 export type Red = "facebook" | "instagram" | "tiktok";
 
 export const REDES: Record<Red, { nombre: string; color: string; formatos: string[] }> = {

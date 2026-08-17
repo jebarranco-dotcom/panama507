@@ -35,13 +35,13 @@ import {
 export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
     meta: [
-      { title: "Dashboard de redes sociales | RENTELO FACIL" },
+      { title: "Dashboard de redes sociales | Centro inmobiliario de redes" },
       {
         name: "description",
         content:
-          "Centro de mando de RENTELO FACIL: contenido diario automatizado para Facebook, Instagram y TikTok, bandeja de solicitudes e informe de trabajo.",
+          "Centro de mando multiempresa (RENTELO FACIL y PANAMA REAL ESTATE): contenido diario automatizado para Facebook, Instagram y TikTok, bandeja de solicitudes e informe de trabajo.",
       },
-      { property: "og:title", content: "Dashboard de redes sociales | RENTELO FACIL" },
+      { property: "og:title", content: "Dashboard de redes sociales | Centro inmobiliario de redes" },
       {
         property: "og:description",
         content:

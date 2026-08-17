@@ -117,6 +117,38 @@ export type Database = {
           },
         ]
       }
+      empresa_usuarios: {
+        Row: {
+          created_at: string
+          empresa_id: string
+          id: string
+          rol: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          empresa_id: string
+          id?: string
+          rol?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          empresa_id?: string
+          id?: string
+          rol?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "empresa_usuarios_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       empresas: {
         Row: {
           activa: boolean
@@ -463,7 +495,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      es_miembro: { Args: { _empresa_id: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

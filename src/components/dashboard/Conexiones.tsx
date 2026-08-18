@@ -6,7 +6,7 @@ import { IconoRed } from "@/components/Estado";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
-import { PILARES, REDES } from "@/lib/estrategia";
+import { REDES, estrategiaDe } from "@/lib/estrategia";
 import { useEmpresa } from "@/lib/empresa";
 import { cuentasQuery } from "@/lib/queries";
 
@@ -18,7 +18,8 @@ const REQUISITOS: Record<string, string> = {
 
 export function Conexiones() {
   const qc = useQueryClient();
-  const { empresaId } = useEmpresa();
+  const { empresaId, empresa } = useEmpresa();
+  const { pilares, tipo } = estrategiaDe(empresa.slug);
   const { data: cuentas = [] } = useQuery(cuentasQuery(empresaId));
 
   const alternar = useMutation({
@@ -91,11 +92,12 @@ export function Conexiones() {
           <ShieldCheck className="size-5 text-primary" /> Estrategia de contenido
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Mezcla diaria que sostiene la captación: mostrar inventario, generar confianza y educar al
-          comprador o inquilino.
+          {tipo === "servicios"
+            ? "Mezcla diaria que sostiene la captación: mostrar el portafolio, explicar rutas de solución y generar confianza institucional."
+            : "Mezcla diaria que sostiene la captación: mostrar inventario, generar confianza y educar al comprador o inquilino."}
         </p>
         <ul className="mt-4 space-y-3">
-          {PILARES.map((p) => (
+          {pilares.map((p) => (
             <li key={p.id} className="rounded-xl border border-border bg-secondary/40 p-4">
               <div className="flex items-center justify-between gap-2">
                 <p className="text-sm font-semibold">{p.nombre}</p>

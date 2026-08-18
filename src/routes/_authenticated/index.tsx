@@ -194,7 +194,7 @@ function Dashboard() {
             </ResponsiveContainer>
           </div>
           <p className="mt-2 text-xs text-muted-foreground">
-            {propiedades.length} propiedades activas en el inventario que alimenta el contenido.
+            {propiedades.length} {tipoCatalogo} activos en el catálogo que alimenta el contenido.
           </p>
         </section>
       </div>

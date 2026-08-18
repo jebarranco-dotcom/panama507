@@ -8,7 +8,7 @@ import {
   parsearJson,
   requireGatewayKey,
 } from "./ai-gateway.server";
-import { PLAN_DIARIO, nombrePilar } from "./estrategia";
+import { estrategiaDe, nombrePilar } from "./estrategia";
 
 /**
  * Cliente de servidor con credenciales de servicio.
@@ -36,6 +36,7 @@ type Cliente = ReturnType<typeof crearClienteServidor>;
 
 type EmpresaFila = {
   id: string;
+  slug: string;
   nombre: string;
   giro: string;
   tono: string;
@@ -46,7 +47,7 @@ type EmpresaFila = {
 async function cargarEmpresa(supabase: Cliente, empresaId?: string): Promise<EmpresaFila> {
   const consulta = supabase
     .from("empresas")
-    .select("id, nombre, giro, tono, whatsapp, zonas")
+    .select("id, slug, nombre, giro, tono, whatsapp, zonas")
     .eq("activa", true);
   const { data, error } = empresaId
     ? await consulta.eq("id", empresaId).maybeSingle()
@@ -134,7 +135,9 @@ export async function generarContenidoDelDia(fecha?: string, empresaId?: string)
     .order("fecha_programada", { ascending: false })
     .limit(12);
 
-  const plan = PLAN_DIARIO.map(
+  const { plan: planDiario, tipo } = estrategiaDe(empresa.slug);
+  const etiquetaCatalogo = tipo === "servicios" ? "Portafolio de servicios" : "Inventario";
+  const plan = planDiario.map(
     (p) => `- red: ${p.red}, hora: ${p.hora}, pilar: ${p.pilar} (${nombrePilar(p.pilar)}), formato: ${p.formato}`,
   ).join("\n");
 
@@ -143,7 +146,7 @@ export async function generarContenidoDelDia(fecha?: string, empresaId?: string)
 Genera EXACTAMENTE 3 publicaciones siguiendo este plan diario:
 ${plan}
 
-Inventario disponible (usa datos reales de aquí cuando el pilar sea de propiedad o tour):
+${etiquetaCatalogo} disponible (usa datos reales de aquí cuando el pilar lo requiera):
 ${JSON.stringify(propiedades ?? [], null, 1)}
 
 Titulares publicados recientemente (NO los repitas ni los parafrasees):
@@ -153,13 +156,14 @@ Devuelve un JSON con esta forma:
 {"publicaciones":[{"red":"instagram","hora_programada":"09:00","pilar":"propiedad_destacada","formato":"carrusel","titular":"...","copy":"...","hashtags":["#..."],"cta":"...","idea_visual":"...","propiedad_titulo":"título exacto del inventario o null"}]}
 
 Requisitos por publicación: titular de máximo 70 caracteres; copy de 400 a 700 caracteres con saltos de línea reales;
-entre 4 y 6 hashtags relevantes al mercado local; idea_visual describiendo tomas o diseño concreto.`;
+entre 4 y 6 hashtags relevantes al mercado local; idea_visual describiendo tomas o diseño concreto.
+${tipo === "servicios" ? "No prometas resultados garantizados ni decisiones de terceros; enfócate en el problema que resuelve el servicio, el entregable y el seguimiento documentado. No inventes precios: si no hay tarifa, invita a una cotización." : ""}`;
 
   const texto = await pedirTexto(prompt, systemContenido(empresa));
   const parsed = parsearJson<{ publicaciones: PostGenerado[] }>(texto);
 
   const filas = (parsed.publicaciones ?? []).slice(0, 3).map((p, i) => {
-    const base = PLAN_DIARIO[i % PLAN_DIARIO.length]!;
+    const base = planDiario[i % planDiario.length]!;
     const prop = (propiedades ?? []).find(
       (x) => p.propiedad_titulo && x.titulo.toLowerCase() === p.propiedad_titulo.toLowerCase(),
     );
@@ -256,11 +260,11 @@ export async function redactarRespuesta(mensajeId: string) {
 "${mensaje.mensaje}"
 Intención detectada: ${mensaje.intencion}. Notas internas: ${mensaje.notas || "ninguna"}.
 
-Inventario disponible: ${JSON.stringify(propiedades ?? [])}
+Catálogo disponible: ${JSON.stringify(propiedades ?? [])}
 
 Devuelve JSON: {"respuesta":"...","siguiente_paso":"...","prioridad":"alta|media|baja"}
 La respuesta debe tener máximo 400 caracteres, saludar por el nombre, resolver la duda con datos reales
-y cerrar proponiendo una visita o enviar la ficha por WhatsApp.`,
+y cerrar proponiendo una reunión, visita o el envío de la ficha por WhatsApp.`,
     systemContenido(empresa),
   );
 

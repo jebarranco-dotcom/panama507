@@ -142,5 +142,7 @@ export function formatearPrecio(valor: number, moneda = "USD") {
 }
 
 export function nombrePilar(id: string) {
-  return PILARES.find((p) => p.id === id)?.nombre ?? id;
+  const todos = [...PILARES, ...PILARES_SERVICIOS];
+  return todos.find((p) => p.id === id)?.nombre ?? id;
+
 }

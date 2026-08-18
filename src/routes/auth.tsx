@@ -116,7 +116,6 @@ function Acceso() {
 }
 
 export const Route = createFileRoute("/auth")({
-  ssr: false,
   head: () => ({
     meta: [
       { title: "Acceso interno | Centro inmobiliario de redes" },

@@ -24,6 +24,7 @@ import { Contenido } from "@/components/dashboard/Contenido";
 import { Informe } from "@/components/dashboard/Informe";
 import { Button } from "@/components/ui/button";
 import { useEmpresa } from "@/lib/empresa";
+import { estrategiaDe } from "@/lib/estrategia";
 import { correrRutina } from "@/lib/marketing.functions";
 import {
   cuentasQuery,
@@ -39,7 +40,7 @@ export const Route = createFileRoute("/_authenticated/")({
       {
         name: "description",
         content:
-          "Centro de mando multiempresa (RENTELO FACIL y PANAMA REAL ESTATE): contenido diario automatizado para Facebook, Instagram y TikTok, bandeja de solicitudes e informe de trabajo.",
+          "Centro de mando multiempresa (RENTELO FACIL, PANAMA REAL ESTATE y GESTIONES COMERCIALES): contenido diario automatizado para Facebook, Instagram y TikTok, bandeja de solicitudes e informe de trabajo.",
       },
       { property: "og:title", content: "Dashboard de redes sociales | Centro inmobiliario de redes" },
       {
@@ -61,6 +62,7 @@ function Dashboard() {
   const { data: mensajes = [] } = useQuery(mensajesQuery(empresaId));
   const { data: cuentas = [] } = useQuery(cuentasQuery(empresaId));
   const { data: propiedades = [] } = useQuery(propiedadesQuery(empresaId));
+  const tipoCatalogo = estrategiaDe(empresa.slug).catalogo;
   const rutina = useServerFn(correrRutina);
 
   const correr = useMutation({

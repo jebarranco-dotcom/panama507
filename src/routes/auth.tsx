@@ -110,6 +110,36 @@ function Acceso() {
         >
           {modo === "entrar" ? "No tengo cuenta todavía" : "Ya tengo cuenta"}
         </button>
+
+        <button
+          type="button"
+          className="mt-2 w-full text-sm text-primary underline-offset-4 hover:underline disabled:opacity-60"
+          disabled={cargando}
+          onClick={async () => {
+            if (!correo) {
+              toast.error("Escribe tu correo para enviarte el enlace");
+              return;
+            }
+            setCargando(true);
+            try {
+              const { error } = await supabase.auth.resetPasswordForEmail(correo, {
+                redirectTo: `${window.location.origin}/reset-password`,
+              });
+              if (error) throw error;
+              toast.success("Te enviamos un enlace de recuperación", {
+                description: "Revisa la bandeja de entrada y el correo no deseado.",
+              });
+            } catch (error) {
+              toast.error("No se pudo enviar el enlace", {
+                description: error instanceof Error ? error.message : undefined,
+              });
+            } finally {
+              setCargando(false);
+            }
+          }}
+        >
+          Olvidé mi contraseña
+        </button>
       </div>
     </main>
   );

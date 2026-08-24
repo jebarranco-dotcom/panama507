@@ -252,8 +252,18 @@ function Conexiones() {
       </div>
 
       <div className="mt-4">
+        <ActivosMeta
+          puedeAdministrar={credenciales?.puedeAdministrar ?? false}
+          verificada={credenciales?.meta.verificada ?? false}
+          seleccionFacebook={conexionDe("facebook")?.cuenta_externa_id ?? ""}
+          seleccionInstagram={conexionDe("instagram")?.cuenta_externa_id ?? ""}
+        />
+      </div>
+
+      <div className="mt-4">
         <PruebaPublicacion />
       </div>
+
 
       <section className="panel mt-4 p-5">
         <h2 className="flex items-center gap-2 font-display text-lg font-bold">

@@ -304,13 +304,18 @@ function Credenciales() {
           <ListChecks className="size-5 text-primary" /> Cómo crear las apps paso a paso
         </h2>
         <p className="mt-2 text-xs text-muted-foreground">
-          Registra estas URL de retorno tal cual en cada plataforma; sin ellas la autorización falla.
+          Registra estas URL tal cual en cada plataforma; sin las de retorno la autorización falla
+          y sin las de cumplimiento Meta no aprueba la app.
         </p>
         <div className="mt-3 space-y-2">
           {[
             { etiqueta: "URL de retorno Meta", valor: `${origen}/api/public/oauth/meta/callback` },
             { etiqueta: "URL de retorno TikTok", valor: `${origen}/api/public/oauth/tiktok/callback` },
+            { etiqueta: "Política de privacidad", valor: `${origen}/privacy` },
+            { etiqueta: "Términos de uso", valor: `${origen}/terms` },
+            { etiqueta: "Eliminación de datos", valor: `${origen}/data-deletion` },
           ].map((u) => (
+
             <div
               key={u.etiqueta}
               className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-secondary/40 p-3"

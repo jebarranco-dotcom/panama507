@@ -171,11 +171,26 @@ ${tipo === "servicios" ? "No prometas resultados garantizados ni decisiones de t
   const texto = await pedirTexto(prompt, systemContenido(empresa));
   const parsed = parsearJson<{ publicaciones: PostGenerado[] }>(texto);
 
+  const { data: config } = await supabase
+    .from("empresas")
+    .select("requiere_aprobacion")
+    .eq("id", empresa.id)
+    .maybeSingle();
+  const requiereAprobacion = config?.requiere_aprobacion ?? true;
+
+  const { data: catalogoConImagen } = await supabase
+    .from("propiedades")
+    .select("id, imagen_url")
+    .eq("empresa_id", empresa.id);
+
   const filas = (parsed.publicaciones ?? []).slice(0, planDiario.length).map((p, i) => {
     const base = planDiario[i % planDiario.length]!;
     const prop = (propiedades ?? []).find(
       (x) => p.propiedad_titulo && x.titulo.toLowerCase() === p.propiedad_titulo.toLowerCase(),
     );
+    const imagen = prop
+      ? ((catalogoConImagen ?? []).find((c) => c.id === prop.id)?.imagen_url ?? "")
+      : "";
     return {
       empresa_id: empresa.id,
       fecha_programada: dia,
@@ -190,7 +205,9 @@ ${tipo === "servicios" ? "No prometas resultados garantizados ni decisiones de t
       hashtags: Array.isArray(p.hashtags) ? p.hashtags.slice(0, 8) : [],
       cta: p.cta ?? "",
       idea_visual: p.idea_visual ?? "",
-      estado: "programado",
+      media_url: imagen ?? "",
+      // Con aprobación obligatoria la pieza nace en borrador para revisión humana.
+      estado: requiereAprobacion ? "borrador" : "programado",
       propiedad_id: prop?.id ?? null,
       generado_por_ia: true,
     };
@@ -201,51 +218,31 @@ ${tipo === "servicios" ? "No prometas resultados garantizados ni decisiones de t
   const { error } = await supabase.from("publicaciones").insert(filas);
   if (error) throw new Error(error.message);
 
-  return { fecha: dia, creadas: filas.length, mensaje: "Contenido diario generado" };
+  return {
+    fecha: dia,
+    creadas: filas.length,
+    mensaje: requiereAprobacion
+      ? "Contenido diario generado en borrador, listo para revisión y aprobación"
+      : "Contenido diario generado y programado",
+  };
 }
 
-/**
- * Publica las piezas cuya hora ya pasó. Mientras las redes no estén conectadas
- * la publicación queda registrada como enviada por la cola interna.
- */
+/** Envía a las redes las piezas aprobadas cuya hora ya llegó (hora de Panamá). */
 export async function publicarPendientes(empresaId?: string) {
-  const supabase = crearClienteServidor();
-  const empresa = await cargarEmpresa(supabase, empresaId);
-  const dia = hoyISO();
-  const ahora = new Date().toISOString().slice(11, 16);
-
-  const { data: cuentas } = await supabase
-    .from("cuentas_sociales")
-    .select("red, conectada")
-    .eq("empresa_id", empresa.id);
-  const conectadas = new Set((cuentas ?? []).filter((c) => c.conectada).map((c) => c.red));
-
-  const { data: pendientes } = await supabase
-    .from("publicaciones")
-    .select("id, red, hora_programada")
-    .eq("empresa_id", empresa.id)
-    .eq("estado", "programado")
-    .lte("fecha_programada", dia);
-
-  const listas = (pendientes ?? []).filter((p) => p.hora_programada <= ahora);
-  let publicadas = 0;
-  let enCola = 0;
-
-  for (const p of listas) {
-    if (conectadas.has(p.red)) {
-      await supabase
-        .from("publicaciones")
-        .update({ estado: "publicado", publicado_at: new Date().toISOString() })
-        .eq("id", p.id);
-      publicadas++;
-    } else {
-      await supabase.from("publicaciones").update({ estado: "en_cola" }).eq("id", p.id);
-      enCola++;
-    }
-  }
-
-  return { publicadas, enCola, revisadas: listas.length };
+  const { ejecutarProgramador } = await import("./publicador.server");
+  const resultado = await ejecutarProgramador(empresaId);
+  const totales = resultado.empresas.reduce(
+    (acc, e) => ({
+      publicadas: acc.publicadas + e.publicadas,
+      enCola: acc.enCola + e.enCola,
+      errores: acc.errores + e.errores,
+      esperandoAprobacion: acc.esperandoAprobacion + e.esperandoAprobacion,
+    }),
+    { publicadas: 0, enCola: 0, errores: 0, esperandoAprobacion: 0 },
+  );
+  return { ...totales, hora: resultado.hora, fecha: resultado.fecha };
 }
+
 
 /** Sugiere una respuesta para un mensaje entrante. */
 export async function redactarRespuesta(mensajeId: string) {

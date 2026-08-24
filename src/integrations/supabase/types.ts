@@ -376,6 +376,7 @@ export type Database = {
           id: string
           logo_url: string | null
           nombre: string
+          requiere_aprobacion: boolean
           slug: string
           tono: string
           updated_at: string
@@ -391,6 +392,7 @@ export type Database = {
           id?: string
           logo_url?: string | null
           nombre: string
+          requiere_aprobacion?: boolean
           slug: string
           tono?: string
           updated_at?: string
@@ -406,6 +408,7 @@ export type Database = {
           id?: string
           logo_url?: string | null
           nombre?: string
+          requiere_aprobacion?: boolean
           slug?: string
           tono?: string
           updated_at?: string
@@ -664,12 +667,15 @@ export type Database = {
       publicaciones: {
         Row: {
           alcance: number
+          aprobada_at: string | null
+          aprobada_por: string | null
           clics: number
           comentarios: number
           copy: string
           created_at: string
           cta: string
           empresa_id: string
+          error_publicacion: string
           estado: string
           fecha_programada: string
           formato: string
@@ -678,22 +684,28 @@ export type Database = {
           hora_programada: string
           id: string
           idea_visual: string
+          intentos_publicacion: number
           leads: number
           likes: number
+          media_url: string
           pilar: string
           propiedad_id: string | null
           publicado_at: string | null
           red: string
+          referencia_externa: string
           titular: string
         }
         Insert: {
           alcance?: number
+          aprobada_at?: string | null
+          aprobada_por?: string | null
           clics?: number
           comentarios?: number
           copy?: string
           created_at?: string
           cta?: string
           empresa_id: string
+          error_publicacion?: string
           estado?: string
           fecha_programada?: string
           formato?: string
@@ -702,22 +714,28 @@ export type Database = {
           hora_programada?: string
           id?: string
           idea_visual?: string
+          intentos_publicacion?: number
           leads?: number
           likes?: number
+          media_url?: string
           pilar?: string
           propiedad_id?: string | null
           publicado_at?: string | null
           red?: string
+          referencia_externa?: string
           titular?: string
         }
         Update: {
           alcance?: number
+          aprobada_at?: string | null
+          aprobada_por?: string | null
           clics?: number
           comentarios?: number
           copy?: string
           created_at?: string
           cta?: string
           empresa_id?: string
+          error_publicacion?: string
           estado?: string
           fecha_programada?: string
           formato?: string
@@ -726,12 +744,15 @@ export type Database = {
           hora_programada?: string
           id?: string
           idea_visual?: string
+          intentos_publicacion?: number
           leads?: number
           likes?: number
+          media_url?: string
           pilar?: string
           propiedad_id?: string | null
           publicado_at?: string | null
           red?: string
+          referencia_externa?: string
           titular?: string
         }
         Relationships: [

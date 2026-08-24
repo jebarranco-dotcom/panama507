@@ -13,10 +13,12 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedBorradoresRouteImport } from './routes/_authenticated/borradores'
 import { Route as AuthenticatedColaboradoresRouteImport } from './routes/_authenticated/colaboradores'
 import { Route as AuthenticatedConexionesRouteImport } from './routes/_authenticated/conexiones'
 import { Route as AuthenticatedCredencialesRouteImport } from './routes/_authenticated/credenciales'
 import { Route as AuthenticatedProgramacionRouteImport } from './routes/_authenticated/programacion'
+import { Route as ApiPublicHooksPublicarProgramadoRouteImport } from './routes/api/public/hooks/publicar-programado'
 import { Route as ApiPublicHooksRutinaDiariaRouteImport } from './routes/api/public/hooks/rutina-diaria'
 import { Route as ApiPublicOauthMetaCallbackRouteImport } from './routes/api/public/oauth/meta/callback'
 import { Route as ApiPublicOauthTiktokCallbackRouteImport } from './routes/api/public/oauth/tiktok/callback'
@@ -38,6 +40,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedBorradoresRoute = AuthenticatedBorradoresRouteImport.update({
+  id: '/borradores',
+  path: '/borradores',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedColaboradoresRoute =
@@ -63,6 +70,12 @@ const AuthenticatedProgramacionRoute =
     path: '/programacion',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicHooksPublicarProgramadoRoute =
+  ApiPublicHooksPublicarProgramadoRouteImport.update({
+    id: '/api/public/hooks/publicar-programado',
+    path: '/api/public/hooks/publicar-programado',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksRutinaDiariaRoute =
   ApiPublicHooksRutinaDiariaRouteImport.update({
     id: '/api/public/hooks/rutina-diaria',
@@ -86,10 +99,12 @@ export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/borradores': typeof AuthenticatedBorradoresRoute
   '/colaboradores': typeof AuthenticatedColaboradoresRoute
   '/conexiones': typeof AuthenticatedConexionesRoute
   '/credenciales': typeof AuthenticatedCredencialesRoute
   '/programacion': typeof AuthenticatedProgramacionRoute
+  '/api/public/hooks/publicar-programado': typeof ApiPublicHooksPublicarProgramadoRoute
   '/api/public/hooks/rutina-diaria': typeof ApiPublicHooksRutinaDiariaRoute
   '/api/public/oauth/meta/callback': typeof ApiPublicOauthMetaCallbackRoute
   '/api/public/oauth/tiktok/callback': typeof ApiPublicOauthTiktokCallbackRoute
@@ -97,11 +112,13 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/borradores': typeof AuthenticatedBorradoresRoute
   '/colaboradores': typeof AuthenticatedColaboradoresRoute
   '/conexiones': typeof AuthenticatedConexionesRoute
   '/credenciales': typeof AuthenticatedCredencialesRoute
   '/programacion': typeof AuthenticatedProgramacionRoute
   '/': typeof AuthenticatedIndexRoute
+  '/api/public/hooks/publicar-programado': typeof ApiPublicHooksPublicarProgramadoRoute
   '/api/public/hooks/rutina-diaria': typeof ApiPublicHooksRutinaDiariaRoute
   '/api/public/oauth/meta/callback': typeof ApiPublicOauthMetaCallbackRoute
   '/api/public/oauth/tiktok/callback': typeof ApiPublicOauthTiktokCallbackRoute
@@ -111,11 +128,13 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/_authenticated/borradores': typeof AuthenticatedBorradoresRoute
   '/_authenticated/colaboradores': typeof AuthenticatedColaboradoresRoute
   '/_authenticated/conexiones': typeof AuthenticatedConexionesRoute
   '/_authenticated/credenciales': typeof AuthenticatedCredencialesRoute
   '/_authenticated/programacion': typeof AuthenticatedProgramacionRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/api/public/hooks/publicar-programado': typeof ApiPublicHooksPublicarProgramadoRoute
   '/api/public/hooks/rutina-diaria': typeof ApiPublicHooksRutinaDiariaRoute
   '/api/public/oauth/meta/callback': typeof ApiPublicOauthMetaCallbackRoute
   '/api/public/oauth/tiktok/callback': typeof ApiPublicOauthTiktokCallbackRoute
@@ -126,10 +145,12 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/reset-password'
+    | '/borradores'
     | '/colaboradores'
     | '/conexiones'
     | '/credenciales'
     | '/programacion'
+    | '/api/public/hooks/publicar-programado'
     | '/api/public/hooks/rutina-diaria'
     | '/api/public/oauth/meta/callback'
     | '/api/public/oauth/tiktok/callback'
@@ -137,11 +158,13 @@ export interface FileRouteTypes {
   to:
     | '/auth'
     | '/reset-password'
+    | '/borradores'
     | '/colaboradores'
     | '/conexiones'
     | '/credenciales'
     | '/programacion'
     | '/'
+    | '/api/public/hooks/publicar-programado'
     | '/api/public/hooks/rutina-diaria'
     | '/api/public/oauth/meta/callback'
     | '/api/public/oauth/tiktok/callback'
@@ -150,11 +173,13 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/reset-password'
+    | '/_authenticated/borradores'
     | '/_authenticated/colaboradores'
     | '/_authenticated/conexiones'
     | '/_authenticated/credenciales'
     | '/_authenticated/programacion'
     | '/_authenticated/'
+    | '/api/public/hooks/publicar-programado'
     | '/api/public/hooks/rutina-diaria'
     | '/api/public/oauth/meta/callback'
     | '/api/public/oauth/tiktok/callback'
@@ -164,6 +189,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  ApiPublicHooksPublicarProgramadoRoute: typeof ApiPublicHooksPublicarProgramadoRoute
   ApiPublicHooksRutinaDiariaRoute: typeof ApiPublicHooksRutinaDiariaRoute
   ApiPublicOauthMetaCallbackRoute: typeof ApiPublicOauthMetaCallbackRoute
   ApiPublicOauthTiktokCallbackRoute: typeof ApiPublicOauthTiktokCallbackRoute
@@ -199,6 +225,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/borradores': {
+      id: '/_authenticated/borradores'
+      path: '/borradores'
+      fullPath: '/borradores'
+      preLoaderRoute: typeof AuthenticatedBorradoresRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/colaboradores': {
       id: '/_authenticated/colaboradores'
       path: '/colaboradores'
@@ -227,6 +260,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProgramacionRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/hooks/publicar-programado': {
+      id: '/api/public/hooks/publicar-programado'
+      path: '/api/public/hooks/publicar-programado'
+      fullPath: '/api/public/hooks/publicar-programado'
+      preLoaderRoute: typeof ApiPublicHooksPublicarProgramadoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/rutina-diaria': {
       id: '/api/public/hooks/rutina-diaria'
       path: '/api/public/hooks/rutina-diaria'
@@ -252,6 +292,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedBorradoresRoute: typeof AuthenticatedBorradoresRoute
   AuthenticatedColaboradoresRoute: typeof AuthenticatedColaboradoresRoute
   AuthenticatedConexionesRoute: typeof AuthenticatedConexionesRoute
   AuthenticatedCredencialesRoute: typeof AuthenticatedCredencialesRoute
@@ -260,6 +301,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedBorradoresRoute: AuthenticatedBorradoresRoute,
   AuthenticatedColaboradoresRoute: AuthenticatedColaboradoresRoute,
   AuthenticatedConexionesRoute: AuthenticatedConexionesRoute,
   AuthenticatedCredencialesRoute: AuthenticatedCredencialesRoute,
@@ -274,6 +316,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  ApiPublicHooksPublicarProgramadoRoute: ApiPublicHooksPublicarProgramadoRoute,
   ApiPublicHooksRutinaDiariaRoute: ApiPublicHooksRutinaDiariaRoute,
   ApiPublicOauthMetaCallbackRoute: ApiPublicOauthMetaCallbackRoute,
   ApiPublicOauthTiktokCallbackRoute: ApiPublicOauthTiktokCallbackRoute,

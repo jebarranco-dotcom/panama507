@@ -130,6 +130,9 @@ export const ETIQUETAS_ESTADO: Record<string, string> = {
   programado: "Programado",
   publicado: "Publicado",
   borrador: "Borrador",
+  en_cola: "En cola",
+  error: "Error",
+  descartado: "Descartado",
   fallido: "Fallido",
 };
 

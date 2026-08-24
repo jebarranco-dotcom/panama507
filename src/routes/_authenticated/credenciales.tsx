@@ -57,9 +57,36 @@ const CONFIG: Record<
   },
 };
 
+const PASOS = [
+  {
+    titulo: "Meta Business (Facebook e Instagram)",
+    pasos: [
+      "Entra a developers.facebook.com con la cuenta que administra la página de la empresa y crea una app tipo Business.",
+      "En Productos agrega Facebook Login for Business y, en su configuración, pega la URL de retorno de Meta en «URI de redireccionamiento de OAuth válidos».",
+      "En Permisos y funciones solicita pages_show_list, pages_read_engagement, pages_manage_posts, instagram_basic e instagram_content_publish.",
+      "Vincula la página de Facebook y la cuenta de Instagram profesional de la empresa en Meta Business Suite.",
+      "En Configuración → Básica copia el App ID y el App Secret y pégalos arriba en META_APP_ID y META_APP_SECRET.",
+      "Vuelve a Conexiones y autoriza Facebook e Instagram por separado.",
+    ],
+  },
+  {
+    titulo: "TikTok for Developers",
+    pasos: [
+      "Convierte la cuenta de TikTok a cuenta Business desde la app (Configuración → Cuenta → Cambiar a cuenta Business).",
+      "Entra a developers.tiktok.com, crea una app y verifica la propiedad del dominio de la app.",
+      "Agrega Login Kit y pega la URL de retorno de TikTok en Redirect URI.",
+      "Solicita Content Posting API con los alcances video.upload y video.publish (la aprobación puede tardar días).",
+      "Copia Client Key y Client Secret y pégalos arriba en TIKTOK_CLIENT_KEY y TIKTOK_CLIENT_SECRET.",
+      "Vuelve a Conexiones y autoriza TikTok; quedará como «autorizada» hasta que TikTok apruebe la API de publicación.",
+    ],
+  },
+];
+
 function Credenciales() {
   const { empresa, empresaId } = useEmpresa();
+  const origen = typeof window === "undefined" ? "https://panama507.lovable.app" : window.location.origin;
   const queryClient = useQueryClient();
+
   const { data: estado } = useQuery({
     queryKey: ["credenciales-oauth", empresaId],
     queryFn: () => estadoCredenciales({ data: { empresaId } }),

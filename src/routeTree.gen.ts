@@ -16,6 +16,7 @@ import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedColaboradoresRouteImport } from './routes/_authenticated/colaboradores'
 import { Route as AuthenticatedConexionesRouteImport } from './routes/_authenticated/conexiones'
 import { Route as AuthenticatedCredencialesRouteImport } from './routes/_authenticated/credenciales'
+import { Route as AuthenticatedProgramacionRouteImport } from './routes/_authenticated/programacion'
 import { Route as ApiPublicHooksRutinaDiariaRouteImport } from './routes/api/public/hooks/rutina-diaria'
 import { Route as ApiPublicOauthMetaCallbackRouteImport } from './routes/api/public/oauth/meta/callback'
 import { Route as ApiPublicOauthTiktokCallbackRouteImport } from './routes/api/public/oauth/tiktok/callback'
@@ -56,6 +57,12 @@ const AuthenticatedCredencialesRoute =
     path: '/credenciales',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedProgramacionRoute =
+  AuthenticatedProgramacionRouteImport.update({
+    id: '/programacion',
+    path: '/programacion',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const ApiPublicHooksRutinaDiariaRoute =
   ApiPublicHooksRutinaDiariaRouteImport.update({
     id: '/api/public/hooks/rutina-diaria',
@@ -82,6 +89,7 @@ export interface FileRoutesByFullPath {
   '/colaboradores': typeof AuthenticatedColaboradoresRoute
   '/conexiones': typeof AuthenticatedConexionesRoute
   '/credenciales': typeof AuthenticatedCredencialesRoute
+  '/programacion': typeof AuthenticatedProgramacionRoute
   '/api/public/hooks/rutina-diaria': typeof ApiPublicHooksRutinaDiariaRoute
   '/api/public/oauth/meta/callback': typeof ApiPublicOauthMetaCallbackRoute
   '/api/public/oauth/tiktok/callback': typeof ApiPublicOauthTiktokCallbackRoute
@@ -92,6 +100,7 @@ export interface FileRoutesByTo {
   '/colaboradores': typeof AuthenticatedColaboradoresRoute
   '/conexiones': typeof AuthenticatedConexionesRoute
   '/credenciales': typeof AuthenticatedCredencialesRoute
+  '/programacion': typeof AuthenticatedProgramacionRoute
   '/': typeof AuthenticatedIndexRoute
   '/api/public/hooks/rutina-diaria': typeof ApiPublicHooksRutinaDiariaRoute
   '/api/public/oauth/meta/callback': typeof ApiPublicOauthMetaCallbackRoute
@@ -105,6 +114,7 @@ export interface FileRoutesById {
   '/_authenticated/colaboradores': typeof AuthenticatedColaboradoresRoute
   '/_authenticated/conexiones': typeof AuthenticatedConexionesRoute
   '/_authenticated/credenciales': typeof AuthenticatedCredencialesRoute
+  '/_authenticated/programacion': typeof AuthenticatedProgramacionRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/api/public/hooks/rutina-diaria': typeof ApiPublicHooksRutinaDiariaRoute
   '/api/public/oauth/meta/callback': typeof ApiPublicOauthMetaCallbackRoute
@@ -119,6 +129,7 @@ export interface FileRouteTypes {
     | '/colaboradores'
     | '/conexiones'
     | '/credenciales'
+    | '/programacion'
     | '/api/public/hooks/rutina-diaria'
     | '/api/public/oauth/meta/callback'
     | '/api/public/oauth/tiktok/callback'
@@ -129,6 +140,7 @@ export interface FileRouteTypes {
     | '/colaboradores'
     | '/conexiones'
     | '/credenciales'
+    | '/programacion'
     | '/'
     | '/api/public/hooks/rutina-diaria'
     | '/api/public/oauth/meta/callback'
@@ -141,6 +153,7 @@ export interface FileRouteTypes {
     | '/_authenticated/colaboradores'
     | '/_authenticated/conexiones'
     | '/_authenticated/credenciales'
+    | '/_authenticated/programacion'
     | '/_authenticated/'
     | '/api/public/hooks/rutina-diaria'
     | '/api/public/oauth/meta/callback'
@@ -207,6 +220,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCredencialesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/programacion': {
+      id: '/_authenticated/programacion'
+      path: '/programacion'
+      fullPath: '/programacion'
+      preLoaderRoute: typeof AuthenticatedProgramacionRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/public/hooks/rutina-diaria': {
       id: '/api/public/hooks/rutina-diaria'
       path: '/api/public/hooks/rutina-diaria'
@@ -235,6 +255,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedColaboradoresRoute: typeof AuthenticatedColaboradoresRoute
   AuthenticatedConexionesRoute: typeof AuthenticatedConexionesRoute
   AuthenticatedCredencialesRoute: typeof AuthenticatedCredencialesRoute
+  AuthenticatedProgramacionRoute: typeof AuthenticatedProgramacionRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
 
@@ -242,6 +263,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedColaboradoresRoute: AuthenticatedColaboradoresRoute,
   AuthenticatedConexionesRoute: AuthenticatedConexionesRoute,
   AuthenticatedCredencialesRoute: AuthenticatedCredencialesRoute,
+  AuthenticatedProgramacionRoute: AuthenticatedProgramacionRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }
 

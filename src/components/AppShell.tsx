@@ -14,10 +14,12 @@ import { useEmpresa } from "@/lib/empresa";
 
 const NAV = [
   { to: "/", label: "Dashboard", icon: BarChart3 },
+  { to: "/programacion", label: "Programación", icon: CalendarClock },
   { to: "/conexiones", label: "Conexiones", icon: Link2 },
   { to: "/credenciales", label: "Credenciales", icon: ShieldCheck },
   { to: "/colaboradores", label: "Colaboradores", icon: Users },
 ] as const;
+
 
 
 export function AppShell({

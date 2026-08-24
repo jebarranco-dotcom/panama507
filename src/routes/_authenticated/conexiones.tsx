@@ -14,9 +14,11 @@ import {
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
+import { ActivosMeta } from "@/components/ActivosMeta";
 import { AppShell } from "@/components/AppShell";
 import { IconoRed } from "@/components/Estado";
 import { PruebaPublicacion } from "@/components/PruebaPublicacion";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useEmpresa } from "@/lib/empresa";

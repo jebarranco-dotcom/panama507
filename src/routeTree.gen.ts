@@ -17,6 +17,7 @@ import { Route as AuthenticatedColaboradoresRouteImport } from './routes/_authen
 import { Route as AuthenticatedConexionesRouteImport } from './routes/_authenticated/conexiones'
 import { Route as AuthenticatedCredencialesRouteImport } from './routes/_authenticated/credenciales'
 import { Route as AuthenticatedProgramacionRouteImport } from './routes/_authenticated/programacion'
+import { Route as ApiPublicHooksPublicarProgramadoRouteImport } from './routes/api/public/hooks/publicar-programado'
 import { Route as ApiPublicHooksRutinaDiariaRouteImport } from './routes/api/public/hooks/rutina-diaria'
 import { Route as ApiPublicOauthMetaCallbackRouteImport } from './routes/api/public/oauth/meta/callback'
 import { Route as ApiPublicOauthTiktokCallbackRouteImport } from './routes/api/public/oauth/tiktok/callback'
@@ -63,6 +64,12 @@ const AuthenticatedProgramacionRoute =
     path: '/programacion',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicHooksPublicarProgramadoRoute =
+  ApiPublicHooksPublicarProgramadoRouteImport.update({
+    id: '/api/public/hooks/publicar-programado',
+    path: '/api/public/hooks/publicar-programado',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksRutinaDiariaRoute =
   ApiPublicHooksRutinaDiariaRouteImport.update({
     id: '/api/public/hooks/rutina-diaria',
@@ -90,6 +97,7 @@ export interface FileRoutesByFullPath {
   '/conexiones': typeof AuthenticatedConexionesRoute
   '/credenciales': typeof AuthenticatedCredencialesRoute
   '/programacion': typeof AuthenticatedProgramacionRoute
+  '/api/public/hooks/publicar-programado': typeof ApiPublicHooksPublicarProgramadoRoute
   '/api/public/hooks/rutina-diaria': typeof ApiPublicHooksRutinaDiariaRoute
   '/api/public/oauth/meta/callback': typeof ApiPublicOauthMetaCallbackRoute
   '/api/public/oauth/tiktok/callback': typeof ApiPublicOauthTiktokCallbackRoute
@@ -102,6 +110,7 @@ export interface FileRoutesByTo {
   '/credenciales': typeof AuthenticatedCredencialesRoute
   '/programacion': typeof AuthenticatedProgramacionRoute
   '/': typeof AuthenticatedIndexRoute
+  '/api/public/hooks/publicar-programado': typeof ApiPublicHooksPublicarProgramadoRoute
   '/api/public/hooks/rutina-diaria': typeof ApiPublicHooksRutinaDiariaRoute
   '/api/public/oauth/meta/callback': typeof ApiPublicOauthMetaCallbackRoute
   '/api/public/oauth/tiktok/callback': typeof ApiPublicOauthTiktokCallbackRoute
@@ -116,6 +125,7 @@ export interface FileRoutesById {
   '/_authenticated/credenciales': typeof AuthenticatedCredencialesRoute
   '/_authenticated/programacion': typeof AuthenticatedProgramacionRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/api/public/hooks/publicar-programado': typeof ApiPublicHooksPublicarProgramadoRoute
   '/api/public/hooks/rutina-diaria': typeof ApiPublicHooksRutinaDiariaRoute
   '/api/public/oauth/meta/callback': typeof ApiPublicOauthMetaCallbackRoute
   '/api/public/oauth/tiktok/callback': typeof ApiPublicOauthTiktokCallbackRoute
@@ -130,6 +140,7 @@ export interface FileRouteTypes {
     | '/conexiones'
     | '/credenciales'
     | '/programacion'
+    | '/api/public/hooks/publicar-programado'
     | '/api/public/hooks/rutina-diaria'
     | '/api/public/oauth/meta/callback'
     | '/api/public/oauth/tiktok/callback'
@@ -142,6 +153,7 @@ export interface FileRouteTypes {
     | '/credenciales'
     | '/programacion'
     | '/'
+    | '/api/public/hooks/publicar-programado'
     | '/api/public/hooks/rutina-diaria'
     | '/api/public/oauth/meta/callback'
     | '/api/public/oauth/tiktok/callback'
@@ -155,6 +167,7 @@ export interface FileRouteTypes {
     | '/_authenticated/credenciales'
     | '/_authenticated/programacion'
     | '/_authenticated/'
+    | '/api/public/hooks/publicar-programado'
     | '/api/public/hooks/rutina-diaria'
     | '/api/public/oauth/meta/callback'
     | '/api/public/oauth/tiktok/callback'
@@ -164,6 +177,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  ApiPublicHooksPublicarProgramadoRoute: typeof ApiPublicHooksPublicarProgramadoRoute
   ApiPublicHooksRutinaDiariaRoute: typeof ApiPublicHooksRutinaDiariaRoute
   ApiPublicOauthMetaCallbackRoute: typeof ApiPublicOauthMetaCallbackRoute
   ApiPublicOauthTiktokCallbackRoute: typeof ApiPublicOauthTiktokCallbackRoute
@@ -227,6 +241,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProgramacionRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/hooks/publicar-programado': {
+      id: '/api/public/hooks/publicar-programado'
+      path: '/api/public/hooks/publicar-programado'
+      fullPath: '/api/public/hooks/publicar-programado'
+      preLoaderRoute: typeof ApiPublicHooksPublicarProgramadoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/rutina-diaria': {
       id: '/api/public/hooks/rutina-diaria'
       path: '/api/public/hooks/rutina-diaria'
@@ -274,6 +295,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  ApiPublicHooksPublicarProgramadoRoute: ApiPublicHooksPublicarProgramadoRoute,
   ApiPublicHooksRutinaDiariaRoute: ApiPublicHooksRutinaDiariaRoute,
   ApiPublicOauthMetaCallbackRoute: ApiPublicOauthMetaCallbackRoute,
   ApiPublicOauthTiktokCallbackRoute: ApiPublicOauthTiktokCallbackRoute,

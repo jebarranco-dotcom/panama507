@@ -179,8 +179,10 @@ ${tipo === "servicios" ? "No prometas resultados garantizados ni decisiones de t
     return {
       empresa_id: empresa.id,
       fecha_programada: dia,
-      hora_programada: p.hora_programada || base.hora,
-      red: p.red || base.red,
+      // La hora y la red las manda la programación de la empresa, no la IA.
+      hora_programada: base.hora,
+      red: base.red,
+
       pilar: p.pilar || base.pilar,
       formato: p.formato || base.formato,
       titular: (p.titular ?? "").slice(0, 120),

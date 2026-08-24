@@ -174,7 +174,9 @@ function Conexiones() {
         {redes.map((red) => {
           const conexion = conexionDe(red);
           const proveedor = PROVEEDOR[red];
-          const listo = credenciales?.[proveedor]?.registrada ?? false;
+          const cred = credenciales?.[proveedor];
+          const listo = proveedor === "meta" ? (cred?.verificada ?? false) : (cred?.registrada ?? false);
+
           const puede = credenciales?.puedeAdministrar ?? false;
           const otorgados = conexion?.permisos_otorgados ?? [];
           const faltantes = conexion?.permisos_faltantes ?? [];

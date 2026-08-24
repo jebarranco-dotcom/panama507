@@ -1,38 +1,22 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
-import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import {
+  ActivoInput,
+  CredencialInput,
+  EmpresaInput,
+  IniciarInput,
+  ProveedorInput,
+} from "@/lib/oauth.schemas";
 
 export type ProveedorOAuth = "meta" | "tiktok";
 export type RedOAuth = "facebook" | "instagram" | "tiktok";
 
-const IniciarInput = z.object({
-  empresaId: z.string().uuid(),
-  red: z.enum(["facebook", "instagram", "tiktok"]),
-});
-
-const CredencialInput = z.object({
-  empresaId: z.string().uuid(),
-  proveedor: z.enum(["meta", "tiktok"]),
-  clientId: z
-    .string()
-    .trim()
-    .min(6, "El identificador de la app es demasiado corto.")
-    .max(120)
-    .regex(/^[A-Za-z0-9._-]+$/, "El identificador solo admite letras, números, punto, guion y guion bajo."),
-  clientSecret: z
-    .string()
-    .trim()
-    .min(16, "El secreto de la app debe tener al menos 16 caracteres.")
-    .max(255)
-    .regex(/^\S+$/, "El secreto no debe contener espacios."),
-});
-
 /** Estado de las credenciales de app por empresa (sin exponer secretos). */
 export const estadoCredenciales = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ empresaId: z.string().uuid() }).parse(input))
+  .inputValidator((input: unknown) => EmpresaInput.parse(input))
   .handler(async ({ data, context }) => {
     const { asegurarMiembro, puedeAdministrar } = await import("@/lib/permisos.server");
     await asegurarMiembro(context.supabase, data.empresaId);
@@ -65,11 +49,7 @@ export const guardarCredenciales = createServerFn({ method: "POST" })
 /** Valida contra la plataforma que las credenciales guardadas sirvan para autorizar. */
 export const verificarCredenciales = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
-    z
-      .object({ empresaId: z.string().uuid(), proveedor: z.enum(["meta", "tiktok"]) })
-      .parse(input),
-  )
+  .inputValidator((input: unknown) => ProveedorInput.parse(input))
   .handler(async ({ data, context }) => {
     const { asegurarAdministrador } = await import("@/lib/permisos.server");
     await asegurarAdministrador(context.supabase, context.userId, data.empresaId);
@@ -81,9 +61,7 @@ export const verificarCredenciales = createServerFn({ method: "POST" })
 /** Bitácora de intentos de verificación/sincronización de la app por proveedor. */
 export const historialVerificaciones = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
-    z.object({ empresaId: z.string().uuid(), proveedor: z.enum(["meta", "tiktok"]) }).parse(input),
-  )
+  .inputValidator((input: unknown) => ProveedorInput.parse(input))
   .handler(async ({ data, context }) => {
     const { asegurarMiembro } = await import("@/lib/permisos.server");
     await asegurarMiembro(context.supabase, data.empresaId);
@@ -94,7 +72,7 @@ export const historialVerificaciones = createServerFn({ method: "POST" })
 /** Sincroniza las páginas de Facebook y cuentas de Instagram disponibles para la app verificada. */
 export const sincronizarActivosMeta = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ empresaId: z.string().uuid() }).parse(input))
+  .inputValidator((input: unknown) => EmpresaInput.parse(input))
   .handler(async ({ data, context }) => {
     const { asegurarAdministrador } = await import("@/lib/permisos.server");
     await asegurarAdministrador(context.supabase, context.userId, data.empresaId);
@@ -105,16 +83,7 @@ export const sincronizarActivosMeta = createServerFn({ method: "POST" })
 /** Asigna a la empresa la página de Facebook o la cuenta de Instagram elegida. */
 export const elegirActivo = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
-    z
-      .object({
-        empresaId: z.string().uuid(),
-        red: z.enum(["facebook", "instagram"]),
-        cuentaId: z.string().trim().min(1).max(64),
-        cuentaNombre: z.string().trim().max(160).default(""),
-      })
-      .parse(input),
-  )
+  .inputValidator((input: unknown) => ActivoInput.parse(input))
   .handler(async ({ data, context }) => {
     const { asegurarAdministrador } = await import("@/lib/permisos.server");
     await asegurarAdministrador(context.supabase, context.userId, data.empresaId);
@@ -125,16 +94,7 @@ export const elegirActivo = createServerFn({ method: "POST" })
 /** Autoriza o reintenta los permisos de publicación de una página o cuenta concreta. */
 export const autorizarActivo = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
-    z
-      .object({
-        empresaId: z.string().uuid(),
-        red: z.enum(["facebook", "instagram"]),
-        cuentaId: z.string().trim().min(1).max(64),
-        cuentaNombre: z.string().trim().max(160).default(""),
-      })
-      .parse(input),
-  )
+  .inputValidator((input: unknown) => ActivoInput.parse(input))
   .handler(async ({ data, context }) => {
     const { asegurarAdministrador } = await import("@/lib/permisos.server");
     await asegurarAdministrador(context.supabase, context.userId, data.empresaId);

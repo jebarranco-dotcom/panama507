@@ -180,13 +180,152 @@ export async function verificarCredencial(empresaId: string, proveedor: Proveedo
     .eq("empresa_id", empresaId)
     .eq("proveedor", proveedor);
 
-  const redes: Red[] = proveedor === "meta" ? ["facebook", "instagram"] : ["tiktok"];
-  for (const red of redes) {
-    await registrarEvento(empresaId, red, ok ? "pendiente" : "error", detalle);
-  }
+  await registrarEventoProveedor(
+    empresaId,
+    proveedor,
+    ok ? "verificacion_ok" : "verificacion_error",
+    detalle,
+  );
   return { ok, detalle };
 }
 
+/** Bitácora de intentos de verificación y sincronización de la app por proveedor. */
+export async function historialVerificacion(empresaId: string, proveedor: Proveedor) {
+  const supabase = crearClienteServidor();
+  const { data } = await supabase
+    .from("conexiones_eventos")
+    .select("id, estado, mensaje, created_at")
+    .eq("empresa_id", empresaId)
+    .eq("red", proveedor)
+    .order("created_at", { ascending: false })
+    .limit(15);
+  return (data ?? []).map((f) => ({
+    id: f.id,
+    estado: f.estado,
+    mensaje: f.mensaje,
+    fecha: f.created_at,
+  }));
+}
+
+/**
+ * Lee las páginas de Facebook y las cuentas de Instagram profesionales que la
+ * autorización vigente de la empresa puede administrar. No publica nada.
+ */
+export async function activosMeta(empresaId: string) {
+  const supabase = crearClienteServidor();
+  const { data } = await supabase
+    .from("conexiones_tokens")
+    .select("red, access_token_cifrado, updated_at")
+    .eq("empresa_id", empresaId)
+    .in("red", ["facebook", "instagram"])
+    .order("updated_at", { ascending: false });
+  const fila = (data ?? [])[0];
+  if (!fila) {
+    const detalle =
+      "Aún no hay una autorización de Meta vigente para esta empresa: autoriza Facebook o Instagram y vuelve a sincronizar.";
+    await registrarEventoProveedor(empresaId, "meta", "sincronizacion_error", detalle);
+    return { ok: false, detalle, paginas: [] as ActivoMeta[] };
+  }
+
+  const token = descifrar(fila.access_token_cifrado);
+  try {
+    const res = await fetch(
+      `https://graph.facebook.com/v21.0/me/accounts?fields=id,name,instagram_business_account{id,username}&limit=100&access_token=${token}`,
+    );
+    const cuerpo = (await res.json()) as {
+      data?: {
+        id: string;
+        name: string;
+        instagram_business_account?: { id: string; username?: string };
+      }[];
+      error?: { message?: string };
+    };
+    if (!res.ok) throw new Error(cuerpo.error?.message ?? `Error HTTP ${res.status}`);
+    const paginas: ActivoMeta[] = (cuerpo.data ?? []).map((p) => ({
+      paginaId: p.id,
+      paginaNombre: p.name,
+      instagramId: p.instagram_business_account?.id ?? "",
+      instagramUsuario: p.instagram_business_account?.username ?? "",
+    }));
+    const detalle = paginas.length
+      ? `Sincronización correcta: ${paginas.length} página(s) de Facebook y ${
+          paginas.filter((p) => p.instagramId).length
+        } cuenta(s) de Instagram profesional disponibles.`
+      : "La autorización vigente no administra ninguna página de Facebook.";
+    await registrarEventoProveedor(
+      empresaId,
+      "meta",
+      paginas.length ? "sincronizacion_ok" : "sincronizacion_error",
+      detalle,
+    );
+    return { ok: paginas.length > 0, detalle, paginas };
+  } catch (e) {
+    const detalle = `No se pudieron leer los activos de Meta: ${(e as Error).message}`;
+    await registrarEventoProveedor(empresaId, "meta", "sincronizacion_error", detalle);
+    return { ok: false, detalle, paginas: [] as ActivoMeta[] };
+  }
+}
+
+export type ActivoMeta = {
+  paginaId: string;
+  paginaNombre: string;
+  instagramId: string;
+  instagramUsuario: string;
+};
+
+/** Asigna a la empresa la página o la cuenta de Instagram elegida entre las sincronizadas. */
+export async function elegirActivoMeta(
+  empresaId: string,
+  red: Exclude<Red, "tiktok">,
+  cuentaId: string,
+  cuentaNombre: string,
+) {
+  const supabase = crearClienteServidor();
+  const { data: fila } = await supabase
+    .from("conexiones_redes")
+    .select("permisos_otorgados")
+    .eq("empresa_id", empresaId)
+    .eq("red", red)
+    .maybeSingle();
+  const otorgados = (fila?.permisos_otorgados ?? []) as string[];
+  const faltantes = PERMISOS_REQUERIDOS[red].filter((p) => !otorgados.includes(p));
+  const conectada = faltantes.length === 0 && Boolean(cuentaId);
+  const detalle = conectada
+    ? `Cuenta vinculada: ${cuentaNombre || cuentaId}. Permisos aprobados (${PERMISOS_REQUERIDOS[red].join(", ")}).`
+    : `Cuenta vinculada: ${cuentaNombre || cuentaId}. Permisos pendientes: ${faltantes.join(", ")}.`;
+
+  await supabase
+    .from("conexiones_redes")
+    .upsert(
+      {
+        empresa_id: empresaId,
+        red,
+        proveedor: "meta",
+        estado: conectada ? "conectada" : "autorizada",
+        cuenta_externa_id: cuentaId,
+        cuenta_externa_nombre: cuentaNombre,
+        permisos_otorgados: otorgados,
+        permisos_faltantes: faltantes,
+        detalle,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "empresa_id,red" },
+    );
+
+  await supabase
+    .from("cuentas_sociales")
+    .update({
+      conectada,
+      ...(cuentaNombre ? { usuario: cuentaNombre } : {}),
+      notas: detalle,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("empresa_id", empresaId)
+    .eq("red", red);
+
+  await registrarEvento(empresaId, red, conectada ? "conectada" : "autorizada", detalle);
+  return { conectada, faltantes, detalle };
+}
 
 export async function registrarEvento(
   empresaId: string,
@@ -202,6 +341,23 @@ export async function registrarEvento(
     mensaje,
   });
 }
+
+/** Registra el evento a nivel de app (proveedor) y no de una red concreta. */
+export async function registrarEventoProveedor(
+  empresaId: string,
+  proveedor: Proveedor,
+  estado: string,
+  mensaje: string,
+) {
+  const supabase = crearClienteServidor();
+  await supabase.from("conexiones_eventos").insert({
+    empresa_id: empresaId,
+    red: proveedor,
+    estado,
+    mensaje,
+  });
+}
+
 
 export async function guardarResultado(opciones: {
   empresaId: string;

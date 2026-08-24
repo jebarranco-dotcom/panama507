@@ -1,4 +1,4 @@
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import {
@@ -7,7 +7,9 @@ import {
   BadgeCheck,
   Check,
   Copy,
+  History,
   Loader2,
+  RotateCw,
   ShieldQuestion,
   Sparkles,
   XCircle,
@@ -20,7 +22,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useEmpresa } from "@/lib/empresa";
-import { guardarCredenciales, verificarCredenciales } from "@/lib/oauth.functions";
+import {
+  guardarCredenciales,
+  historialVerificaciones,
+  verificarCredenciales,
+} from "@/lib/oauth.functions";
+
 
 type EstadoMeta = {
   registrada: boolean;
@@ -70,8 +77,18 @@ export function AsistenteMeta({
     estado?.verificada ? { ok: true, detalle: estado.detalleVerificacion } : null,
   );
 
+  const {
+    data: historial = [],
+    isFetching: cargandoHistorial,
+    refetch: refetchHistorial,
+  } = useQuery({
+    queryKey: ["verificaciones-meta", empresaId],
+    queryFn: () => historialVerificaciones({ data: { empresaId, proveedor: "meta" } }),
+  });
+
   const redirectUri = `${origen}/api/public/oauth/meta/callback`;
   const listo = estado?.verificada ?? false;
+
 
   const copiar = (valor: string) => {
     void navigator.clipboard.writeText(valor);
@@ -107,9 +124,11 @@ export function AsistenteMeta({
       const r = await verificar({ data: { empresaId, proveedor: "meta" } });
       setResultado({ ok: r.ok, detalle: r.detalle });
       await queryClient.invalidateQueries({ queryKey: ["credenciales-oauth", empresaId] });
+      await refetchHistorial();
       if (r.ok) toast.success("Listo para autorizar");
       else toast.error("Verificación fallida", { description: r.detalle });
     } catch (e) {
+
       toast.error("No se pudo verificar", { description: (e as Error).message });
     } finally {
       setTrabajando(false);
@@ -268,18 +287,29 @@ export function AsistenteMeta({
               Pedimos un token de aplicación a Meta con el App ID y el App Secret guardados. No
               publica nada: solo confirma que el par es válido y deja la app «lista para autorizar».
             </p>
-            <Button
-              className="w-full"
-              disabled={!puedeAdministrar || trabajando || !estado?.registrada}
-              onClick={() => void comprobar()}
-            >
-              {trabajando ? (
-                <Loader2 className="size-4 animate-spin" />
-              ) : (
-                <ShieldQuestion className="size-4" />
-              )}
-              Verificar credenciales con Meta
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                className="flex-1"
+                disabled={!puedeAdministrar || trabajando || !estado?.registrada}
+                onClick={() => void comprobar()}
+              >
+                {trabajando ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <ShieldQuestion className="size-4" />
+                )}
+                {listo || resultado ? "Reintentar verificación con Meta" : "Verificar credenciales con Meta"}
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                aria-label="Actualizar historial de intentos"
+                disabled={cargandoHistorial}
+                onClick={() => void refetchHistorial()}
+              >
+                <RotateCw className={`size-4 ${cargandoHistorial ? "animate-spin" : ""}`} />
+              </Button>
+            </div>
             {resultado ? (
               <div
                 className={`flex gap-2 rounded-lg border p-3 text-xs ${
@@ -301,6 +331,39 @@ export function AsistenteMeta({
                 Verificada el {new Date(estado.verificadaAt).toLocaleString("es-PA")}.
               </p>
             ) : null}
+
+            <div className="rounded-lg border border-border bg-background/40 p-3">
+              <p className="flex items-center gap-2 text-xs font-semibold">
+                <History className="size-3.5 text-primary" /> Historial de intentos
+              </p>
+              {historial.length === 0 ? (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Todavía no hay intentos de verificación registrados para {empresa.nombre}.
+                </p>
+              ) : (
+                <ul className="mt-2 space-y-1.5">
+                  {historial.map((h) => {
+                    const bien = h.estado.endsWith("_ok");
+                    return (
+                      <li key={h.id} className="flex gap-2 text-xs leading-relaxed">
+                        {bien ? (
+                          <BadgeCheck className="mt-0.5 size-3.5 shrink-0 text-success" />
+                        ) : (
+                          <XCircle className="mt-0.5 size-3.5 shrink-0 text-destructive" />
+                        )}
+                        <span className="text-muted-foreground">
+                          <span className="font-mono">
+                            {new Date(h.fecha).toLocaleString("es-PA")}
+                          </span>{" "}
+                          — {h.mensaje}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
+
             {listo ? (
               <Button asChild variant="outline" className="w-full">
                 <Link to="/conexiones">
@@ -310,6 +373,7 @@ export function AsistenteMeta({
             ) : null}
           </div>
         ) : null}
+
       </div>
 
       <div className="mt-4 flex items-center justify-between gap-2">

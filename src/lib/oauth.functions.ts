@@ -78,6 +78,50 @@ export const verificarCredenciales = createServerFn({ method: "POST" })
     return { ...resultado, estado: await resumenCredenciales(data.empresaId) };
   });
 
+/** Bitácora de intentos de verificación/sincronización de la app por proveedor. */
+export const historialVerificaciones = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({ empresaId: z.string().uuid(), proveedor: z.enum(["meta", "tiktok"]) }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { asegurarMiembro } = await import("@/lib/permisos.server");
+    await asegurarMiembro(context.supabase, data.empresaId);
+    const { historialVerificacion } = await import("@/lib/conexiones.server");
+    return historialVerificacion(data.empresaId, data.proveedor);
+  });
+
+/** Sincroniza las páginas de Facebook y cuentas de Instagram disponibles para la app verificada. */
+export const sincronizarActivosMeta = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ empresaId: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { asegurarAdministrador } = await import("@/lib/permisos.server");
+    await asegurarAdministrador(context.supabase, context.userId, data.empresaId);
+    const { activosMeta } = await import("@/lib/conexiones.server");
+    return activosMeta(data.empresaId);
+  });
+
+/** Asigna a la empresa la página de Facebook o la cuenta de Instagram elegida. */
+export const elegirActivo = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        empresaId: z.string().uuid(),
+        red: z.enum(["facebook", "instagram"]),
+        cuentaId: z.string().trim().min(1).max(64),
+        cuentaNombre: z.string().trim().max(160).default(""),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { asegurarAdministrador } = await import("@/lib/permisos.server");
+    await asegurarAdministrador(context.supabase, context.userId, data.empresaId);
+    const { elegirActivoMeta } = await import("@/lib/conexiones.server");
+    return elegirActivoMeta(data.empresaId, data.red, data.cuentaId, data.cuentaNombre);
+  });
+
 
 /** Construye la URL de autorización de la red indicada para abrirla en una ventana emergente. */
 export const iniciarOAuth = createServerFn({ method: "POST" })

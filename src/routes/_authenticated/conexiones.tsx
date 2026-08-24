@@ -14,9 +14,11 @@ import {
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
+import { ActivosMeta } from "@/components/ActivosMeta";
 import { AppShell } from "@/components/AppShell";
 import { IconoRed } from "@/components/Estado";
 import { PruebaPublicacion } from "@/components/PruebaPublicacion";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useEmpresa } from "@/lib/empresa";
@@ -84,7 +86,24 @@ const ETIQUETA_ESTADO: Record<string, { texto: string; clase: string }> = {
     clase: "border-warning/40 bg-warning/15 text-warning",
   },
   error: { texto: "Error de autorización", clase: "border-destructive/40 bg-destructive/15 text-destructive" },
+  verificacion_ok: {
+    texto: "App verificada",
+    clase: "border-success/40 bg-success/15 text-success",
+  },
+  verificacion_error: {
+    texto: "Verificación fallida",
+    clase: "border-destructive/40 bg-destructive/15 text-destructive",
+  },
+  sincronizacion_ok: {
+    texto: "Activos sincronizados",
+    clase: "border-success/40 bg-success/15 text-success",
+  },
+  sincronizacion_error: {
+    texto: "Sincronización sin resultados",
+    clase: "border-warning/40 bg-warning/15 text-warning",
+  },
 };
+
 
 function Conexiones() {
   const { empresa, empresaId } = useEmpresa();
@@ -252,8 +271,18 @@ function Conexiones() {
       </div>
 
       <div className="mt-4">
+        <ActivosMeta
+          puedeAdministrar={credenciales?.puedeAdministrar ?? false}
+          verificada={credenciales?.meta.verificada ?? false}
+          seleccionFacebook={conexionDe("facebook")?.cuenta_externa_id ?? ""}
+          seleccionInstagram={conexionDe("instagram")?.cuenta_externa_id ?? ""}
+        />
+      </div>
+
+      <div className="mt-4">
         <PruebaPublicacion />
       </div>
+
 
       <section className="panel mt-4 p-5">
         <h2 className="flex items-center gap-2 font-display text-lg font-bold">

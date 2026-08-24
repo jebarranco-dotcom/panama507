@@ -74,14 +74,16 @@ export function Conexiones() {
                       : "border-warning/40 bg-warning/15 text-warning"
                   }
                 >
-                  {c.conectada ? "Conectada" : "Pendiente"}
+                  {c.conectada ? "Conectada" : "Pendiente de conexión oficial"}
                 </Badge>
                 <Switch
                   checked={c.conectada}
                   onCheckedChange={(conectada) => alternar.mutate({ id: c.id, conectada })}
                 />
               </div>
-              <p className="w-full text-xs text-muted-foreground">{REQUISITOS[c.red]}</p>
+              <p className="w-full text-xs text-muted-foreground">
+                {c.notas?.trim() ? c.notas : REQUISITOS[c.red]}
+              </p>
             </div>
           ))}
         </div>

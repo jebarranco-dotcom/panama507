@@ -35,7 +35,27 @@ export const Route = createFileRoute("/_authenticated/credenciales")({
     ],
   }),
   component: Credenciales,
+  errorComponent: ErrorCredenciales,
 });
+
+/** Evita que un fallo puntual del servidor tumbe toda la aplicación. */
+function ErrorCredenciales({ error, reset }: { error: Error; reset: () => void }) {
+  return (
+    <AppShell
+      titulo="Credenciales de apps"
+      descripcion="No pudimos cargar esta pantalla. Reintenta; si el problema sigue, vuelve a iniciar sesión."
+    >
+      <section className="panel border-destructive/40 p-5">
+        <h2 className="font-display text-base font-bold">Credenciales no disponibles temporalmente</h2>
+        <p className="mt-2 text-xs text-muted-foreground">{error.message}</p>
+        <Button className="mt-3" size="sm" variant="outline" onClick={reset}>
+          <RefreshCw className="size-4" /> Reintentar
+        </Button>
+      </section>
+    </AppShell>
+  );
+}
+
 
 type Proveedor = "meta" | "tiktok";
 

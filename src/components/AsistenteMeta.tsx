@@ -84,7 +84,10 @@ export function AsistenteMeta({
   } = useQuery({
     queryKey: ["verificaciones-meta", empresaId],
     queryFn: () => historialVerificaciones({ data: { empresaId, proveedor: "meta" } }),
+    enabled: Boolean(empresaId),
+    retry: 1,
   });
+
 
   const redirectUri = `${origen}/api/public/oauth/meta/callback`;
   const listo = estado?.verificada ?? false;

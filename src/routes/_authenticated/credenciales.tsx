@@ -35,7 +35,27 @@ export const Route = createFileRoute("/_authenticated/credenciales")({
     ],
   }),
   component: Credenciales,
+  errorComponent: ErrorCredenciales,
 });
+
+/** Evita que un fallo puntual del servidor tumbe toda la aplicación. */
+function ErrorCredenciales({ error, reset }: { error: Error; reset: () => void }) {
+  return (
+    <AppShell
+      titulo="Credenciales de apps"
+      descripcion="No pudimos cargar esta pantalla. Reintenta; si el problema sigue, vuelve a iniciar sesión."
+    >
+      <section className="panel border-destructive/40 p-5">
+        <h2 className="font-display text-base font-bold">Credenciales no disponibles temporalmente</h2>
+        <p className="mt-2 text-xs text-muted-foreground">{error.message}</p>
+        <Button className="mt-3" size="sm" variant="outline" onClick={reset}>
+          <RefreshCw className="size-4" /> Reintentar
+        </Button>
+      </section>
+    </AppShell>
+  );
+}
+
 
 type Proveedor = "meta" | "tiktok";
 
@@ -89,15 +109,24 @@ function Credenciales() {
   const origen = typeof window === "undefined" ? "https://panama507.lovable.app" : window.location.origin;
   const queryClient = useQueryClient();
 
-  const { data: estado } = useQuery({
+  const {
+    data: estado,
+    error: errorEstado,
+    isLoading: cargandoEstado,
+    refetch: recargarEstado,
+    isFetching: recargando,
+  } = useQuery({
     queryKey: ["credenciales-oauth", empresaId],
     queryFn: () => estadoCredenciales({ data: { empresaId } }),
+    enabled: Boolean(empresaId),
+    retry: 1,
   });
   const guardar = useServerFn(guardarCredenciales);
   const [valores, setValores] = useState<Record<string, string>>({});
   const [guardando, setGuardando] = useState<Proveedor | null>(null);
 
   const puede = estado?.puedeAdministrar ?? false;
+
 
   const enviar = async (proveedor: Proveedor) => {
     const clientId = (valores[`${proveedor}-id`] ?? "").trim();
@@ -129,11 +158,39 @@ function Credenciales() {
       titulo="Credenciales de apps"
       descripcion={`${empresa.nombre}: registra o rota las credenciales OAuth de Meta y TikTok. Los secretos se guardan cifrados y nunca se devuelven al navegador.`}
     >
+      {errorEstado ? (
+        <section className="panel mb-4 border-destructive/40 p-5">
+          <h2 className="font-display text-base font-bold">No se pudo cargar el estado de las credenciales</h2>
+          <p className="mt-2 text-xs text-muted-foreground">
+            {(errorEstado as Error).message ||
+              "La sesión pudo expirar o el servidor no respondió. Reintenta; si persiste, vuelve a iniciar sesión."}
+          </p>
+          <Button
+            className="mt-3"
+            variant="outline"
+            size="sm"
+            disabled={recargando}
+            onClick={() => void recargarEstado()}
+          >
+            {recargando ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
+            Reintentar
+          </Button>
+        </section>
+      ) : null}
+
+      {cargandoEstado ? (
+        <div className="panel mb-4 flex items-center gap-2 p-5 text-xs text-muted-foreground">
+          <Loader2 className="size-4 animate-spin text-primary" /> Cargando el estado de las apps…
+        </div>
+      ) : null}
+
       <AsistenteMeta
         estado={estado?.meta}
         puedeAdministrar={puede}
         origen={origen}
       />
+
+
 
       <div className="mt-4 grid gap-4 lg:grid-cols-2">
 

@@ -89,3 +89,32 @@ export const propiedadesQuery = (empresaId: string) =>
       return data;
     },
   });
+
+export const conexionesQuery = (empresaId: string) =>
+  queryOptions({
+    queryKey: ["conexiones_redes", empresaId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("conexiones_redes")
+        .select("*")
+        .eq("empresa_id", empresaId)
+        .order("red");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+export const conexionEventosQuery = (empresaId: string) =>
+  queryOptions({
+    queryKey: ["conexiones_eventos", empresaId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("conexiones_eventos")
+        .select("*")
+        .eq("empresa_id", empresaId)
+        .order("created_at", { ascending: false })
+        .limit(20);
+      if (error) throw error;
+      return data;
+    },
+  });

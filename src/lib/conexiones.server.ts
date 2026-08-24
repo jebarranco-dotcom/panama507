@@ -197,6 +197,7 @@ export async function historialVerificacion(empresaId: string, proveedor: Provee
     .select("id, estado, mensaje, created_at")
     .eq("empresa_id", empresaId)
     .eq("red", proveedor)
+    .neq("estado", "activos_firma")
     .order("created_at", { ascending: false })
     .limit(15);
   return (data ?? []).map((f) => ({

@@ -546,6 +546,50 @@ export type Database = {
           },
         ]
       }
+      programacion_redes: {
+        Row: {
+          activo: boolean
+          created_at: string
+          empresa_id: string
+          formato: string
+          hora: string
+          id: string
+          pilar: string
+          red: string
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean
+          created_at?: string
+          empresa_id: string
+          formato?: string
+          hora?: string
+          id?: string
+          pilar?: string
+          red: string
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean
+          created_at?: string
+          empresa_id?: string
+          formato?: string
+          hora?: string
+          id?: string
+          pilar?: string
+          red?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "programacion_redes_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       propiedades: {
         Row: {
           area_m2: number

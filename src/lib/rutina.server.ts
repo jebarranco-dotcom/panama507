@@ -135,15 +135,24 @@ export async function generarContenidoDelDia(fecha?: string, empresaId?: string)
     .order("fecha_programada", { ascending: false })
     .limit(12);
 
-  const { plan: planDiario, tipo } = estrategiaDe(empresa.slug);
+  const { plan: planBase, tipo } = estrategiaDe(empresa.slug);
+  const { programacionDe } = await import("./programacion.server");
+  const programada = (await programacionDe(empresa.id)).filter((f) => f.activo);
+  const planDiario = (programada.length ? programada : planBase).map((f) => ({
+    red: f.red,
+    hora: f.hora,
+    pilar: f.pilar || planBase.find((b) => b.red === f.red)?.pilar || "educativo",
+    formato: f.formato || planBase.find((b) => b.red === f.red)?.formato || "imagen",
+  }));
   const etiquetaCatalogo = tipo === "servicios" ? "Portafolio de servicios" : "Inventario";
   const plan = planDiario.map(
     (p) => `- red: ${p.red}, hora: ${p.hora}, pilar: ${p.pilar} (${nombrePilar(p.pilar)}), formato: ${p.formato}`,
   ).join("\n");
 
+
   const prompt = `Fecha de publicación: ${dia}.
 
-Genera EXACTAMENTE 3 publicaciones siguiendo este plan diario:
+Genera EXACTAMENTE ${planDiario.length} publicaciones siguiendo este plan diario (respeta la hora indicada en cada línea):
 ${plan}
 
 ${etiquetaCatalogo} disponible (usa datos reales de aquí cuando el pilar lo requiera):
@@ -162,7 +171,7 @@ ${tipo === "servicios" ? "No prometas resultados garantizados ni decisiones de t
   const texto = await pedirTexto(prompt, systemContenido(empresa));
   const parsed = parsearJson<{ publicaciones: PostGenerado[] }>(texto);
 
-  const filas = (parsed.publicaciones ?? []).slice(0, 3).map((p, i) => {
+  const filas = (parsed.publicaciones ?? []).slice(0, planDiario.length).map((p, i) => {
     const base = planDiario[i % planDiario.length]!;
     const prop = (propiedades ?? []).find(
       (x) => p.propiedad_titulo && x.titulo.toLowerCase() === p.propiedad_titulo.toLowerCase(),
@@ -170,8 +179,10 @@ ${tipo === "servicios" ? "No prometas resultados garantizados ni decisiones de t
     return {
       empresa_id: empresa.id,
       fecha_programada: dia,
-      hora_programada: p.hora_programada || base.hora,
-      red: p.red || base.red,
+      // La hora y la red las manda la programación de la empresa, no la IA.
+      hora_programada: base.hora,
+      red: base.red,
+
       pilar: p.pilar || base.pilar,
       formato: p.formato || base.formato,
       titular: (p.titular ?? "").slice(0, 120),

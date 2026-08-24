@@ -245,6 +245,10 @@ function Conexiones() {
         })}
       </div>
 
+      <div className="mt-4">
+        <PruebaPublicacion />
+      </div>
+
       <section className="panel mt-4 p-5">
         <h2 className="flex items-center gap-2 font-display text-lg font-bold">
           <History className="size-5 text-primary" /> Bitácora de estados

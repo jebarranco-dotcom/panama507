@@ -101,6 +101,16 @@ export const iniciarOAuth = createServerFn({ method: "POST" })
           : "Falta registrar el client key y el client secret de la app de TikTok para esta empresa.",
       );
     }
+    if (proveedor === "meta") {
+      const { resumenCredenciales } = await import("@/lib/conexiones.server");
+      const { meta } = await resumenCredenciales(data.empresaId);
+      if (!meta.verificada) {
+        throw new Error(
+          "La app de Meta aún no está verificada. Completa el paso de verificación en Credenciales para dejarla lista para autorizar.",
+        );
+      }
+    }
+
 
     const origen = origenPublico(getRequest());
     const redirectUri = `${origen}/api/public/oauth/${proveedor}/callback`;

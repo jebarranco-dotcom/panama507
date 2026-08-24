@@ -152,7 +152,7 @@ export async function generarContenidoDelDia(fecha?: string, empresaId?: string)
 
   const prompt = `Fecha de publicación: ${dia}.
 
-Genera EXACTAMENTE 3 publicaciones siguiendo este plan diario:
+Genera EXACTAMENTE ${planDiario.length} publicaciones siguiendo este plan diario (respeta la hora indicada en cada línea):
 ${plan}
 
 ${etiquetaCatalogo} disponible (usa datos reales de aquí cuando el pilar lo requiera):

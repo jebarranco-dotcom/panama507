@@ -234,10 +234,14 @@ function Conexiones() {
               {!listo ? (
                 <p className="mt-2 flex gap-1.5 text-xs text-warning">
                   <AlertTriangle className="mt-0.5 size-3.5 shrink-0" />
-                  Credenciales de app pendientes: registra la app de{" "}
-                  {proveedor === "meta" ? "Meta Business" : "TikTok for Developers"} en Credenciales.
+                  {proveedor === "meta"
+                    ? cred?.registrada
+                      ? "App de Meta registrada pero sin verificar: completa el paso 5 del asistente en Credenciales para dejarla «lista para autorizar»."
+                      : "Credenciales de app pendientes: completa el asistente de Meta Business en Credenciales."
+                    : "Credenciales de app pendientes: registra la app de TikTok for Developers en Credenciales."}
                 </p>
               ) : !puede ? (
+
                 <p className="mt-2 text-xs text-muted-foreground">
                   Solo un administrador o gestor de la empresa puede autorizar redes.
                 </p>

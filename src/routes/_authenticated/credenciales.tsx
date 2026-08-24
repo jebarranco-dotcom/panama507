@@ -138,11 +138,39 @@ function Credenciales() {
       titulo="Credenciales de apps"
       descripcion={`${empresa.nombre}: registra o rota las credenciales OAuth de Meta y TikTok. Los secretos se guardan cifrados y nunca se devuelven al navegador.`}
     >
+      {errorEstado ? (
+        <section className="panel mb-4 border-destructive/40 p-5">
+          <h2 className="font-display text-base font-bold">No se pudo cargar el estado de las credenciales</h2>
+          <p className="mt-2 text-xs text-muted-foreground">
+            {(errorEstado as Error).message ||
+              "La sesión pudo expirar o el servidor no respondió. Reintenta; si persiste, vuelve a iniciar sesión."}
+          </p>
+          <Button
+            className="mt-3"
+            variant="outline"
+            size="sm"
+            disabled={recargando}
+            onClick={() => void recargarEstado()}
+          >
+            {recargando ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
+            Reintentar
+          </Button>
+        </section>
+      ) : null}
+
+      {cargandoEstado ? (
+        <div className="panel mb-4 flex items-center gap-2 p-5 text-xs text-muted-foreground">
+          <Loader2 className="size-4 animate-spin text-primary" /> Cargando el estado de las apps…
+        </div>
+      ) : null}
+
       <AsistenteMeta
         estado={estado?.meta}
         puedeAdministrar={puede}
         origen={origen}
       />
+
+
 
       <div className="mt-4 grid gap-4 lg:grid-cols-2">
 

@@ -25,6 +25,8 @@ export type Database = {
           pista_secreto: string
           proveedor: string
           updated_at: string
+          verificacion_detalle: string
+          verificada_at: string | null
         }
         Insert: {
           actualizado_por?: string | null
@@ -36,6 +38,8 @@ export type Database = {
           pista_secreto?: string
           proveedor: string
           updated_at?: string
+          verificacion_detalle?: string
+          verificada_at?: string | null
         }
         Update: {
           actualizado_por?: string | null
@@ -47,6 +51,8 @@ export type Database = {
           pista_secreto?: string
           proveedor?: string
           updated_at?: string
+          verificacion_detalle?: string
+          verificada_at?: string | null
         }
         Relationships: [
           {

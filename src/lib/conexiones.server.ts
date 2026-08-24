@@ -78,7 +78,7 @@ export async function resumenCredenciales(empresaId: string) {
   const supabase = crearClienteServidor();
   const { data } = await supabase
     .from("app_credenciales")
-    .select("proveedor, client_id, pista_secreto, updated_at")
+    .select("proveedor, client_id, pista_secreto, updated_at, verificada_at, verificacion_detalle")
     .eq("empresa_id", empresaId);
   const de = (proveedor: Proveedor) => {
     const fila = (data ?? []).find((f) => f.proveedor === proveedor);
@@ -89,6 +89,9 @@ export async function resumenCredenciales(empresaId: string) {
         clientId: fila.client_id,
         pista: fila.pista_secreto,
         actualizado: fila.updated_at,
+        verificada: Boolean(fila.verificada_at),
+        verificadaAt: fila.verificada_at as string | null,
+        detalleVerificacion: fila.verificacion_detalle ?? "",
       };
     }
     const global =
@@ -101,10 +104,89 @@ export async function resumenCredenciales(empresaId: string) {
       clientId: "",
       pista: "",
       actualizado: null as string | null,
+      verificada: false,
+      verificadaAt: null as string | null,
+      detalleVerificacion: "",
     };
   };
   return { meta: de("meta"), tiktok: de("tiktok") };
 }
+
+/**
+ * Comprueba contra la plataforma que el par ID/secreto sea válido pidiendo un token de app.
+ * No publica nada ni pide permisos de usuario: solo confirma que la app existe y el secreto coincide.
+ */
+export async function verificarCredencial(empresaId: string, proveedor: Proveedor) {
+  const cred = await leerCredencial(empresaId, proveedor);
+  if (!cred) {
+    return {
+      ok: false,
+      detalle:
+        proveedor === "meta"
+          ? "Aún no hay App ID ni App Secret de Meta guardados para esta empresa."
+          : "Aún no hay Client Key ni Client Secret de TikTok guardados para esta empresa.",
+    };
+  }
+
+  let ok = false;
+  let detalle = "";
+  try {
+    if (proveedor === "meta") {
+      const url = new URL("https://graph.facebook.com/v21.0/oauth/access_token");
+      url.searchParams.set("client_id", cred.clientId);
+      url.searchParams.set("client_secret", cred.clientSecret);
+      url.searchParams.set("grant_type", "client_credentials");
+      const res = await fetch(url, { method: "GET" });
+      const cuerpo = (await res.json()) as {
+        access_token?: string;
+        error?: { message?: string; code?: number };
+      };
+      ok = res.ok && Boolean(cuerpo.access_token);
+      detalle = ok
+        ? "Meta validó el App ID y el App Secret: la app responde y emitió un token de aplicación."
+        : `Meta rechazó las credenciales: ${cuerpo.error?.message ?? `error HTTP ${res.status}`}.`;
+    } else {
+      const res = await fetch("https://open.tiktokapis.com/v2/oauth/token/", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          client_key: cred.clientId,
+          client_secret: cred.clientSecret,
+          grant_type: "client_credentials",
+        }),
+      });
+      const cuerpo = (await res.json()) as {
+        access_token?: string;
+        error?: string;
+        error_description?: string;
+      };
+      ok = res.ok && Boolean(cuerpo.access_token);
+      detalle = ok
+        ? "TikTok validó el Client Key y el Client Secret: la app responde y emitió un token de aplicación."
+        : `TikTok rechazó las credenciales: ${cuerpo.error_description ?? cuerpo.error ?? `error HTTP ${res.status}`}.`;
+    }
+  } catch (e) {
+    ok = false;
+    detalle = `No se pudo contactar a la plataforma: ${(e as Error).message}`;
+  }
+
+  const supabase = crearClienteServidor();
+  await supabase
+    .from("app_credenciales")
+    .update({
+      verificada_at: ok ? new Date().toISOString() : null,
+      verificacion_detalle: detalle,
+    })
+    .eq("empresa_id", empresaId)
+    .eq("proveedor", proveedor);
+
+  const redes: Red[] = proveedor === "meta" ? ["facebook", "instagram"] : ["tiktok"];
+  for (const red of redes) {
+    await registrarEvento(empresaId, red, ok ? "pendiente" : "error", detalle);
+  }
+  return { ok, detalle };
+}
+
 
 export async function registrarEvento(
   empresaId: string,

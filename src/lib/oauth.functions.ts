@@ -62,6 +62,23 @@ export const guardarCredenciales = createServerFn({ method: "POST" })
     return resumenCredenciales(data.empresaId);
   });
 
+/** Valida contra la plataforma que las credenciales guardadas sirvan para autorizar. */
+export const verificarCredenciales = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({ empresaId: z.string().uuid(), proveedor: z.enum(["meta", "tiktok"]) })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { asegurarAdministrador } = await import("@/lib/permisos.server");
+    await asegurarAdministrador(context.supabase, context.userId, data.empresaId);
+    const { verificarCredencial, resumenCredenciales } = await import("@/lib/conexiones.server");
+    const resultado = await verificarCredencial(data.empresaId, data.proveedor);
+    return { ...resultado, estado: await resumenCredenciales(data.empresaId) };
+  });
+
+
 /** Construye la URL de autorización de la red indicada para abrirla en una ventana emergente. */
 export const iniciarOAuth = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -84,6 +101,16 @@ export const iniciarOAuth = createServerFn({ method: "POST" })
           : "Falta registrar el client key y el client secret de la app de TikTok para esta empresa.",
       );
     }
+    if (proveedor === "meta") {
+      const { resumenCredenciales } = await import("@/lib/conexiones.server");
+      const { meta } = await resumenCredenciales(data.empresaId);
+      if (!meta.verificada) {
+        throw new Error(
+          "La app de Meta aún no está verificada. Completa el paso de verificación en Credenciales para dejarla lista para autorizar.",
+        );
+      }
+    }
+
 
     const origen = origenPublico(getRequest());
     const redirectUri = `${origen}/api/public/oauth/${proveedor}/callback`;

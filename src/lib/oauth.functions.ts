@@ -5,70 +5,116 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 export type ProveedorOAuth = "meta" | "tiktok";
+export type RedOAuth = "facebook" | "instagram" | "tiktok";
 
-const ProveedorInput = z.object({ proveedor: z.enum(["meta", "tiktok"]) });
+const IniciarInput = z.object({
+  empresaId: z.string().uuid(),
+  red: z.enum(["facebook", "instagram", "tiktok"]),
+});
 
-const SCOPES_META = [
-  "pages_show_list",
-  "pages_read_engagement",
-  "pages_manage_posts",
-  "instagram_basic",
-  "instagram_content_publish",
-];
+const CredencialInput = z.object({
+  empresaId: z.string().uuid(),
+  proveedor: z.enum(["meta", "tiktok"]),
+  clientId: z
+    .string()
+    .trim()
+    .min(6, "El identificador de la app es demasiado corto.")
+    .max(120)
+    .regex(/^[A-Za-z0-9._-]+$/, "El identificador solo admite letras, números, punto, guion y guion bajo."),
+  clientSecret: z
+    .string()
+    .trim()
+    .min(16, "El secreto de la app debe tener al menos 16 caracteres.")
+    .max(255)
+    .regex(/^\S+$/, "El secreto no debe contener espacios."),
+});
 
-const SCOPES_TIKTOK = ["user.info.basic", "video.publish", "video.upload"];
-
-/** Qué credenciales de app están configuradas en el servidor. */
-export const estadoCredenciales = createServerFn({ method: "GET" })
+/** Estado de las credenciales de app por empresa (sin exponer secretos). */
+export const estadoCredenciales = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async () => ({
-    meta: Boolean(process.env["META_APP_ID"] && process.env["META_APP_SECRET"]),
-    tiktok: Boolean(
-      process.env["TIKTOK_CLIENT_KEY"] && process.env["TIKTOK_CLIENT_SECRET"],
-    ),
-    scopes: { meta: SCOPES_META, tiktok: SCOPES_TIKTOK },
-  }));
+  .inputValidator((input: unknown) => z.object({ empresaId: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { asegurarMiembro, puedeAdministrar } = await import("@/lib/permisos.server");
+    await asegurarMiembro(context.supabase, data.empresaId);
+    const { resumenCredenciales, SCOPES_SOLICITADOS } = await import("@/lib/conexiones.server");
+    return {
+      ...(await resumenCredenciales(data.empresaId)),
+      scopes: SCOPES_SOLICITADOS,
+      puedeAdministrar: await puedeAdministrar(context.supabase, context.userId, data.empresaId),
+    };
+  });
 
-/** Construye la URL de autorización del proveedor para abrirla en una ventana emergente. */
+/** Registra o rota las credenciales de la app de Meta o TikTok para una empresa. */
+export const guardarCredenciales = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => CredencialInput.parse(input))
+  .handler(async ({ data, context }) => {
+    const { asegurarAdministrador } = await import("@/lib/permisos.server");
+    await asegurarAdministrador(context.supabase, context.userId, data.empresaId);
+    const { guardarCredencial, resumenCredenciales } = await import("@/lib/conexiones.server");
+    await guardarCredencial(
+      data.empresaId,
+      data.proveedor,
+      data.clientId,
+      data.clientSecret,
+      context.userId,
+    );
+    return resumenCredenciales(data.empresaId);
+  });
+
+/** Construye la URL de autorización de la red indicada para abrirla en una ventana emergente. */
 export const iniciarOAuth = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => ProveedorInput.parse(input))
+  .inputValidator((input: unknown) => IniciarInput.parse(input))
   .handler(async ({ data, context }) => {
-    const request = getRequest();
-    if (!request) throw new Error("La autorización debe iniciarse desde la aplicación.");
-    const url = new URL(request.url);
-    const host =
-      url.hostname === "localhost" ? request.headers.get("x-forwarded-host") : null;
-    const origen = host ? `https://${host}` : url.origin;
-    const estado = `${data.proveedor}:${context.userId}`;
+    const { asegurarAdministrador } = await import("@/lib/permisos.server");
+    await asegurarAdministrador(context.supabase, context.userId, data.empresaId);
+    const { PROVEEDOR_DE_RED, SCOPES_SOLICITADOS, leerCredencial, registrarEvento } = await import(
+      "@/lib/conexiones.server"
+    );
+    const { firmarEstado } = await import("@/lib/cripto.server");
+    const { origenPublico } = await import("@/lib/permisos.server");
 
-    if (data.proveedor === "meta") {
-      const appId = process.env["META_APP_ID"];
-      if (!appId) {
-        throw new Error(
-          "Falta la credencial de la app de Meta (META_APP_ID). Configúrala para habilitar la autorización.",
-        );
-      }
-      const autorizar = new URL("https://www.facebook.com/v21.0/dialog/oauth");
-      autorizar.searchParams.set("client_id", appId);
-      autorizar.searchParams.set("redirect_uri", `${origen}/api/public/oauth/meta/callback`);
-      autorizar.searchParams.set("response_type", "code");
-      autorizar.searchParams.set("scope", SCOPES_META.join(","));
-      autorizar.searchParams.set("state", estado);
-      return { authorizationUrl: autorizar.toString() };
-    }
-
-    const clientKey = process.env["TIKTOK_CLIENT_KEY"];
-    if (!clientKey) {
+    const proveedor = PROVEEDOR_DE_RED[data.red];
+    const cred = await leerCredencial(data.empresaId, proveedor);
+    if (!cred) {
       throw new Error(
-        "Falta la credencial de la app de TikTok (TIKTOK_CLIENT_KEY). Configúrala para habilitar la autorización.",
+        proveedor === "meta"
+          ? "Falta registrar el ID y el secreto de la app de Meta Business para esta empresa."
+          : "Falta registrar el client key y el client secret de la app de TikTok para esta empresa.",
       );
     }
-    const autorizar = new URL("https://www.tiktok.com/v2/auth/authorize/");
-    autorizar.searchParams.set("client_key", clientKey);
-    autorizar.searchParams.set("redirect_uri", `${origen}/api/public/oauth/tiktok/callback`);
+
+    const origen = origenPublico(getRequest());
+    const redirectUri = `${origen}/api/public/oauth/${proveedor}/callback`;
+    const estado = firmarEstado({
+      empresaId: data.empresaId,
+      red: data.red,
+      proveedor,
+      userId: context.userId,
+    });
+    const scopes = SCOPES_SOLICITADOS[data.red];
+
+    const autorizar =
+      proveedor === "meta"
+        ? new URL("https://www.facebook.com/v21.0/dialog/oauth")
+        : new URL("https://www.tiktok.com/v2/auth/authorize/");
+    if (proveedor === "meta") {
+      autorizar.searchParams.set("client_id", cred.clientId);
+      autorizar.searchParams.set("scope", scopes.join(","));
+    } else {
+      autorizar.searchParams.set("client_key", cred.clientId);
+      autorizar.searchParams.set("scope", scopes.join(","));
+    }
+    autorizar.searchParams.set("redirect_uri", redirectUri);
     autorizar.searchParams.set("response_type", "code");
-    autorizar.searchParams.set("scope", SCOPES_TIKTOK.join(","));
     autorizar.searchParams.set("state", estado);
+
+    await registrarEvento(
+      data.empresaId,
+      data.red,
+      "pendiente",
+      `Autorización iniciada solicitando: ${scopes.join(", ")}.`,
+    );
     return { authorizationUrl: autorizar.toString() };
   });

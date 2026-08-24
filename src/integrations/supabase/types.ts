@@ -14,6 +14,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_credenciales: {
+        Row: {
+          actualizado_por: string | null
+          client_id: string
+          client_secret_cifrado: string
+          created_at: string
+          empresa_id: string
+          id: string
+          pista_secreto: string
+          proveedor: string
+          updated_at: string
+        }
+        Insert: {
+          actualizado_por?: string | null
+          client_id: string
+          client_secret_cifrado: string
+          created_at?: string
+          empresa_id: string
+          id?: string
+          pista_secreto?: string
+          proveedor: string
+          updated_at?: string
+        }
+        Update: {
+          actualizado_por?: string | null
+          client_id?: string
+          client_secret_cifrado?: string
+          created_at?: string
+          empresa_id?: string
+          id?: string
+          pista_secreto?: string
+          proveedor?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "app_credenciales_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       colaboradores: {
         Row: {
           activo: boolean
@@ -63,6 +107,141 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "colaboradores_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conexiones_eventos: {
+        Row: {
+          created_at: string
+          empresa_id: string
+          estado: string
+          id: string
+          mensaje: string
+          red: string
+        }
+        Insert: {
+          created_at?: string
+          empresa_id: string
+          estado: string
+          id?: string
+          mensaje?: string
+          red: string
+        }
+        Update: {
+          created_at?: string
+          empresa_id?: string
+          estado?: string
+          id?: string
+          mensaje?: string
+          red?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conexiones_eventos_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conexiones_redes: {
+        Row: {
+          autorizada_at: string | null
+          created_at: string
+          cuenta_externa_id: string
+          cuenta_externa_nombre: string
+          detalle: string
+          empresa_id: string
+          estado: string
+          expira_at: string | null
+          id: string
+          permisos_faltantes: string[]
+          permisos_otorgados: string[]
+          proveedor: string
+          red: string
+          updated_at: string
+        }
+        Insert: {
+          autorizada_at?: string | null
+          created_at?: string
+          cuenta_externa_id?: string
+          cuenta_externa_nombre?: string
+          detalle?: string
+          empresa_id: string
+          estado?: string
+          expira_at?: string | null
+          id?: string
+          permisos_faltantes?: string[]
+          permisos_otorgados?: string[]
+          proveedor: string
+          red: string
+          updated_at?: string
+        }
+        Update: {
+          autorizada_at?: string | null
+          created_at?: string
+          cuenta_externa_id?: string
+          cuenta_externa_nombre?: string
+          detalle?: string
+          empresa_id?: string
+          estado?: string
+          expira_at?: string | null
+          id?: string
+          permisos_faltantes?: string[]
+          permisos_otorgados?: string[]
+          proveedor?: string
+          red?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conexiones_redes_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conexiones_tokens: {
+        Row: {
+          access_token_cifrado: string
+          created_at: string
+          empresa_id: string
+          expira_at: string | null
+          id: string
+          red: string
+          refresh_token_cifrado: string | null
+          updated_at: string
+        }
+        Insert: {
+          access_token_cifrado: string
+          created_at?: string
+          empresa_id: string
+          expira_at?: string | null
+          id?: string
+          red: string
+          refresh_token_cifrado?: string | null
+          updated_at?: string
+        }
+        Update: {
+          access_token_cifrado?: string
+          created_at?: string
+          empresa_id?: string
+          expira_at?: string | null
+          id?: string
+          red?: string
+          refresh_token_cifrado?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conexiones_tokens_empresa_id_fkey"
             columns: ["empresa_id"]
             isOneToOne: false
             referencedRelation: "empresas"

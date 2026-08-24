@@ -30,6 +30,9 @@ export function EstadoBadge({ estado }: { estado: string }) {
     respondido: "border-success/40 bg-success/15 text-success",
     cerrado: "border-border bg-secondary text-muted-foreground",
     fallido: "border-destructive/40 bg-destructive/15 text-destructive",
+    error: "border-destructive/40 bg-destructive/15 text-destructive",
+    borrador: "border-border bg-secondary text-foreground",
+    descartado: "border-border bg-secondary text-muted-foreground",
   };
   return (
     <Badge variant="outline" className={cn("font-medium", estilos[estado] ?? "")}>

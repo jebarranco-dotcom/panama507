@@ -1,5 +1,14 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { BarChart3, Building2, CalendarClock, Link2, LogOut, ShieldCheck, Users } from "lucide-react";
+import {
+  BarChart3,
+  Building2,
+  CalendarClock,
+  ClipboardCheck,
+  Link2,
+  LogOut,
+  ShieldCheck,
+  Users,
+} from "lucide-react";
 import type { ReactNode } from "react";
 
 import {
@@ -15,6 +24,7 @@ import { useEmpresa } from "@/lib/empresa";
 const NAV = [
   { to: "/", label: "Dashboard", icon: BarChart3 },
   { to: "/programacion", label: "Programación", icon: CalendarClock },
+  { to: "/borradores", label: "Revisión", icon: ClipboardCheck },
   { to: "/conexiones", label: "Conexiones", icon: Link2 },
   { to: "/credenciales", label: "Credenciales", icon: ShieldCheck },
   { to: "/colaboradores", label: "Colaboradores", icon: Users },

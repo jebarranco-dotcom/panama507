@@ -229,7 +229,7 @@ function Borradores() {
               className="flex items-center gap-2 rounded-xl border border-border bg-secondary/40 p-3 text-xs"
             >
               <IconoRed red={f.red} className="size-4" />
-              <span className="font-semibold">{REDES[f.red]?.nombre ?? f.red}</span>
+              <span className="font-semibold">{REDES[f.red as keyof typeof REDES]?.nombre ?? f.red}</span>
               <span className="ml-auto flex items-center gap-1 text-muted-foreground">
                 <Clock className="size-3.5" /> {f.hora}
               </span>
@@ -263,7 +263,7 @@ function Borradores() {
               <section key={p.id} className="panel flex flex-col p-5">
                 <div className="flex flex-wrap items-center gap-2">
                   <IconoRed red={p.red} className="size-5" />
-                  <p className="text-sm font-semibold">{REDES[p.red]?.nombre ?? p.red}</p>
+                  <p className="text-sm font-semibold">{REDES[p.red as keyof typeof REDES]?.nombre ?? p.red}</p>
                   <EstadoBadge estado={p.estado} />
                   <span className="ml-auto flex items-center gap-1 text-xs text-muted-foreground">
                     <Clock className="size-3.5" /> {p.fecha_programada} · {p.hora_programada}

@@ -102,7 +102,24 @@ const ETIQUETA_ESTADO: Record<string, { texto: string; clase: string }> = {
     texto: "Sincronización sin resultados",
     clase: "border-warning/40 bg-warning/15 text-warning",
   },
+  activos_cambiaron: {
+    texto: "Listado de activos actualizado",
+    clase: "border-primary/40 bg-primary/15 text-primary",
+  },
+  autorizacion_activo_ok: {
+    texto: "Activo aprobado",
+    clase: "border-success/40 bg-success/15 text-success",
+  },
+  autorizacion_activo_pendiente: {
+    texto: "Activo con permisos pendientes",
+    clase: "border-warning/40 bg-warning/15 text-warning",
+  },
+  autorizacion_activo_error: {
+    texto: "Error al autorizar activo",
+    clase: "border-destructive/40 bg-destructive/15 text-destructive",
+  },
 };
+
 
 
 function Conexiones() {

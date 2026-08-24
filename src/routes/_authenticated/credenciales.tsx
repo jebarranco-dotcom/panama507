@@ -127,7 +127,14 @@ function Credenciales() {
       titulo="Credenciales de apps"
       descripcion={`${empresa.nombre}: registra o rota las credenciales OAuth de Meta y TikTok. Los secretos se guardan cifrados y nunca se devuelven al navegador.`}
     >
-      <div className="grid gap-4 lg:grid-cols-2">
+      <AsistenteMeta
+        estado={estado?.meta}
+        puedeAdministrar={puede}
+        origen={origen}
+      />
+
+      <div className="mt-4 grid gap-4 lg:grid-cols-2">
+
         {(["meta", "tiktok"] as Proveedor[]).map((proveedor) => {
           const cfg = CONFIG[proveedor];
           const info = estado?.[proveedor];

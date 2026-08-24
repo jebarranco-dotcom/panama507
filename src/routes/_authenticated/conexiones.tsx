@@ -16,6 +16,7 @@ import { toast } from "sonner";
 
 import { AppShell } from "@/components/AppShell";
 import { IconoRed } from "@/components/Estado";
+import { PruebaPublicacion } from "@/components/PruebaPublicacion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useEmpresa } from "@/lib/empresa";
@@ -242,6 +243,10 @@ function Conexiones() {
             </section>
           );
         })}
+      </div>
+
+      <div className="mt-4">
+        <PruebaPublicacion />
       </div>
 
       <section className="panel mt-4 p-5">

@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 import { AppShell } from "@/components/AppShell";
 import { IconoRed } from "@/components/Estado";
+import { PruebaPublicacion } from "@/components/PruebaPublicacion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -191,6 +192,10 @@ function Programacion() {
           trazabilidad.
         </p>
       </section>
+
+      <div className="mt-4">
+        <PruebaPublicacion />
+      </div>
     </AppShell>
   );
 }

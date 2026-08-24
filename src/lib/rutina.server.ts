@@ -135,11 +135,20 @@ export async function generarContenidoDelDia(fecha?: string, empresaId?: string)
     .order("fecha_programada", { ascending: false })
     .limit(12);
 
-  const { plan: planDiario, tipo } = estrategiaDe(empresa.slug);
+  const { plan: planBase, tipo } = estrategiaDe(empresa.slug);
+  const { programacionDe } = await import("./programacion.server");
+  const programada = (await programacionDe(empresa.id)).filter((f) => f.activo);
+  const planDiario = (programada.length ? programada : planBase).map((f) => ({
+    red: f.red,
+    hora: f.hora,
+    pilar: f.pilar || planBase.find((b) => b.red === f.red)?.pilar || "educativo",
+    formato: f.formato || planBase.find((b) => b.red === f.red)?.formato || "imagen",
+  }));
   const etiquetaCatalogo = tipo === "servicios" ? "Portafolio de servicios" : "Inventario";
   const plan = planDiario.map(
     (p) => `- red: ${p.red}, hora: ${p.hora}, pilar: ${p.pilar} (${nombrePilar(p.pilar)}), formato: ${p.formato}`,
   ).join("\n");
+
 
   const prompt = `Fecha de publicación: ${dia}.
 

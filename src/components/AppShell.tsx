@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { BarChart3, Building2, LogOut, Users } from "lucide-react";
+import { BarChart3, Building2, Link2, LogOut, Users } from "lucide-react";
 import type { ReactNode } from "react";
 
 import {

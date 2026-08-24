@@ -86,7 +86,24 @@ const ETIQUETA_ESTADO: Record<string, { texto: string; clase: string }> = {
     clase: "border-warning/40 bg-warning/15 text-warning",
   },
   error: { texto: "Error de autorización", clase: "border-destructive/40 bg-destructive/15 text-destructive" },
+  verificacion_ok: {
+    texto: "App verificada",
+    clase: "border-success/40 bg-success/15 text-success",
+  },
+  verificacion_error: {
+    texto: "Verificación fallida",
+    clase: "border-destructive/40 bg-destructive/15 text-destructive",
+  },
+  sincronizacion_ok: {
+    texto: "Activos sincronizados",
+    clase: "border-success/40 bg-success/15 text-success",
+  },
+  sincronizacion_error: {
+    texto: "Sincronización sin resultados",
+    clase: "border-warning/40 bg-warning/15 text-warning",
+  },
 };
+
 
 function Conexiones() {
   const { empresa, empresaId } = useEmpresa();

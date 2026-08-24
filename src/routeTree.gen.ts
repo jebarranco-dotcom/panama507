@@ -14,6 +14,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedColaboradoresRouteImport } from './routes/_authenticated/colaboradores'
+import { Route as AuthenticatedConexionesRouteImport } from './routes/_authenticated/conexiones'
 import { Route as ApiPublicHooksRutinaDiariaRouteImport } from './routes/api/public/hooks/rutina-diaria'
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
@@ -41,6 +42,11 @@ const AuthenticatedColaboradoresRoute =
     path: '/colaboradores',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedConexionesRoute = AuthenticatedConexionesRouteImport.update({
+  id: '/conexiones',
+  path: '/conexiones',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const ApiPublicHooksRutinaDiariaRoute =
   ApiPublicHooksRutinaDiariaRouteImport.update({
     id: '/api/public/hooks/rutina-diaria',
@@ -53,12 +59,14 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/colaboradores': typeof AuthenticatedColaboradoresRoute
+  '/conexiones': typeof AuthenticatedConexionesRoute
   '/api/public/hooks/rutina-diaria': typeof ApiPublicHooksRutinaDiariaRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/colaboradores': typeof AuthenticatedColaboradoresRoute
+  '/conexiones': typeof AuthenticatedConexionesRoute
   '/': typeof AuthenticatedIndexRoute
   '/api/public/hooks/rutina-diaria': typeof ApiPublicHooksRutinaDiariaRoute
 }
@@ -68,6 +76,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/colaboradores': typeof AuthenticatedColaboradoresRoute
+  '/_authenticated/conexiones': typeof AuthenticatedConexionesRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/api/public/hooks/rutina-diaria': typeof ApiPublicHooksRutinaDiariaRoute
 }
@@ -78,12 +87,14 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/colaboradores'
+    | '/conexiones'
     | '/api/public/hooks/rutina-diaria'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
     | '/reset-password'
     | '/colaboradores'
+    | '/conexiones'
     | '/'
     | '/api/public/hooks/rutina-diaria'
   id:
@@ -92,6 +103,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/_authenticated/colaboradores'
+    | '/_authenticated/conexiones'
     | '/_authenticated/'
     | '/api/public/hooks/rutina-diaria'
   fileRoutesById: FileRoutesById
@@ -140,6 +152,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedColaboradoresRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/conexiones': {
+      id: '/_authenticated/conexiones'
+      path: '/conexiones'
+      fullPath: '/conexiones'
+      preLoaderRoute: typeof AuthenticatedConexionesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/public/hooks/rutina-diaria': {
       id: '/api/public/hooks/rutina-diaria'
       path: '/api/public/hooks/rutina-diaria'
@@ -152,11 +171,13 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedColaboradoresRoute: typeof AuthenticatedColaboradoresRoute
+  AuthenticatedConexionesRoute: typeof AuthenticatedConexionesRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedColaboradoresRoute: AuthenticatedColaboradoresRoute,
+  AuthenticatedConexionesRoute: AuthenticatedConexionesRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }
 

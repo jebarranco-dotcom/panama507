@@ -171,7 +171,7 @@ ${tipo === "servicios" ? "No prometas resultados garantizados ni decisiones de t
   const texto = await pedirTexto(prompt, systemContenido(empresa));
   const parsed = parsearJson<{ publicaciones: PostGenerado[] }>(texto);
 
-  const filas = (parsed.publicaciones ?? []).slice(0, 3).map((p, i) => {
+  const filas = (parsed.publicaciones ?? []).slice(0, planDiario.length).map((p, i) => {
     const base = planDiario[i % planDiario.length]!;
     const prop = (propiedades ?? []).find(
       (x) => p.propiedad_titulo && x.titulo.toLowerCase() === p.propiedad_titulo.toLowerCase(),

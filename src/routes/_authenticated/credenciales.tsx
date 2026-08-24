@@ -205,6 +205,60 @@ function Credenciales() {
           );
         })}
       </div>
+
+      <section className="panel mt-4 p-5">
+        <h2 className="flex items-center gap-2 font-display text-lg font-bold">
+          <ListChecks className="size-5 text-primary" /> Cómo crear las apps paso a paso
+        </h2>
+        <p className="mt-2 text-xs text-muted-foreground">
+          Registra estas URL de retorno tal cual en cada plataforma; sin ellas la autorización falla.
+        </p>
+        <div className="mt-3 space-y-2">
+          {[
+            { etiqueta: "URL de retorno Meta", valor: `${origen}/api/public/oauth/meta/callback` },
+            { etiqueta: "URL de retorno TikTok", valor: `${origen}/api/public/oauth/tiktok/callback` },
+          ].map((u) => (
+            <div
+              key={u.etiqueta}
+              className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-secondary/40 p-3"
+            >
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground">{u.etiqueta}</p>
+                <p className="truncate font-mono text-xs">{u.valor}</p>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  void navigator.clipboard.writeText(u.valor);
+                  toast.success("URL copiada");
+                }}
+              >
+                <Copy className="size-3.5" /> Copiar
+              </Button>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-5 grid gap-5 md:grid-cols-2">
+          {PASOS.map((bloque) => (
+            <div key={bloque.titulo}>
+              <h3 className="font-display text-sm font-bold">{bloque.titulo}</h3>
+              <ol className="mt-2 space-y-2 text-xs leading-relaxed text-muted-foreground">
+                {bloque.pasos.map((p, i) => (
+                  <li key={p} className="flex gap-2">
+                    <span className="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full bg-primary/15 text-[10px] font-bold text-primary">
+                      {i + 1}
+                    </span>
+                    {p}
+                  </li>
+                ))}
+              </ol>
+            </div>
+          ))}
+        </div>
+      </section>
     </AppShell>
   );
 }
+

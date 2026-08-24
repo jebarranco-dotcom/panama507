@@ -89,15 +89,24 @@ function Credenciales() {
   const origen = typeof window === "undefined" ? "https://panama507.lovable.app" : window.location.origin;
   const queryClient = useQueryClient();
 
-  const { data: estado } = useQuery({
+  const {
+    data: estado,
+    error: errorEstado,
+    isLoading: cargandoEstado,
+    refetch: recargarEstado,
+    isFetching: recargando,
+  } = useQuery({
     queryKey: ["credenciales-oauth", empresaId],
     queryFn: () => estadoCredenciales({ data: { empresaId } }),
+    enabled: Boolean(empresaId),
+    retry: 1,
   });
   const guardar = useServerFn(guardarCredenciales);
   const [valores, setValores] = useState<Record<string, string>>({});
   const [guardando, setGuardando] = useState<Proveedor | null>(null);
 
   const puede = estado?.puedeAdministrar ?? false;
+
 
   const enviar = async (proveedor: Proveedor) => {
     const clientId = (valores[`${proveedor}-id`] ?? "").trim();

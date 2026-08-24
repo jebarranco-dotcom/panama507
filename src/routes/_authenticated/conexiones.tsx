@@ -276,7 +276,10 @@ function Conexiones() {
           verificada={credenciales?.meta.verificada ?? false}
           seleccionFacebook={conexionDe("facebook")?.cuenta_externa_id ?? ""}
           seleccionInstagram={conexionDe("instagram")?.cuenta_externa_id ?? ""}
+          estadoFacebook={conexionDe("facebook")?.estado ?? ""}
+          estadoInstagram={conexionDe("instagram")?.estado ?? ""}
         />
+
       </div>
 
       <div className="mt-4">

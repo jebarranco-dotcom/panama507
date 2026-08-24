@@ -197,6 +197,7 @@ export async function historialVerificacion(empresaId: string, proveedor: Provee
     .select("id, estado, mensaje, created_at")
     .eq("empresa_id", empresaId)
     .eq("red", proveedor)
+    .neq("estado", "activos_firma")
     .order("created_at", { ascending: false })
     .limit(15);
   return (data ?? []).map((f) => ({
@@ -224,7 +225,7 @@ export async function activosMeta(empresaId: string) {
     const detalle =
       "Aún no hay una autorización de Meta vigente para esta empresa: autoriza Facebook o Instagram y vuelve a sincronizar.";
     await registrarEventoProveedor(empresaId, "meta", "sincronizacion_error", detalle);
-    return { ok: false, detalle, paginas: [] as ActivoMeta[] };
+    return { ok: false, detalle, paginas: [] as ActivoMeta[], cambio: false };
   }
 
   const token = descifrar(fila.access_token_cifrado);
@@ -258,13 +259,182 @@ export async function activosMeta(empresaId: string) {
       paginas.length ? "sincronizacion_ok" : "sincronizacion_error",
       detalle,
     );
-    return { ok: paginas.length > 0, detalle, paginas };
+    const cambio = await registrarCambioActivos(empresaId, paginas);
+    return { ok: paginas.length > 0, detalle, paginas, cambio };
   } catch (e) {
     const detalle = `No se pudieron leer los activos de Meta: ${(e as Error).message}`;
     await registrarEventoProveedor(empresaId, "meta", "sincronizacion_error", detalle);
-    return { ok: false, detalle, paginas: [] as ActivoMeta[] };
+    return { ok: false, detalle, paginas: [] as ActivoMeta[], cambio: false };
   }
 }
+
+/** Compara el listado sincronizado con el anterior y deja constancia si cambió. */
+async function registrarCambioActivos(empresaId: string, paginas: ActivoMeta[]) {
+  const supabase = crearClienteServidor();
+  const firma = JSON.stringify(
+    paginas
+      .map((p) => `${p.paginaId}:${p.paginaNombre}|${p.instagramId}:${p.instagramUsuario}`)
+      .sort(),
+  );
+  const { data } = await supabase
+    .from("conexiones_eventos")
+    .select("mensaje")
+    .eq("empresa_id", empresaId)
+    .eq("red", "meta")
+    .eq("estado", "activos_firma")
+    .order("created_at", { ascending: false })
+    .limit(1);
+  const anterior = (data ?? [])[0]?.mensaje ?? "";
+  const cambio = anterior !== "" && anterior !== firma;
+  if (anterior !== firma) {
+    await supabase
+      .from("conexiones_eventos")
+      .insert({ empresa_id: empresaId, red: "meta", estado: "activos_firma", mensaje: firma });
+    if (cambio) {
+      await registrarEventoProveedor(
+        empresaId,
+        "meta",
+        "activos_cambiaron",
+        `El listado de activos cambió: ahora hay ${paginas.length} página(s) de Facebook y ${
+          paginas.filter((p) => p.instagramId).length
+        } cuenta(s) de Instagram profesional.`,
+      );
+    }
+  }
+  return cambio;
+}
+
+/**
+ * Autoriza (o reintenta) un activo concreto: vincula la página o cuenta a la empresa y
+ * confirma contra Meta que los permisos de publicación estén realmente aprobados.
+ */
+export async function autorizarActivoMeta(
+  empresaId: string,
+  red: Exclude<Red, "tiktok">,
+  cuentaId: string,
+  cuentaNombre: string,
+) {
+  const supabase = crearClienteServidor();
+  const { data: tokens } = await supabase
+    .from("conexiones_tokens")
+    .select("access_token_cifrado, updated_at")
+    .eq("empresa_id", empresaId)
+    .in("red", ["facebook", "instagram"])
+    .order("updated_at", { ascending: false });
+  const filaToken = (tokens ?? [])[0];
+  if (!filaToken) {
+    const detalle =
+      "No hay una autorización de Meta vigente: vuelve a autorizar Facebook o Instagram antes de habilitar el activo.";
+    await registrarEventoProveedor(empresaId, "meta", "autorizacion_activo_error", detalle);
+    return { estado: "error" as const, detalle, otorgados: [] as string[], faltantes: PERMISOS_REQUERIDOS[red] };
+  }
+  const token = descifrar(filaToken.access_token_cifrado);
+  const requeridos = PERMISOS_REQUERIDOS[red];
+
+  let otorgados: string[] = [];
+  let estado: "aprobado" | "pendiente" | "error" = "error";
+  let detalle = "";
+  try {
+    const permisosRes = await fetch(
+      `https://graph.facebook.com/v21.0/me/permissions?access_token=${token}`,
+    );
+    const permisosJson = (await permisosRes.json()) as {
+      data?: { permission: string; status: string }[];
+      error?: { message?: string };
+    };
+    if (!permisosRes.ok) throw new Error(permisosJson.error?.message ?? `Error HTTP ${permisosRes.status}`);
+    otorgados = (permisosJson.data ?? [])
+      .filter((p) => p.status === "granted")
+      .map((p) => p.permission);
+
+    const url =
+      red === "facebook"
+        ? `https://graph.facebook.com/v21.0/${cuentaId}?fields=id,name,tasks&access_token=${token}`
+        : `https://graph.facebook.com/v21.0/${cuentaId}?fields=id,username&access_token=${token}`;
+    const activoRes = await fetch(url);
+    const activoJson = (await activoRes.json()) as {
+      id?: string;
+      name?: string;
+      username?: string;
+      tasks?: string[];
+      error?: { message?: string };
+    };
+    if (!activoRes.ok || !activoJson.id) {
+      throw new Error(activoJson.error?.message ?? `Error HTTP ${activoRes.status}`);
+    }
+
+    const faltantesPermisos = requeridos.filter((p) => !otorgados.includes(p));
+    const tareas = activoJson.tasks ?? [];
+    const sinTareaPublicar =
+      red === "facebook" && tareas.length > 0 && !tareas.includes("CREATE_CONTENT");
+
+    if (faltantesPermisos.length === 0 && !sinTareaPublicar) {
+      estado = "aprobado";
+      detalle = `Activo aprobado para publicar: ${cuentaNombre || activoJson.name || activoJson.username || cuentaId}. Permisos concedidos (${requeridos.join(", ")}).`;
+    } else {
+      estado = "pendiente";
+      detalle = [
+        `Activo vinculado: ${cuentaNombre || activoJson.name || activoJson.username || cuentaId}.`,
+        faltantesPermisos.length ? `Permisos pendientes: ${faltantesPermisos.join(", ")}.` : "",
+        sinTareaPublicar
+          ? "La cuenta que autorizó no tiene la tarea CREATE_CONTENT sobre esta página."
+          : "",
+      ]
+        .filter(Boolean)
+        .join(" ");
+    }
+  } catch (e) {
+    estado = "error";
+    detalle = `Meta rechazó la autorización del activo (${cuentaNombre || cuentaId}): ${(e as Error).message}`;
+  }
+
+  const faltantes = requeridos.filter((p) => !otorgados.includes(p));
+  const conectada = estado === "aprobado";
+
+  if (estado !== "error") {
+    await supabase.from("conexiones_redes").upsert(
+      {
+        empresa_id: empresaId,
+        red,
+        proveedor: "meta",
+        estado: conectada ? "conectada" : "autorizada",
+        cuenta_externa_id: cuentaId,
+        cuenta_externa_nombre: cuentaNombre,
+        permisos_otorgados: otorgados,
+        permisos_faltantes: faltantes,
+        detalle,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "empresa_id,red" },
+    );
+    await supabase
+      .from("cuentas_sociales")
+      .update({
+        conectada,
+        ...(cuentaNombre ? { usuario: cuentaNombre } : {}),
+        notas: detalle,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("empresa_id", empresaId)
+      .eq("red", red);
+  }
+
+  await registrarEvento(
+    empresaId,
+    red,
+    estado === "aprobado" ? "conectada" : estado === "pendiente" ? "autorizada" : "error",
+    detalle,
+  );
+  await registrarEventoProveedor(
+    empresaId,
+    "meta",
+    estado === "aprobado" ? "autorizacion_activo_ok" : estado === "pendiente" ? "autorizacion_activo_pendiente" : "autorizacion_activo_error",
+    `${red === "facebook" ? "Facebook" : "Instagram"} · ${detalle}`,
+  );
+
+  return { estado, detalle, otorgados, faltantes };
+}
+
 
 export type ActivoMeta = {
   paginaId: string;

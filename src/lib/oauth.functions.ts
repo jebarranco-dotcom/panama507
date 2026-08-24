@@ -122,6 +122,28 @@ export const elegirActivo = createServerFn({ method: "POST" })
     return elegirActivoMeta(data.empresaId, data.red, data.cuentaId, data.cuentaNombre);
   });
 
+/** Autoriza o reintenta los permisos de publicación de una página o cuenta concreta. */
+export const autorizarActivo = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        empresaId: z.string().uuid(),
+        red: z.enum(["facebook", "instagram"]),
+        cuentaId: z.string().trim().min(1).max(64),
+        cuentaNombre: z.string().trim().max(160).default(""),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { asegurarAdministrador } = await import("@/lib/permisos.server");
+    await asegurarAdministrador(context.supabase, context.userId, data.empresaId);
+    const { autorizarActivoMeta } = await import("@/lib/conexiones.server");
+    return autorizarActivoMeta(data.empresaId, data.red, data.cuentaId, data.cuentaNombre);
+  });
+
+
+
 
 /** Construye la URL de autorización de la red indicada para abrirla en una ventana emergente. */
 export const iniciarOAuth = createServerFn({ method: "POST" })

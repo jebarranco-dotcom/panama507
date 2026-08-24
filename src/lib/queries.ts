@@ -112,6 +112,7 @@ export const conexionEventosQuery = (empresaId: string) =>
         .from("conexiones_eventos")
         .select("*")
         .eq("empresa_id", empresaId)
+        .neq("estado", "activos_firma")
         .order("created_at", { ascending: false })
         .limit(20);
       if (error) throw error;

@@ -124,9 +124,11 @@ export function AsistenteMeta({
       const r = await verificar({ data: { empresaId, proveedor: "meta" } });
       setResultado({ ok: r.ok, detalle: r.detalle });
       await queryClient.invalidateQueries({ queryKey: ["credenciales-oauth", empresaId] });
+      await refetchHistorial();
       if (r.ok) toast.success("Listo para autorizar");
       else toast.error("Verificación fallida", { description: r.detalle });
     } catch (e) {
+
       toast.error("No se pudo verificar", { description: (e as Error).message });
     } finally {
       setTrabajando(false);

@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedBorradoresRouteImport } from './routes/_authenticated/borradores'
@@ -30,6 +31,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -98,6 +104,7 @@ const ApiPublicOauthTiktokCallbackRoute =
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/auth': typeof AuthRoute
+  '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/borradores': typeof AuthenticatedBorradoresRoute
   '/colaboradores': typeof AuthenticatedColaboradoresRoute
@@ -111,6 +118,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
+  '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/borradores': typeof AuthenticatedBorradoresRoute
   '/colaboradores': typeof AuthenticatedColaboradoresRoute
@@ -127,6 +135,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/borradores': typeof AuthenticatedBorradoresRoute
   '/_authenticated/colaboradores': typeof AuthenticatedColaboradoresRoute
@@ -144,6 +153,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/privacy'
     | '/reset-password'
     | '/borradores'
     | '/colaboradores'
@@ -157,6 +167,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
+    | '/privacy'
     | '/reset-password'
     | '/borradores'
     | '/colaboradores'
@@ -172,6 +183,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_authenticated'
     | '/auth'
+    | '/privacy'
     | '/reset-password'
     | '/_authenticated/borradores'
     | '/_authenticated/colaboradores'
@@ -188,6 +200,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  PrivacyRoute: typeof PrivacyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ApiPublicHooksPublicarProgramadoRoute: typeof ApiPublicHooksPublicarProgramadoRoute
   ApiPublicHooksRutinaDiariaRoute: typeof ApiPublicHooksRutinaDiariaRoute
@@ -209,6 +222,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reset-password': {
@@ -315,6 +335,7 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  PrivacyRoute: PrivacyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ApiPublicHooksPublicarProgramadoRoute: ApiPublicHooksPublicarProgramadoRoute,
   ApiPublicHooksRutinaDiariaRoute: ApiPublicHooksRutinaDiariaRoute,

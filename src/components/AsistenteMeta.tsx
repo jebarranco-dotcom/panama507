@@ -77,8 +77,18 @@ export function AsistenteMeta({
     estado?.verificada ? { ok: true, detalle: estado.detalleVerificacion } : null,
   );
 
+  const {
+    data: historial = [],
+    isFetching: cargandoHistorial,
+    refetch: refetchHistorial,
+  } = useQuery({
+    queryKey: ["verificaciones-meta", empresaId],
+    queryFn: () => historialVerificaciones({ data: { empresaId, proveedor: "meta" } }),
+  });
+
   const redirectUri = `${origen}/api/public/oauth/meta/callback`;
   const listo = estado?.verificada ?? false;
+
 
   const copiar = (valor: string) => {
     void navigator.clipboard.writeText(valor);

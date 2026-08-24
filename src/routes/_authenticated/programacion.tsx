@@ -192,7 +192,6 @@ function Programacion() {
           trazabilidad.
         </p>
       </section>
-      </section>
 
       <div className="mt-4">
         <PruebaPublicacion />

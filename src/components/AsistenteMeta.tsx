@@ -1,4 +1,4 @@
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import {
@@ -7,7 +7,9 @@ import {
   BadgeCheck,
   Check,
   Copy,
+  History,
   Loader2,
+  RotateCw,
   ShieldQuestion,
   Sparkles,
   XCircle,
@@ -20,7 +22,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useEmpresa } from "@/lib/empresa";
-import { guardarCredenciales, verificarCredenciales } from "@/lib/oauth.functions";
+import {
+  guardarCredenciales,
+  historialVerificaciones,
+  verificarCredenciales,
+} from "@/lib/oauth.functions";
+
 
 type EstadoMeta = {
   registrada: boolean;

@@ -1,13 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
-import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-
-const EmpresaInput = z.object({ empresaId: z.string().uuid() });
-const PiezaInput = z.object({
-  empresaId: z.string().uuid(),
-  publicacionId: z.string().uuid(),
-});
+import {
+  AprobacionInput,
+  EditarBorradorInput,
+  EmpresaInput,
+  PiezaInput,
+} from "@/lib/entradas.schemas";
 
 /** Configuración de revisión y resumen del programador para la empresa. */
 export const estadoProgramador = createServerFn({ method: "POST" })
@@ -34,9 +33,7 @@ export const estadoProgramador = createServerFn({ method: "POST" })
 /** Activa o desactiva la aprobación obligatoria antes de publicar. */
 export const cambiarModoAprobacion = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
-    EmpresaInput.extend({ requiereAprobacion: z.boolean() }).parse(input),
-  )
+  .inputValidator((input: unknown) => AprobacionInput.parse(input))
   .handler(async ({ data, context }) => {
     const { asegurarAdministrador } = await import("@/lib/permisos.server");
     await asegurarAdministrador(context.supabase, context.userId, data.empresaId);
@@ -51,16 +48,7 @@ export const cambiarModoAprobacion = createServerFn({ method: "POST" })
 /** Guarda los cambios de un borrador antes de aprobarlo. */
 export const editarBorrador = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
-    PiezaInput.extend({
-      titular: z.string().trim().min(3).max(120),
-      copy: z.string().trim().min(10).max(2200),
-      cta: z.string().trim().max(160).default(""),
-      hashtags: z.array(z.string().trim().max(40)).max(10).default([]),
-      mediaUrl: z.string().trim().max(600).default(""),
-      horaProgramada: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Usa el formato HH:MM."),
-    }).parse(input),
-  )
+  .inputValidator((input: unknown) => EditarBorradorInput.parse(input))
   .handler(async ({ data, context }) => {
     const { asegurarAdministrador } = await import("@/lib/permisos.server");
     await asegurarAdministrador(context.supabase, context.userId, data.empresaId);

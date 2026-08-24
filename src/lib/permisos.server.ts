@@ -10,10 +10,11 @@ export async function asegurarMiembro(supabase: Cliente, empresaId: string) {
     .from("empresa_usuarios")
     .select("id")
     .eq("empresa_id", empresaId)
-    .maybeSingle();
+    .limit(1);
   if (error) throw new Error(error.message);
-  if (!data) throw new Error("No tienes acceso a esta empresa.");
+  if (!data || data.length === 0) throw new Error("No tienes acceso a esta empresa.");
 }
+
 
 export async function puedeAdministrar(supabase: Cliente, userId: string, empresaId: string) {
   const { data } = await supabase

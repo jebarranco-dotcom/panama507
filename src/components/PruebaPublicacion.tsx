@@ -33,13 +33,16 @@ export function PruebaPublicacion({ soloRed }: { soloRed?: Red }) {
       setResultados((r) => ({ ...r, [red]: resultado }));
       void queryClient.invalidateQueries({ queryKey: ["publicaciones", empresaId] });
       void queryClient.invalidateQueries({ queryKey: ["conexiones_eventos", empresaId] });
-      if (resultado.ok) {
+      if (resultado.resultado === "publicada") {
         toast.success(`Prueba publicada en ${REDES[red].nombre}`, { description: resultado.detalle });
-      } else {
-        toast.warning(`Prueba registrada sin envío real en ${REDES[red].nombre}`, {
-          description: resultado.detalle,
+      } else if (resultado.resultado === "pending_oauth") {
+        toast.warning(`${REDES[red].nombre}: falta completar la conexión`, {
+          description: resultado.requisitos[0] ?? resultado.detalle,
         });
+      } else {
+        toast.error(`${REDES[red].nombre} rechazó la prueba`, { description: resultado.detalle });
       }
+
     } catch (e) {
       toast.error("No se pudo ejecutar la prueba", { description: (e as Error).message });
     } finally {

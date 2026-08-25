@@ -91,17 +91,23 @@ export function PruebaPublicacion({ soloRed }: { soloRed?: Red }) {
                   <Badge
                     variant="outline"
                     className={
-                      r.ok
+                      r.resultado === "publicada"
                         ? "border-success/40 bg-success/15 text-success"
-                        : "border-warning/40 bg-warning/15 text-warning"
+                        : r.resultado === "pending_oauth"
+                          ? "border-warning/40 bg-warning/15 text-warning"
+                          : "border-destructive/40 bg-destructive/15 text-destructive"
                     }
                   >
-                    {r.ok ? (
+                    {r.resultado === "publicada" ? (
                       <CheckCircle2 className="size-3.5" />
                     ) : (
                       <XCircle className="size-3.5" />
                     )}
-                    {r.modo === "real" && r.ok ? "Publicada en la red" : "Registro interno"}
+                    {r.resultado === "publicada"
+                      ? "Publicada en la red"
+                      : r.resultado === "pending_oauth"
+                        ? "Conexión pendiente"
+                        : "La red rechazó el envío"}
                   </Badge>
                   <span className="text-xs text-muted-foreground">
                     {r.empresa} · {new Date(r.ejecutadoAt).toLocaleString("es-PA")} · estado {r.estado}
@@ -110,9 +116,22 @@ export function PruebaPublicacion({ soloRed }: { soloRed?: Red }) {
                 <p className="mt-2 text-sm font-semibold">{r.titular}</p>
                 <p className="mt-1 whitespace-pre-line text-xs text-muted-foreground">{r.copy}</p>
                 <p className="mt-2 text-xs text-muted-foreground">{r.detalle}</p>
+                {r.requisitos.length ? (
+                  <div className="mt-3 rounded-lg border border-warning/40 bg-warning/10 p-3">
+                    <p className="flex items-center gap-1.5 text-xs font-semibold text-warning">
+                      <AlertTriangle className="size-3.5" /> Requisitos pendientes
+                    </p>
+                    <ul className="mt-1.5 list-disc space-y-1 pl-4 text-xs text-muted-foreground">
+                      {r.requisitos.map((req) => (
+                        <li key={req}>{req}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
                 {r.referenciaExterna ? (
                   <p className="mt-1 text-xs text-success">ID en la red: {r.referenciaExterna}</p>
                 ) : null}
+
               </li>
             ))}
         </ul>

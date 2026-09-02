@@ -18,16 +18,14 @@ import { Eye, Inbox, Loader2, MousePointerClick, Users, Zap } from "lucide-react
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/AppShell";
-import { Bandeja } from "@/components/dashboard/Bandeja";
 import { Conexiones } from "@/components/dashboard/Conexiones";
-import { Contenido } from "@/components/dashboard/Contenido";
-import { Informe } from "@/components/dashboard/Informe";
 import { Button } from "@/components/ui/button";
 import { useEmpresa } from "@/lib/empresa";
 import { estrategiaDe } from "@/lib/estrategia";
 import { correrRutina } from "@/lib/marketing.functions";
 import {
   cuentasQuery,
+  informesQuery,
   mensajesQuery,
   propiedadesQuery,
   publicacionesQuery,
@@ -62,6 +60,8 @@ function Dashboard() {
   const { data: mensajes = [] } = useQuery(mensajesQuery(empresaId));
   const { data: cuentas = [] } = useQuery(cuentasQuery(empresaId));
   const { data: propiedades = [] } = useQuery(propiedadesQuery(empresaId));
+  const { data: informes = [] } = useQuery(informesQuery(empresaId));
+  const ultimoInforme = informes[0];
   const tipoCatalogo = estrategiaDe(empresa.slug).catalogo;
   const rutina = useServerFn(correrRutina);
 
@@ -79,9 +79,47 @@ function Dashboard() {
   const publicadas = publicaciones.filter((p) => p.estado === "publicado");
   const alcance = publicadas.reduce((s, p) => s + p.alcance, 0);
   const clics = publicadas.reduce((s, p) => s + p.clics, 0);
+  const interacciones = publicadas.reduce((s, p) => s + p.likes + p.comentarios, 0);
   const leads = publicadas.reduce((s, p) => s + p.leads, 0);
   const seguidores = cuentas.reduce((s, c) => s + c.seguidores, 0);
   const sinAtender = mensajes.filter((m) => m.estado === "nuevo" || m.estado === "en_proceso").length;
+
+  const ahora = new Date();
+  const hoyIso = ahora.toISOString().slice(0, 10);
+  const programadas = publicaciones.filter((p) => p.estado === "programado").length;
+  const fallidas = publicaciones.filter((p) => p.estado === "error").length;
+  const pendientes = publicaciones.filter(
+    (p) => p.estado === "borrador" || p.estado === "en_cola",
+  ).length;
+
+  const proxima = publicaciones
+    .filter((p) => p.estado !== "publicado" && p.estado !== "error" && p.fecha_programada >= hoyIso)
+    .sort((a, b) =>
+      `${a.fecha_programada}${a.hora_programada}`.localeCompare(
+        `${b.fecha_programada}${b.hora_programada}`,
+      ),
+    )[0];
+
+  const leadsPorEstado = {
+    nuevos: mensajes.filter((m) => m.estado === "nuevo").length,
+    seguimiento: mensajes.filter((m) => m.estado === "en_proceso").length,
+    calificados: mensajes.filter((m) => m.estado === "respondido").length,
+    cerrados: mensajes.filter((m) => m.estado === "cerrado").length,
+  };
+
+  const alcancePorSemana = (desde: number, hasta: number) => {
+    const limiteSup = new Date(ahora.getTime() - desde * 86400000).toISOString().slice(0, 10);
+    const limiteInf = new Date(ahora.getTime() - hasta * 86400000).toISOString().slice(0, 10);
+    return publicadas
+      .filter((p) => p.fecha_programada > limiteInf && p.fecha_programada <= limiteSup)
+      .reduce((s, p) => s + p.alcance, 0);
+  };
+  const semanaActual = alcancePorSemana(0, 7);
+  const semanaAnterior = alcancePorSemana(7, 14);
+  const crecimiento =
+    semanaAnterior > 0
+      ? Math.round(((semanaActual - semanaAnterior) / semanaAnterior) * 100)
+      : null;
 
   const porFecha = Object.values(
     publicadas.reduce<Record<string, { fecha: string; alcance: number; leads: number }>>(
@@ -131,6 +169,74 @@ function Dashboard() {
           destacado={sinAtender > 0}
         />
       </div>
+
+      <div className="mt-4 grid gap-4 lg:grid-cols-3">
+        <section className="panel p-5">
+          <h2 className="font-display text-lg font-bold">Publicaciones</h2>
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            <Mini etiqueta="Programadas" valor={programadas} />
+            <Mini etiqueta="Publicadas" valor={publicadas.length} />
+            <Mini etiqueta="Fallidas" valor={fallidas} alerta={fallidas > 0} />
+            <Mini etiqueta="Pendientes" valor={pendientes} />
+          </div>
+          <div className="mt-4 border-t border-border pt-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Próxima publicación
+            </p>
+            {proxima ? (
+              <p className="mt-1 text-sm">
+                <span className="font-semibold capitalize">{proxima.red}</span> ·{" "}
+                {proxima.fecha_programada} {proxima.hora_programada} — {proxima.titular}
+              </p>
+            ) : (
+              <p className="mt-1 text-sm text-muted-foreground">
+                No hay publicaciones pendientes en el calendario.
+              </p>
+            )}
+          </div>
+        </section>
+
+        <section className="panel p-5">
+          <h2 className="font-display text-lg font-bold">Rendimiento</h2>
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            <Mini etiqueta="Alcance" valor={alcance} />
+            <Mini etiqueta="Impresiones estimadas" valor={Math.round(alcance * 1.35)} />
+            <Mini etiqueta="Interacciones" valor={interacciones} />
+            <Mini
+              etiqueta="Crecimiento semanal"
+              valor={crecimiento === null ? "—" : `${crecimiento > 0 ? "+" : ""}${crecimiento}%`}
+            />
+          </div>
+          <p className="mt-3 text-xs text-muted-foreground">
+            Métricas calculadas sobre las publicaciones registradas como publicadas en este centro.
+          </p>
+        </section>
+
+        <section className="panel p-5">
+          <h2 className="font-display text-lg font-bold">Leads y bandeja</h2>
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            <Mini etiqueta="Nuevos" valor={leadsPorEstado.nuevos} />
+            <Mini etiqueta="En seguimiento" valor={leadsPorEstado.seguimiento} />
+            <Mini etiqueta="Calificados" valor={leadsPorEstado.calificados} />
+            <Mini etiqueta="Cerrados" valor={leadsPorEstado.cerrados} />
+          </div>
+          <div className="mt-4 border-t border-border pt-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Último informe diario
+            </p>
+            {ultimoInforme ? (
+              <p className="mt-1 text-sm">
+                {ultimoInforme.fecha} · {ultimoInforme.publicaciones_publicadas} publicadas ·{" "}
+                {ultimoInforme.mensajes_atendidos}/{ultimoInforme.mensajes_recibidos} mensajes
+                atendidos
+              </p>
+            ) : (
+              <p className="mt-1 text-sm text-muted-foreground">Todavía no hay informes generados.</p>
+            )}
+          </div>
+        </section>
+      </div>
+
 
       <div className="mt-4 grid gap-4 lg:grid-cols-3">
         <section className="panel p-5 lg:col-span-2">
@@ -202,14 +308,37 @@ function Dashboard() {
       </div>
 
       <div className="mt-4 grid gap-4">
-        <Contenido />
-        <Bandeja />
-        <Informe />
         <Conexiones />
       </div>
     </AppShell>
   );
 }
+
+function Mini({
+  etiqueta,
+  valor,
+  alerta,
+}: {
+  etiqueta: string;
+  valor: number | string;
+  alerta?: boolean;
+}) {
+  return (
+    <div className="rounded-xl border border-border bg-secondary/40 p-3">
+      <p className="text-xs text-muted-foreground">{etiqueta}</p>
+      <p
+        className={
+          alerta
+            ? "mt-1 font-display text-xl font-bold text-destructive"
+            : "mt-1 font-display text-xl font-bold"
+        }
+      >
+        {typeof valor === "number" ? valor.toLocaleString("es-PA") : valor}
+      </p>
+    </div>
+  );
+}
+
 
 function Kpi({
   icono: Icono,

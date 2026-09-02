@@ -4,9 +4,12 @@ import {
   Building2,
   CalendarClock,
   ClipboardCheck,
+  FileText,
+  Inbox,
   Link2,
   LogOut,
   ShieldCheck,
+  Sparkles,
   Users,
 } from "lucide-react";
 import type { ReactNode } from "react";
@@ -23,11 +26,14 @@ import { useEmpresa } from "@/lib/empresa";
 
 const NAV = [
   { to: "/", label: "Dashboard", icon: BarChart3 },
+  { to: "/contenido", label: "Contenido", icon: Sparkles },
+  { to: "/borradores", label: "Borradores", icon: ClipboardCheck },
   { to: "/programacion", label: "Programación", icon: CalendarClock },
-  { to: "/borradores", label: "Revisión", icon: ClipboardCheck },
   { to: "/conexiones", label: "Conexiones", icon: Link2 },
-  { to: "/credenciales", label: "Credenciales", icon: ShieldCheck },
+  { to: "/mensajeria", label: "Mensajería", icon: Inbox },
+  { to: "/informes", label: "Informes", icon: FileText },
   { to: "/colaboradores", label: "Colaboradores", icon: Users },
+  { to: "/credenciales", label: "Credenciales", icon: ShieldCheck },
 ] as const;
 
 
@@ -77,7 +83,7 @@ export function AppShell({
           </Select>
         </div>
 
-        <nav className="mt-8 flex flex-col gap-1">
+        <nav className="mt-8 flex flex-col gap-1 overflow-y-auto">
           {NAV.map(({ to, label, icon: Icon }) => (
             <Link
               key={to}
@@ -140,13 +146,13 @@ export function AppShell({
               {acciones}
             </div>
           </div>
-          <nav className="flex gap-1 border-t border-border px-4 py-2 md:hidden">
+          <nav className="flex gap-1 overflow-x-auto border-t border-border px-4 py-2 md:hidden">
             {NAV.map(({ to, label, icon: Icon }) => (
               <Link
                 key={to}
                 to={to}
                 activeOptions={{ exact: to === "/" }}
-                className="flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground"
+                className="flex shrink-0 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground"
                 activeProps={{ className: "bg-secondary text-secondary-foreground" }}
               >
                 <Icon className="size-4" />

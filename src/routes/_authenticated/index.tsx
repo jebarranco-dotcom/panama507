@@ -79,9 +79,47 @@ function Dashboard() {
   const publicadas = publicaciones.filter((p) => p.estado === "publicado");
   const alcance = publicadas.reduce((s, p) => s + p.alcance, 0);
   const clics = publicadas.reduce((s, p) => s + p.clics, 0);
+  const interacciones = publicadas.reduce((s, p) => s + p.likes + p.comentarios, 0);
   const leads = publicadas.reduce((s, p) => s + p.leads, 0);
   const seguidores = cuentas.reduce((s, c) => s + c.seguidores, 0);
   const sinAtender = mensajes.filter((m) => m.estado === "nuevo" || m.estado === "en_proceso").length;
+
+  const ahora = new Date();
+  const hoyIso = ahora.toISOString().slice(0, 10);
+  const programadas = publicaciones.filter((p) => p.estado === "programado").length;
+  const fallidas = publicaciones.filter((p) => p.estado === "error").length;
+  const pendientes = publicaciones.filter(
+    (p) => p.estado === "borrador" || p.estado === "pendiente_aprobacion" || p.estado === "en_cola",
+  ).length;
+
+  const proxima = publicaciones
+    .filter((p) => p.estado !== "publicado" && p.estado !== "error" && p.fecha_programada >= hoyIso)
+    .sort((a, b) =>
+      `${a.fecha_programada}${a.hora_programada}`.localeCompare(
+        `${b.fecha_programada}${b.hora_programada}`,
+      ),
+    )[0];
+
+  const leadsPorEstado = {
+    nuevos: mensajes.filter((m) => m.estado === "nuevo").length,
+    seguimiento: mensajes.filter((m) => m.estado === "en_proceso").length,
+    calificados: mensajes.filter((m) => m.estado === "respondido").length,
+    cerrados: mensajes.filter((m) => m.estado === "cerrado").length,
+  };
+
+  const alcancePorSemana = (desde: number, hasta: number) => {
+    const limiteSup = new Date(ahora.getTime() - desde * 86400000).toISOString().slice(0, 10);
+    const limiteInf = new Date(ahora.getTime() - hasta * 86400000).toISOString().slice(0, 10);
+    return publicadas
+      .filter((p) => p.fecha_programada > limiteInf && p.fecha_programada <= limiteSup)
+      .reduce((s, p) => s + p.alcance, 0);
+  };
+  const semanaActual = alcancePorSemana(0, 7);
+  const semanaAnterior = alcancePorSemana(7, 14);
+  const crecimiento =
+    semanaAnterior > 0
+      ? Math.round(((semanaActual - semanaAnterior) / semanaAnterior) * 100)
+      : null;
 
   const porFecha = Object.values(
     publicadas.reduce<Record<string, { fecha: string; alcance: number; leads: number }>>(

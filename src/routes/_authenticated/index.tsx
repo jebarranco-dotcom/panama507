@@ -18,16 +18,14 @@ import { Eye, Inbox, Loader2, MousePointerClick, Users, Zap } from "lucide-react
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/AppShell";
-import { Bandeja } from "@/components/dashboard/Bandeja";
 import { Conexiones } from "@/components/dashboard/Conexiones";
-import { Contenido } from "@/components/dashboard/Contenido";
-import { Informe } from "@/components/dashboard/Informe";
 import { Button } from "@/components/ui/button";
 import { useEmpresa } from "@/lib/empresa";
 import { estrategiaDe } from "@/lib/estrategia";
 import { correrRutina } from "@/lib/marketing.functions";
 import {
   cuentasQuery,
+  informesQuery,
   mensajesQuery,
   propiedadesQuery,
   publicacionesQuery,
@@ -62,6 +60,8 @@ function Dashboard() {
   const { data: mensajes = [] } = useQuery(mensajesQuery(empresaId));
   const { data: cuentas = [] } = useQuery(cuentasQuery(empresaId));
   const { data: propiedades = [] } = useQuery(propiedadesQuery(empresaId));
+  const { data: informes = [] } = useQuery(informesQuery(empresaId));
+  const ultimoInforme = informes[0];
   const tipoCatalogo = estrategiaDe(empresa.slug).catalogo;
   const rutina = useServerFn(correrRutina);
 

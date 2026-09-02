@@ -19,6 +19,7 @@ import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedBorradoresRouteImport } from './routes/_authenticated/borradores'
 import { Route as AuthenticatedColaboradoresRouteImport } from './routes/_authenticated/colaboradores'
 import { Route as AuthenticatedConexionesRouteImport } from './routes/_authenticated/conexiones'
+import { Route as AuthenticatedContenidoRouteImport } from './routes/_authenticated/contenido'
 import { Route as AuthenticatedCredencialesRouteImport } from './routes/_authenticated/credenciales'
 import { Route as AuthenticatedProgramacionRouteImport } from './routes/_authenticated/programacion'
 import { Route as ApiPublicHooksPublicarProgramadoRouteImport } from './routes/api/public/hooks/publicar-programado'
@@ -76,6 +77,11 @@ const AuthenticatedConexionesRoute = AuthenticatedConexionesRouteImport.update({
   path: '/conexiones',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedContenidoRoute = AuthenticatedContenidoRouteImport.update({
+  id: '/contenido',
+  path: '/contenido',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedCredencialesRoute =
   AuthenticatedCredencialesRouteImport.update({
     id: '/credenciales',
@@ -123,6 +129,7 @@ export interface FileRoutesByFullPath {
   '/borradores': typeof AuthenticatedBorradoresRoute
   '/colaboradores': typeof AuthenticatedColaboradoresRoute
   '/conexiones': typeof AuthenticatedConexionesRoute
+  '/contenido': typeof AuthenticatedContenidoRoute
   '/credenciales': typeof AuthenticatedCredencialesRoute
   '/programacion': typeof AuthenticatedProgramacionRoute
   '/api/public/hooks/publicar-programado': typeof ApiPublicHooksPublicarProgramadoRoute
@@ -139,6 +146,7 @@ export interface FileRoutesByTo {
   '/borradores': typeof AuthenticatedBorradoresRoute
   '/colaboradores': typeof AuthenticatedColaboradoresRoute
   '/conexiones': typeof AuthenticatedConexionesRoute
+  '/contenido': typeof AuthenticatedContenidoRoute
   '/credenciales': typeof AuthenticatedCredencialesRoute
   '/programacion': typeof AuthenticatedProgramacionRoute
   '/': typeof AuthenticatedIndexRoute
@@ -158,6 +166,7 @@ export interface FileRoutesById {
   '/_authenticated/borradores': typeof AuthenticatedBorradoresRoute
   '/_authenticated/colaboradores': typeof AuthenticatedColaboradoresRoute
   '/_authenticated/conexiones': typeof AuthenticatedConexionesRoute
+  '/_authenticated/contenido': typeof AuthenticatedContenidoRoute
   '/_authenticated/credenciales': typeof AuthenticatedCredencialesRoute
   '/_authenticated/programacion': typeof AuthenticatedProgramacionRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
@@ -178,6 +187,7 @@ export interface FileRouteTypes {
     | '/borradores'
     | '/colaboradores'
     | '/conexiones'
+    | '/contenido'
     | '/credenciales'
     | '/programacion'
     | '/api/public/hooks/publicar-programado'
@@ -194,6 +204,7 @@ export interface FileRouteTypes {
     | '/borradores'
     | '/colaboradores'
     | '/conexiones'
+    | '/contenido'
     | '/credenciales'
     | '/programacion'
     | '/'
@@ -212,6 +223,7 @@ export interface FileRouteTypes {
     | '/_authenticated/borradores'
     | '/_authenticated/colaboradores'
     | '/_authenticated/conexiones'
+    | '/_authenticated/contenido'
     | '/_authenticated/credenciales'
     | '/_authenticated/programacion'
     | '/_authenticated/'
@@ -306,6 +318,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedConexionesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/contenido': {
+      id: '/_authenticated/contenido'
+      path: '/contenido'
+      fullPath: '/contenido'
+      preLoaderRoute: typeof AuthenticatedContenidoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/credenciales': {
       id: '/_authenticated/credenciales'
       path: '/credenciales'
@@ -355,6 +374,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedBorradoresRoute: typeof AuthenticatedBorradoresRoute
   AuthenticatedColaboradoresRoute: typeof AuthenticatedColaboradoresRoute
   AuthenticatedConexionesRoute: typeof AuthenticatedConexionesRoute
+  AuthenticatedContenidoRoute: typeof AuthenticatedContenidoRoute
   AuthenticatedCredencialesRoute: typeof AuthenticatedCredencialesRoute
   AuthenticatedProgramacionRoute: typeof AuthenticatedProgramacionRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
@@ -364,6 +384,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedBorradoresRoute: AuthenticatedBorradoresRoute,
   AuthenticatedColaboradoresRoute: AuthenticatedColaboradoresRoute,
   AuthenticatedConexionesRoute: AuthenticatedConexionesRoute,
+  AuthenticatedContenidoRoute: AuthenticatedContenidoRoute,
   AuthenticatedCredencialesRoute: AuthenticatedCredencialesRoute,
   AuthenticatedProgramacionRoute: AuthenticatedProgramacionRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,

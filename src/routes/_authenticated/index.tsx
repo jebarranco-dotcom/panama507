@@ -171,6 +171,74 @@ function Dashboard() {
       </div>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-3">
+        <section className="panel p-5">
+          <h2 className="font-display text-lg font-bold">Publicaciones</h2>
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            <Mini etiqueta="Programadas" valor={programadas} />
+            <Mini etiqueta="Publicadas" valor={publicadas.length} />
+            <Mini etiqueta="Fallidas" valor={fallidas} alerta={fallidas > 0} />
+            <Mini etiqueta="Pendientes" valor={pendientes} />
+          </div>
+          <div className="mt-4 border-t border-border pt-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Próxima publicación
+            </p>
+            {proxima ? (
+              <p className="mt-1 text-sm">
+                <span className="font-semibold capitalize">{proxima.red}</span> ·{" "}
+                {proxima.fecha_programada} {proxima.hora_programada} — {proxima.titular}
+              </p>
+            ) : (
+              <p className="mt-1 text-sm text-muted-foreground">
+                No hay publicaciones pendientes en el calendario.
+              </p>
+            )}
+          </div>
+        </section>
+
+        <section className="panel p-5">
+          <h2 className="font-display text-lg font-bold">Rendimiento</h2>
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            <Mini etiqueta="Alcance" valor={alcance} />
+            <Mini etiqueta="Impresiones estimadas" valor={Math.round(alcance * 1.35)} />
+            <Mini etiqueta="Interacciones" valor={interacciones} />
+            <Mini
+              etiqueta="Crecimiento semanal"
+              valor={crecimiento === null ? "—" : `${crecimiento > 0 ? "+" : ""}${crecimiento}%`}
+            />
+          </div>
+          <p className="mt-3 text-xs text-muted-foreground">
+            Métricas calculadas sobre las publicaciones registradas como publicadas en este centro.
+          </p>
+        </section>
+
+        <section className="panel p-5">
+          <h2 className="font-display text-lg font-bold">Leads y bandeja</h2>
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            <Mini etiqueta="Nuevos" valor={leadsPorEstado.nuevos} />
+            <Mini etiqueta="En seguimiento" valor={leadsPorEstado.seguimiento} />
+            <Mini etiqueta="Calificados" valor={leadsPorEstado.calificados} />
+            <Mini etiqueta="Cerrados" valor={leadsPorEstado.cerrados} />
+          </div>
+          <div className="mt-4 border-t border-border pt-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Último informe diario
+            </p>
+            {ultimoInforme ? (
+              <p className="mt-1 text-sm">
+                {ultimoInforme.fecha} · {ultimoInforme.publicaciones_publicadas} publicadas ·{" "}
+                {ultimoInforme.mensajes_atendidos}/{ultimoInforme.mensajes_recibidos} mensajes
+                atendidos
+              </p>
+            ) : (
+              <p className="mt-1 text-sm text-muted-foreground">Todavía no hay informes generados.</p>
+            )}
+          </div>
+        </section>
+      </div>
+
+
+      <div className="mt-4 grid gap-4 lg:grid-cols-3">
         <section className="panel p-5 lg:col-span-2">
           <h2 className="font-display text-lg font-bold">Alcance y leads por día</h2>
           <div className="mt-4 h-64">

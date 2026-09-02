@@ -146,13 +146,13 @@ export function AppShell({
               {acciones}
             </div>
           </div>
-          <nav className="flex gap-1 border-t border-border px-4 py-2 md:hidden">
+          <nav className="flex gap-1 overflow-x-auto border-t border-border px-4 py-2 md:hidden">
             {NAV.map(({ to, label, icon: Icon }) => (
               <Link
                 key={to}
                 to={to}
                 activeOptions={{ exact: to === "/" }}
-                className="flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground"
+                className="flex shrink-0 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground"
                 activeProps={{ className: "bg-secondary text-secondary-foreground" }}
               >
                 <Icon className="size-4" />

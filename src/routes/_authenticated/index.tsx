@@ -308,14 +308,37 @@ function Dashboard() {
       </div>
 
       <div className="mt-4 grid gap-4">
-        <Contenido />
-        <Bandeja />
-        <Informe />
         <Conexiones />
       </div>
     </AppShell>
   );
 }
+
+function Mini({
+  etiqueta,
+  valor,
+  alerta,
+}: {
+  etiqueta: string;
+  valor: number | string;
+  alerta?: boolean;
+}) {
+  return (
+    <div className="rounded-xl border border-border bg-secondary/40 p-3">
+      <p className="text-xs text-muted-foreground">{etiqueta}</p>
+      <p
+        className={
+          alerta
+            ? "mt-1 font-display text-xl font-bold text-destructive"
+            : "mt-1 font-display text-xl font-bold"
+        }
+      >
+        {typeof valor === "number" ? valor.toLocaleString("es-PA") : valor}
+      </p>
+    </div>
+  );
+}
+
 
 function Kpi({
   icono: Icono,

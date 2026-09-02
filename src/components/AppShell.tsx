@@ -4,9 +4,12 @@ import {
   Building2,
   CalendarClock,
   ClipboardCheck,
+  FileText,
+  Inbox,
   Link2,
   LogOut,
   ShieldCheck,
+  Sparkles,
   Users,
 } from "lucide-react";
 import type { ReactNode } from "react";

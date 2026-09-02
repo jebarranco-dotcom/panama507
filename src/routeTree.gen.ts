@@ -21,6 +21,7 @@ import { Route as AuthenticatedColaboradoresRouteImport } from './routes/_authen
 import { Route as AuthenticatedConexionesRouteImport } from './routes/_authenticated/conexiones'
 import { Route as AuthenticatedContenidoRouteImport } from './routes/_authenticated/contenido'
 import { Route as AuthenticatedCredencialesRouteImport } from './routes/_authenticated/credenciales'
+import { Route as AuthenticatedInformesRouteImport } from './routes/_authenticated/informes'
 import { Route as AuthenticatedMensajeriaRouteImport } from './routes/_authenticated/mensajeria'
 import { Route as AuthenticatedProgramacionRouteImport } from './routes/_authenticated/programacion'
 import { Route as ApiPublicHooksPublicarProgramadoRouteImport } from './routes/api/public/hooks/publicar-programado'
@@ -89,6 +90,11 @@ const AuthenticatedCredencialesRoute =
     path: '/credenciales',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedInformesRoute = AuthenticatedInformesRouteImport.update({
+  id: '/informes',
+  path: '/informes',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedMensajeriaRoute = AuthenticatedMensajeriaRouteImport.update({
   id: '/mensajeria',
   path: '/mensajeria',
@@ -137,6 +143,7 @@ export interface FileRoutesByFullPath {
   '/conexiones': typeof AuthenticatedConexionesRoute
   '/contenido': typeof AuthenticatedContenidoRoute
   '/credenciales': typeof AuthenticatedCredencialesRoute
+  '/informes': typeof AuthenticatedInformesRoute
   '/mensajeria': typeof AuthenticatedMensajeriaRoute
   '/programacion': typeof AuthenticatedProgramacionRoute
   '/api/public/hooks/publicar-programado': typeof ApiPublicHooksPublicarProgramadoRoute
@@ -155,6 +162,7 @@ export interface FileRoutesByTo {
   '/conexiones': typeof AuthenticatedConexionesRoute
   '/contenido': typeof AuthenticatedContenidoRoute
   '/credenciales': typeof AuthenticatedCredencialesRoute
+  '/informes': typeof AuthenticatedInformesRoute
   '/mensajeria': typeof AuthenticatedMensajeriaRoute
   '/programacion': typeof AuthenticatedProgramacionRoute
   '/': typeof AuthenticatedIndexRoute
@@ -176,6 +184,7 @@ export interface FileRoutesById {
   '/_authenticated/conexiones': typeof AuthenticatedConexionesRoute
   '/_authenticated/contenido': typeof AuthenticatedContenidoRoute
   '/_authenticated/credenciales': typeof AuthenticatedCredencialesRoute
+  '/_authenticated/informes': typeof AuthenticatedInformesRoute
   '/_authenticated/mensajeria': typeof AuthenticatedMensajeriaRoute
   '/_authenticated/programacion': typeof AuthenticatedProgramacionRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
@@ -198,6 +207,7 @@ export interface FileRouteTypes {
     | '/conexiones'
     | '/contenido'
     | '/credenciales'
+    | '/informes'
     | '/mensajeria'
     | '/programacion'
     | '/api/public/hooks/publicar-programado'
@@ -216,6 +226,7 @@ export interface FileRouteTypes {
     | '/conexiones'
     | '/contenido'
     | '/credenciales'
+    | '/informes'
     | '/mensajeria'
     | '/programacion'
     | '/'
@@ -236,6 +247,7 @@ export interface FileRouteTypes {
     | '/_authenticated/conexiones'
     | '/_authenticated/contenido'
     | '/_authenticated/credenciales'
+    | '/_authenticated/informes'
     | '/_authenticated/mensajeria'
     | '/_authenticated/programacion'
     | '/_authenticated/'
@@ -344,6 +356,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCredencialesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/informes': {
+      id: '/_authenticated/informes'
+      path: '/informes'
+      fullPath: '/informes'
+      preLoaderRoute: typeof AuthenticatedInformesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/mensajeria': {
       id: '/_authenticated/mensajeria'
       path: '/mensajeria'
@@ -395,6 +414,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedConexionesRoute: typeof AuthenticatedConexionesRoute
   AuthenticatedContenidoRoute: typeof AuthenticatedContenidoRoute
   AuthenticatedCredencialesRoute: typeof AuthenticatedCredencialesRoute
+  AuthenticatedInformesRoute: typeof AuthenticatedInformesRoute
   AuthenticatedMensajeriaRoute: typeof AuthenticatedMensajeriaRoute
   AuthenticatedProgramacionRoute: typeof AuthenticatedProgramacionRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
@@ -406,6 +426,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedConexionesRoute: AuthenticatedConexionesRoute,
   AuthenticatedContenidoRoute: AuthenticatedContenidoRoute,
   AuthenticatedCredencialesRoute: AuthenticatedCredencialesRoute,
+  AuthenticatedInformesRoute: AuthenticatedInformesRoute,
   AuthenticatedMensajeriaRoute: AuthenticatedMensajeriaRoute,
   AuthenticatedProgramacionRoute: AuthenticatedProgramacionRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,

@@ -89,7 +89,7 @@ function Dashboard() {
   const programadas = publicaciones.filter((p) => p.estado === "programado").length;
   const fallidas = publicaciones.filter((p) => p.estado === "error").length;
   const pendientes = publicaciones.filter(
-    (p) => p.estado === "borrador" || p.estado === "pendiente_aprobacion" || p.estado === "en_cola",
+    (p) => p.estado === "borrador" || p.estado === "en_cola",
   ).length;
 
   const proxima = publicaciones

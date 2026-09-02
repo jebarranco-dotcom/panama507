@@ -83,7 +83,7 @@ export function AppShell({
           </Select>
         </div>
 
-        <nav className="mt-8 flex flex-col gap-1">
+        <nav className="mt-8 flex flex-col gap-1 overflow-y-auto">
           {NAV.map(({ to, label, icon: Icon }) => (
             <Link
               key={to}

@@ -26,11 +26,14 @@ import { useEmpresa } from "@/lib/empresa";
 
 const NAV = [
   { to: "/", label: "Dashboard", icon: BarChart3 },
+  { to: "/contenido", label: "Contenido", icon: Sparkles },
+  { to: "/borradores", label: "Borradores", icon: ClipboardCheck },
   { to: "/programacion", label: "Programación", icon: CalendarClock },
-  { to: "/borradores", label: "Revisión", icon: ClipboardCheck },
   { to: "/conexiones", label: "Conexiones", icon: Link2 },
-  { to: "/credenciales", label: "Credenciales", icon: ShieldCheck },
+  { to: "/mensajeria", label: "Mensajería", icon: Inbox },
+  { to: "/informes", label: "Informes", icon: FileText },
   { to: "/colaboradores", label: "Colaboradores", icon: Users },
+  { to: "/credenciales", label: "Credenciales", icon: ShieldCheck },
 ] as const;
 
 

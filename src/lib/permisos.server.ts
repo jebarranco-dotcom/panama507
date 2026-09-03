@@ -36,11 +36,15 @@ export async function asegurarAdministrador(
   }
 }
 
-/** Origen público de la app, válido tanto en vista previa como en producción. */
+/**
+ * Origen canónico registrado en Meta/TikTok.
+ *
+ * La vista previa usa dominios internos que pueden cambiar o exigir sesión, por
+ * lo que nunca deben formar parte del redirect_uri enviado al proveedor OAuth.
+ */
+const ORIGEN_OAUTH_PUBLICO = "https://panama507.lovable.app";
+
 export function origenPublico(request: Request | undefined): string {
   if (!request) throw new Error("La acción debe iniciarse desde la aplicación.");
-  const url = new URL(request.url);
-  const reenviado = request.headers.get("x-forwarded-host");
-  if (url.hostname === "localhost" && reenviado) return `https://${reenviado}`;
-  return url.origin;
+  return ORIGEN_OAUTH_PUBLICO;
 }

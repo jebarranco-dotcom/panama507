@@ -97,11 +97,12 @@ const PASOS = [
     titulo: "Meta Business (Facebook e Instagram)",
     pasos: [
       "Entra a developers.facebook.com con la cuenta que administra la página de la empresa y crea una app tipo Business.",
-      "En Productos agrega Facebook Login for Business y, en su configuración, pega la URL de retorno de Meta en «URI de redireccionamiento de OAuth válidos».",
-      "En Permisos y funciones solicita pages_show_list, pages_read_engagement, pages_manage_posts, instagram_basic e instagram_content_publish.",
+      "Ve a Configuración → Básica y en «Dominios de la app» agrega exactamente: panama507.lovable.app y id-preview--2d59501b-39dd-4b6c-a079-b7c875bf56cc.lovable.app. Sin esto Meta rechaza la URL de autorización.",
+      "En Productos agrega Facebook Login for Business. En su configuración, pega en «URI de redireccionamiento de OAuth válidos» las URLs de retorno de Meta que aparecen arriba (producción, preview y localhost).",
+      "En Permisos y funciones solicita pages_show_list, pages_read_engagement, pages_manage_posts, pages_messaging, pages_manage_metadata, instagram_basic, instagram_content_publish e instagram_manage_messages.",
       "Vincula la página de Facebook y la cuenta de Instagram profesional de la empresa en Meta Business Suite.",
       "En Configuración → Básica copia el App ID y el App Secret y pégalos arriba en META_APP_ID y META_APP_SECRET.",
-      "Vuelve a Conexiones y autoriza Facebook e Instagram por separado.",
+      "Vuelve a Conexiones y pulsa Autorizar en Facebook y en Instagram.",
     ],
   },
   {

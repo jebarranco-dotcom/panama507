@@ -229,7 +229,9 @@ function Borradores() {
               className="flex items-center gap-2 rounded-xl border border-border bg-secondary/40 p-3 text-xs"
             >
               <IconoRed red={f.red} className="size-4" />
-              <span className="font-semibold">{REDES[f.red as keyof typeof REDES]?.nombre ?? f.red}</span>
+              <span className="font-semibold">
+                {REDES[f.red as keyof typeof REDES]?.nombre ?? f.red}
+              </span>
               <span className="ml-auto flex items-center gap-1 text-muted-foreground">
                 <Clock className="size-3.5" /> {f.hora}
               </span>
@@ -259,11 +261,14 @@ function Borradores() {
         <div className="mt-4 grid gap-4 lg:grid-cols-2">
           {pendientes.map((p) => {
             const enEdicion = editando === p.id;
+            const puedeAprobarPieza = p.estado === "borrador" || p.estado === "error";
             return (
               <section key={p.id} className="panel flex flex-col p-5">
                 <div className="flex flex-wrap items-center gap-2">
                   <IconoRed red={p.red} className="size-5" />
-                  <p className="text-sm font-semibold">{REDES[p.red as keyof typeof REDES]?.nombre ?? p.red}</p>
+                  <p className="text-sm font-semibold">
+                    {REDES[p.red as keyof typeof REDES]?.nombre ?? p.red}
+                  </p>
                   <EstadoBadge estado={p.estado} />
                   <span className="ml-auto flex items-center gap-1 text-xs text-muted-foreground">
                     <Clock className="size-3.5" /> {p.fecha_programada} · {p.hora_programada}
@@ -312,11 +317,15 @@ function Borradores() {
                     </div>
                     <div className="grid gap-3 sm:grid-cols-2">
                       <div>
-                        <Label htmlFor={`media-${p.id}`}>URL de imagen (obligatoria en Instagram)</Label>
+                        <Label htmlFor={`media-${p.id}`}>
+                          URL de imagen (obligatoria en Instagram)
+                        </Label>
                         <Input
                           id={`media-${p.id}`}
                           value={borrador.media_url ?? ""}
-                          onChange={(e) => setBorrador((b) => ({ ...b, media_url: e.target.value }))}
+                          onChange={(e) =>
+                            setBorrador((b) => ({ ...b, media_url: e.target.value }))
+                          }
                         />
                       </div>
                       <div>
@@ -368,7 +377,9 @@ function Borradores() {
                       </div>
                     )}
                     <p className="mt-3 text-sm font-semibold">{p.titular}</p>
-                    <p className="mt-2 whitespace-pre-line text-sm text-muted-foreground">{p.copy}</p>
+                    <p className="mt-2 whitespace-pre-line text-sm text-muted-foreground">
+                      {p.copy}
+                    </p>
                     {p.cta ? <p className="mt-2 text-sm text-primary">{p.cta}</p> : null}
                     {p.hashtags?.length ? (
                       <p className="mt-2 text-xs text-muted-foreground">{p.hashtags.join(" ")}</p>
@@ -405,7 +416,7 @@ function Borradores() {
                       >
                         <RotateCcw className="size-3.5" /> Volver a borrador
                       </Button>
-                    ) : (
+                    ) : puedeAprobarPieza ? (
                       <Button
                         size="sm"
                         disabled={!puede || trabajando === `aprobar-${p.id}`}
@@ -424,8 +435,15 @@ function Borradores() {
                         )}
                         Aprobar
                       </Button>
+                    ) : (
+                      <Badge variant="outline">Ya programada</Badge>
                     )}
-                    <Button size="sm" variant="outline" disabled={!puede} onClick={() => abrirEdicion(p)}>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={!puede}
+                      onClick={() => abrirEdicion(p)}
+                    >
                       <Pencil className="size-3.5" /> Editar
                     </Button>
                     <Button

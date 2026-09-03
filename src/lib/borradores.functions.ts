@@ -75,17 +75,23 @@ export const aprobarBorrador = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { asegurarAdministrador } = await import("@/lib/permisos.server");
     await asegurarAdministrador(context.supabase, context.userId, data.empresaId);
-    const { error } = await context.supabase
+    const { data: actualizada, error } = await context.supabase
       .from("publicaciones")
       .update({
         estado: "programado",
         aprobada_at: new Date().toISOString(),
         aprobada_por: context.userId,
         error_publicacion: "",
+        intentos_publicacion: 0,
       })
       .eq("empresa_id", data.empresaId)
-      .eq("id", data.publicacionId);
+      .eq("id", data.publicacionId)
+      .in("estado", ["borrador", "error"])
+      .select("id");
     if (error) throw new Error(error.message);
+    if (!actualizada?.length) {
+      throw new Error("La pieza no está disponible para aprobación o ya fue procesada.");
+    }
     return { ok: true };
   });
 

@@ -311,6 +311,7 @@ function Credenciales() {
           {[
             { etiqueta: "URL de retorno Meta", valor: `${origen}/api/public/oauth/meta/callback` },
             { etiqueta: "URL de retorno TikTok", valor: `${origen}/api/public/oauth/tiktok/callback` },
+            { etiqueta: "URL del webhook de mensajería (Meta)", valor: `${origen}/api/public/hooks/meta-mensajes` },
             { etiqueta: "Política de privacidad", valor: `${origen}/privacy` },
             { etiqueta: "Términos de uso", valor: `${origen}/terms` },
             { etiqueta: "Eliminación de datos", valor: `${origen}/data-deletion` },

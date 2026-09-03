@@ -7,8 +7,8 @@ export const sincronizarConversaciones = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => BandejaInput.parse(input))
   .handler(async ({ data, context }) => {
-    const { asegurarMembresia } = await import("@/lib/permisos.server");
-    await asegurarMembresia(context.supabase, context.userId, data.empresaId);
+    const { asegurarMiembro } = await import("@/lib/permisos.server");
+    await asegurarMiembro(context.supabase, data.empresaId);
     const { sincronizarBandeja } = await import("@/lib/mensajeria.server");
     const redes: ("facebook" | "instagram")[] =
       data.red === "todas" ? ["facebook", "instagram"] : [data.red];

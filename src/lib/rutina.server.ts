@@ -112,18 +112,11 @@ export async function generarContenidoDelDia(fecha?: string, empresaId?: string)
   const empresa = await cargarEmpresa(supabase, empresaId);
   const dia = fecha ?? hoyISO();
 
-  const { data: existentes } = await supabase
-    .from("publicaciones")
-    .select("id")
-    .eq("empresa_id", empresa.id)
-    .eq("fecha_programada", dia);
-  if (existentes && existentes.length > 0) {
-    return { fecha: dia, creadas: 0, mensaje: "Ya existe contenido para esa fecha" };
-  }
-
   const { data: propiedades } = await supabase
     .from("propiedades")
-    .select("id, titulo, operacion, tipo, precio, moneda, habitaciones, banos, area_m2, ubicacion, descripcion")
+    .select(
+      "id, titulo, operacion, tipo, precio, moneda, habitaciones, banos, area_m2, ubicacion, descripcion",
+    )
     .eq("empresa_id", empresa.id)
     .eq("estado", "disponible")
     .limit(12);
@@ -144,15 +137,27 @@ export async function generarContenidoDelDia(fecha?: string, empresaId?: string)
     pilar: f.pilar || planBase.find((b) => b.red === f.red)?.pilar || "educativo",
     formato: f.formato || planBase.find((b) => b.red === f.red)?.formato || "imagen",
   }));
+  const { data: existentes } = await supabase
+    .from("publicaciones")
+    .select("red")
+    .eq("empresa_id", empresa.id)
+    .eq("fecha_programada", dia);
+  const redesExistentes = new Set((existentes ?? []).map((fila) => fila.red));
+  const planPendiente = planDiario.filter((fila) => !redesExistentes.has(fila.red));
+  if (planPendiente.length === 0) {
+    return { fecha: dia, creadas: 0, mensaje: "El contenido de esa fecha ya está completo" };
+  }
   const etiquetaCatalogo = tipo === "servicios" ? "Portafolio de servicios" : "Inventario";
-  const plan = planDiario.map(
-    (p) => `- red: ${p.red}, hora: ${p.hora}, pilar: ${p.pilar} (${nombrePilar(p.pilar)}), formato: ${p.formato}`,
-  ).join("\n");
-
+  const plan = planPendiente
+    .map(
+      (p) =>
+        `- red: ${p.red}, hora: ${p.hora}, pilar: ${p.pilar} (${nombrePilar(p.pilar)}), formato: ${p.formato}`,
+    )
+    .join("\n");
 
   const prompt = `Fecha de publicación: ${dia}.
 
-Genera EXACTAMENTE ${planDiario.length} publicaciones siguiendo este plan diario (respeta la hora indicada en cada línea):
+Genera EXACTAMENTE ${planPendiente.length} publicaciones siguiendo este plan diario (respeta la hora indicada en cada línea):
 ${plan}
 
 ${etiquetaCatalogo} disponible (usa datos reales de aquí cuando el pilar lo requiera):
@@ -183,8 +188,8 @@ ${tipo === "servicios" ? "No prometas resultados garantizados ni decisiones de t
     .select("id, imagen_url")
     .eq("empresa_id", empresa.id);
 
-  const filas = (parsed.publicaciones ?? []).slice(0, planDiario.length).map((p, i) => {
-    const base = planDiario[i % planDiario.length]!;
+  const filas = (parsed.publicaciones ?? []).slice(0, planPendiente.length).map((p, i) => {
+    const base = planPendiente[i % planPendiente.length]!;
     const prop = (propiedades ?? []).find(
       (x) => p.propiedad_titulo && x.titulo.toLowerCase() === p.propiedad_titulo.toLowerCase(),
     );
@@ -216,7 +221,16 @@ ${tipo === "servicios" ? "No prometas resultados garantizados ni decisiones de t
   if (filas.length === 0) return { fecha: dia, creadas: 0, mensaje: "La IA no devolvió contenido" };
 
   const { error } = await supabase.from("publicaciones").insert(filas);
-  if (error) throw new Error(error.message);
+  if (error) {
+    if (error.code === "23505") {
+      return {
+        fecha: dia,
+        creadas: 0,
+        mensaje: "Otra ejecución completó el contenido de esa fecha; no se duplicó ninguna pieza",
+      };
+    }
+    throw new Error(error.message);
+  }
 
   return {
     fecha: dia,
@@ -242,7 +256,6 @@ export async function publicarPendientes(empresaId?: string) {
   );
   return { ...totales, hora: resultado.hora, fecha: resultado.fecha };
 }
-
 
 /** Sugiere una respuesta para un mensaje entrante. */
 export async function redactarRespuesta(mensajeId: string) {
@@ -384,7 +397,11 @@ export async function ejecutarRutinaDiaria(empresaId?: string) {
   const resultados = [];
   for (const e of empresas) {
     try {
-      resultados.push({ empresaId: e.id, nombre: e.nombre, ...(await ejecutarRutinaEmpresa(e.id)) });
+      resultados.push({
+        empresaId: e.id,
+        nombre: e.nombre,
+        ...(await ejecutarRutinaEmpresa(e.id)),
+      });
     } catch (error) {
       resultados.push({
         empresaId: e.id,

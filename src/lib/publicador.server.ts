@@ -250,7 +250,10 @@ export async function ejecutarProgramador(empresaId?: string) {
         "id, red, titular, copy, hashtags, cta, media_url, intentos_publicacion, hora_programada, aprobada_at, estado",
       )
       .eq("empresa_id", empresa.id)
-      .in("estado", ["programado", "borrador"])
+      // Las piezas en_cola vuelven a evaluarse cuando una conexión se autoriza
+      // después de la generación. TikTok continúa en cola hasta implementar
+      // el flujo de video aprobado por Content Posting API.
+      .in("estado", ["programado", "borrador", "en_cola"])
       .lte("fecha_programada", fecha)
       .order("hora_programada");
 
@@ -261,6 +264,7 @@ export async function ejecutarProgramador(empresaId?: string) {
 
     for (const pieza of piezas ?? []) {
       if (!activas.has(pieza.red)) continue;
+      if (pieza.estado === "en_cola" && pieza.red === "tiktok") continue;
       if (pieza.hora_programada > hora) continue;
       const aprobada = Boolean(pieza.aprobada_at);
       if (empresa.requiere_aprobacion && !aprobada) {

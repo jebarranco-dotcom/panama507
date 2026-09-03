@@ -9,13 +9,15 @@ import { AppShell } from "@/components/AppShell";
 import { Automatizacion } from "@/components/dashboard/Automatizacion";
 import { IconoRed } from "@/components/Estado";
 import { PruebaPublicacion } from "@/components/PruebaPublicacion";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useEmpresa } from "@/lib/empresa";
-import { PILARES, PILARES_SERVICIOS, REDES, type Red } from "@/lib/estrategia";
+import { ETIQUETAS_ESTADO, PILARES, PILARES_SERVICIOS, REDES, type Red } from "@/lib/estrategia";
 import { guardarProgramacion, leerProgramacion } from "@/lib/programacion.functions";
+import { publicacionesQuery } from "@/lib/queries";
 import {
   Select,
   SelectContent,
@@ -51,6 +53,7 @@ type Fila = { red: Red; hora: string; pilar: string; formato: string; activo: bo
 function Programacion() {
   const { empresa, empresaId } = useEmpresa();
   const queryClient = useQueryClient();
+  const { data: publicaciones = [] } = useQuery(publicacionesQuery(empresaId));
   const { data } = useQuery({
     queryKey: ["programacion", empresaId],
     queryFn: () => leerProgramacion({ data: { empresaId } }),
@@ -65,6 +68,9 @@ function Programacion() {
 
   const puede = data?.puedeAdministrar ?? false;
   const pilares = empresa.slug === "gestiones-comerciales" ? PILARES_SERVICIOS : PILARES;
+  const cola = publicaciones
+    .filter((publicacion) => publicacion.estado !== "publicado")
+    .slice(0, 12);
 
   const actualizar = (red: Red, cambio: Partial<Fila>) =>
     setFilas((f) => f.map((x) => (x.red === red ? { ...x, ...cambio } : x)));
@@ -184,6 +190,47 @@ function Programacion() {
         ) : null}
       </section>
 
+      <section className="panel mt-4 p-5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 className="font-display text-lg font-bold">Cola editorial</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Piezas pendientes de aprobación, programación o publicación. La cola se vuelve a
+              evaluar cuando una conexión social queda disponible.
+            </p>
+          </div>
+          <Badge variant="outline">{cola.length} pendientes</Badge>
+        </div>
+        {cola.length === 0 ? (
+          <p className="mt-5 rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+            No hay piezas pendientes en la cola editorial.
+          </p>
+        ) : (
+          <div className="mt-5 grid gap-3 lg:grid-cols-2">
+            {cola.map((publicacion) => (
+              <div
+                key={publicacion.id}
+                className="flex items-center justify-between gap-4 rounded-xl border border-border bg-secondary/30 p-4"
+              >
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <IconoRed red={publicacion.red as Red} />
+                    <p className="truncate text-sm font-semibold">{publicacion.titular}</p>
+                  </div>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {publicacion.fecha_programada} · {publicacion.hora_programada} ·{" "}
+                    {publicacion.formato}
+                  </p>
+                </div>
+                <Badge variant={publicacion.estado === "error" ? "destructive" : "secondary"}>
+                  {ETIQUETAS_ESTADO[publicacion.estado] ?? publicacion.estado}
+                </Badge>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
       <section className="panel mt-4 p-5 text-xs leading-relaxed text-muted-foreground">
         <p>
           Cada mañana la rutina automática genera el contenido del día para las redes activas y lo
@@ -197,7 +244,7 @@ function Programacion() {
       <div className="mt-4">
         <PruebaPublicacion />
       </div>
-    
+
       <div className="mt-4">
         <Automatizacion />
       </div>

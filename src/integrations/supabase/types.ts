@@ -688,6 +688,7 @@ export type Database = {
           propiedad_id: string | null
           proximo_seguimiento: string | null
           red: string
+          referencia_externa: string
           remitente: string
           respondido_at: string | null
           respuesta: string | null
@@ -708,6 +709,7 @@ export type Database = {
           propiedad_id?: string | null
           proximo_seguimiento?: string | null
           red?: string
+          referencia_externa?: string
           remitente?: string
           respondido_at?: string | null
           respuesta?: string | null
@@ -728,6 +730,7 @@ export type Database = {
           propiedad_id?: string | null
           proximo_seguimiento?: string | null
           red?: string
+          referencia_externa?: string
           remitente?: string
           respondido_at?: string | null
           respuesta?: string | null

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/AppShell";
+import { Automatizacion } from "@/components/dashboard/Automatizacion";
 import { IconoRed } from "@/components/Estado";
 import { PruebaPublicacion } from "@/components/PruebaPublicacion";
 import { Button } from "@/components/ui/button";
@@ -195,6 +196,10 @@ function Programacion() {
 
       <div className="mt-4">
         <PruebaPublicacion />
+      </div>
+    
+      <div className="mt-4">
+        <Automatizacion />
       </div>
     </AppShell>
   );

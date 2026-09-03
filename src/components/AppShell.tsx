@@ -26,6 +26,7 @@ import { useEmpresa } from "@/lib/empresa";
 
 const NAV = [
   { to: "/", label: "Dashboard", icon: BarChart3 },
+  { to: "/analiticas", label: "Analíticas", icon: BarChart3 },
   { to: "/contenido", label: "Contenido", icon: Sparkles },
   { to: "/borradores", label: "Borradores", icon: ClipboardCheck },
   { to: "/programacion", label: "Programación", icon: CalendarClock },
@@ -35,8 +36,6 @@ const NAV = [
   { to: "/colaboradores", label: "Colaboradores", icon: Users },
   { to: "/credenciales", label: "Credenciales", icon: ShieldCheck },
 ] as const;
-
-
 
 export function AppShell({
   titulo,

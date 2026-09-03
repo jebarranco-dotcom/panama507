@@ -1,7 +1,15 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Copy, EyeOff, ListChecks, Loader2, RefreshCw, ShieldCheck } from "lucide-react";
+import {
+  CheckCircle2,
+  Copy,
+  EyeOff,
+  ListChecks,
+  Loader2,
+  RefreshCw,
+  ShieldCheck,
+} from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -13,7 +21,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useEmpresa } from "@/lib/empresa";
-import { estadoCredenciales, guardarCredenciales } from "@/lib/oauth.functions";
+import {
+  estadoCredenciales,
+  guardarCredenciales,
+  verificarCredenciales,
+} from "@/lib/oauth.functions";
 
 export const Route = createFileRoute("/_authenticated/credenciales")({
   head: () => ({
@@ -46,7 +58,9 @@ function ErrorCredenciales({ error, reset }: { error: Error; reset: () => void }
       descripcion="No pudimos cargar esta pantalla. Reintenta; si el problema sigue, vuelve a iniciar sesión."
     >
       <section className="panel border-destructive/40 p-5">
-        <h2 className="font-display text-base font-bold">Credenciales no disponibles temporalmente</h2>
+        <h2 className="font-display text-base font-bold">
+          Credenciales no disponibles temporalmente
+        </h2>
         <p className="mt-2 text-xs text-muted-foreground">{error.message}</p>
         <Button className="mt-3" size="sm" variant="outline" onClick={reset}>
           <RefreshCw className="size-4" /> Reintentar
@@ -55,7 +69,6 @@ function ErrorCredenciales({ error, reset }: { error: Error; reset: () => void }
     </AppShell>
   );
 }
-
 
 type Proveedor = "meta" | "tiktok";
 
@@ -106,7 +119,8 @@ const PASOS = [
 
 function Credenciales() {
   const { empresa, empresaId } = useEmpresa();
-  const origen = typeof window === "undefined" ? "https://panama507.lovable.app" : window.location.origin;
+  const origen =
+    typeof window === "undefined" ? "https://panama507.lovable.app" : window.location.origin;
   const queryClient = useQueryClient();
 
   const {
@@ -122,11 +136,12 @@ function Credenciales() {
     retry: 1,
   });
   const guardar = useServerFn(guardarCredenciales);
+  const verificar = useServerFn(verificarCredenciales);
   const [valores, setValores] = useState<Record<string, string>>({});
   const [guardando, setGuardando] = useState<Proveedor | null>(null);
+  const [verificando, setVerificando] = useState<Proveedor | null>(null);
 
   const puede = estado?.puedeAdministrar ?? false;
-
 
   const enviar = async (proveedor: Proveedor) => {
     const clientId = (valores[`${proveedor}-id`] ?? "").trim();
@@ -153,6 +168,23 @@ function Credenciales() {
     }
   };
 
+  const comprobar = async (proveedor: Proveedor) => {
+    setVerificando(proveedor);
+    try {
+      const resultado = await verificar({ data: { empresaId, proveedor } });
+      await queryClient.invalidateQueries({ queryKey: ["credenciales-oauth", empresaId] });
+      if (resultado.ok) {
+        toast.success("Credenciales verificadas", { description: resultado.detalle });
+      } else {
+        toast.warning("La plataforma rechazó las credenciales", { description: resultado.detalle });
+      }
+    } catch (e) {
+      toast.error("No se pudo verificar", { description: (e as Error).message });
+    } finally {
+      setVerificando(null);
+    }
+  };
+
   return (
     <AppShell
       titulo="Credenciales de apps"
@@ -160,7 +192,9 @@ function Credenciales() {
     >
       {errorEstado ? (
         <section className="panel mb-4 border-destructive/40 p-5">
-          <h2 className="font-display text-base font-bold">No se pudo cargar el estado de las credenciales</h2>
+          <h2 className="font-display text-base font-bold">
+            No se pudo cargar el estado de las credenciales
+          </h2>
           <p className="mt-2 text-xs text-muted-foreground">
             {(errorEstado as Error).message ||
               "La sesión pudo expirar o el servidor no respondió. Reintenta; si persiste, vuelve a iniciar sesión."}
@@ -172,7 +206,11 @@ function Credenciales() {
             disabled={recargando}
             onClick={() => void recargarEstado()}
           >
-            {recargando ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
+            {recargando ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <RefreshCw className="size-4" />
+            )}
             Reintentar
           </Button>
         </section>
@@ -184,16 +222,9 @@ function Credenciales() {
         </div>
       ) : null}
 
-      <AsistenteMeta
-        estado={estado?.meta}
-        puedeAdministrar={puede}
-        origen={origen}
-      />
-
-
+      <AsistenteMeta estado={estado?.meta} puedeAdministrar={puede} origen={origen} />
 
       <div className="mt-4 grid gap-4 lg:grid-cols-2">
-
         {(["meta", "tiktok"] as Proveedor[]).map((proveedor) => {
           const cfg = CONFIG[proveedor];
           const info = estado?.[proveedor];
@@ -288,9 +319,23 @@ function Credenciales() {
                   )}
                   {info?.registrada ? "Rotar credenciales" : "Registrar credenciales"}
                 </Button>
+                <Button
+                  className="w-full"
+                  variant="outline"
+                  disabled={!puede || !info?.registrada || verificando === proveedor}
+                  onClick={() => void comprobar(proveedor)}
+                >
+                  {verificando === proveedor ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <CheckCircle2 className="size-4" />
+                  )}
+                  Verificar contra {proveedor === "meta" ? "Meta" : "TikTok"}
+                </Button>
                 {!puede ? (
                   <p className="text-xs text-muted-foreground">
-                    Solo un administrador o gestor de la empresa puede registrar o rotar credenciales.
+                    Solo un administrador o gestor de la empresa puede registrar o rotar
+                    credenciales.
                   </p>
                 ) : null}
               </div>
@@ -304,19 +349,24 @@ function Credenciales() {
           <ListChecks className="size-5 text-primary" /> Cómo crear las apps paso a paso
         </h2>
         <p className="mt-2 text-xs text-muted-foreground">
-          Registra estas URL tal cual en cada plataforma; sin las de retorno la autorización falla
-          y sin las de cumplimiento Meta no aprueba la app.
+          Registra estas URL tal cual en cada plataforma; sin las de retorno la autorización falla y
+          sin las de cumplimiento Meta no aprueba la app.
         </p>
         <div className="mt-3 space-y-2">
           {[
             { etiqueta: "URL de retorno Meta", valor: `${origen}/api/public/oauth/meta/callback` },
-            { etiqueta: "URL de retorno TikTok", valor: `${origen}/api/public/oauth/tiktok/callback` },
-            { etiqueta: "URL del webhook de mensajería (Meta)", valor: `${origen}/api/public/hooks/meta-mensajes` },
+            {
+              etiqueta: "URL de retorno TikTok",
+              valor: `${origen}/api/public/oauth/tiktok/callback`,
+            },
+            {
+              etiqueta: "URL del webhook de mensajería (Meta)",
+              valor: `${origen}/api/public/hooks/meta-mensajes`,
+            },
             { etiqueta: "Política de privacidad", valor: `${origen}/privacy` },
             { etiqueta: "Términos de uso", valor: `${origen}/terms` },
             { etiqueta: "Eliminación de datos", valor: `${origen}/data-deletion` },
           ].map((u) => (
-
             <div
               key={u.etiqueta}
               className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-secondary/40 p-3"
@@ -360,4 +410,3 @@ function Credenciales() {
     </AppShell>
   );
 }
-

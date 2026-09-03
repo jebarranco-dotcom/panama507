@@ -18,6 +18,7 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedAnaliticasRouteImport } from './routes/_authenticated/analiticas'
 import { Route as AuthenticatedBorradoresRouteImport } from './routes/_authenticated/borradores'
 import { Route as AuthenticatedColaboradoresRouteImport } from './routes/_authenticated/colaboradores'
 import { Route as AuthenticatedConexionesRouteImport } from './routes/_authenticated/conexiones'
@@ -74,6 +75,11 @@ const TermsRoute = TermsRouteImport.update({
 const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAnaliticasRoute = AuthenticatedAnaliticasRouteImport.update({
+  id: '/analiticas',
+  path: '/analiticas',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedBorradoresRoute = AuthenticatedBorradoresRouteImport.update({
@@ -159,6 +165,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/terms': typeof TermsRoute
+  '/analiticas': typeof AuthenticatedAnaliticasRoute
   '/borradores': typeof AuthenticatedBorradoresRoute
   '/colaboradores': typeof AuthenticatedColaboradoresRoute
   '/conexiones': typeof AuthenticatedConexionesRoute
@@ -181,6 +188,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/terms': typeof TermsRoute
+  '/analiticas': typeof AuthenticatedAnaliticasRoute
   '/borradores': typeof AuthenticatedBorradoresRoute
   '/colaboradores': typeof AuthenticatedColaboradoresRoute
   '/conexiones': typeof AuthenticatedConexionesRoute
@@ -206,6 +214,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/terms': typeof TermsRoute
+  '/_authenticated/analiticas': typeof AuthenticatedAnaliticasRoute
   '/_authenticated/borradores': typeof AuthenticatedBorradoresRoute
   '/_authenticated/colaboradores': typeof AuthenticatedColaboradoresRoute
   '/_authenticated/conexiones': typeof AuthenticatedConexionesRoute
@@ -232,6 +241,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/reset-password'
     | '/terms'
+    | '/analiticas'
     | '/borradores'
     | '/colaboradores'
     | '/conexiones'
@@ -254,6 +264,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/reset-password'
     | '/terms'
+    | '/analiticas'
     | '/borradores'
     | '/colaboradores'
     | '/conexiones'
@@ -278,6 +289,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/reset-password'
     | '/terms'
+    | '/_authenticated/analiticas'
     | '/_authenticated/borradores'
     | '/_authenticated/colaboradores'
     | '/_authenticated/conexiones'
@@ -375,6 +387,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/analiticas': {
+      id: '/_authenticated/analiticas'
+      path: '/analiticas'
+      fullPath: '/analiticas'
+      preLoaderRoute: typeof AuthenticatedAnaliticasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/borradores': {
       id: '/_authenticated/borradores'
       path: '/borradores'
@@ -470,6 +489,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAnaliticasRoute: typeof AuthenticatedAnaliticasRoute
   AuthenticatedBorradoresRoute: typeof AuthenticatedBorradoresRoute
   AuthenticatedColaboradoresRoute: typeof AuthenticatedColaboradoresRoute
   AuthenticatedConexionesRoute: typeof AuthenticatedConexionesRoute
@@ -482,6 +502,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAnaliticasRoute: AuthenticatedAnaliticasRoute,
   AuthenticatedBorradoresRoute: AuthenticatedBorradoresRoute,
   AuthenticatedColaboradoresRoute: AuthenticatedColaboradoresRoute,
   AuthenticatedConexionesRoute: AuthenticatedConexionesRoute,

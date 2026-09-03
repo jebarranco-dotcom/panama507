@@ -24,6 +24,10 @@ export const PiezaInput = z.object({
   publicacionId: z.string().uuid(),
 });
 
+export const ZonaHorariaInput = EmpresaInput.extend({
+  zonaHoraria: z.string().min(3).max(64),
+});
+
 export const AprobacionInput = EmpresaInput.extend({ requiereAprobacion: z.boolean() });
 
 export const EditarBorradorInput = PiezaInput.extend({

@@ -6,7 +6,7 @@ import { AppShell } from "@/components/AppShell";
 import { Informe } from "@/components/dashboard/Informe";
 import { Button } from "@/components/ui/button";
 import { useEmpresa } from "@/lib/empresa";
-import { informesQuery } from "@/lib/queries";
+import { informesQuery, publicacionesRedesQuery } from "@/lib/queries";
 
 export const Route = createFileRoute("/_authenticated/informes")({
   head: () => ({
@@ -51,6 +51,9 @@ function aCsv(filas: Record<string, unknown>[]) {
 function PaginaInformes() {
   const { empresa, empresaId } = useEmpresa();
   const { data: informes = [], isLoading, error } = useQuery(informesQuery(empresaId));
+  const { data: porRed = [] } = useQuery(publicacionesRedesQuery(empresaId));
+  const conError = porRed.filter((r) => r.estado === "error");
+  const reintentos = porRed.reduce((s, r) => s + r.intentos, 0);
 
   const descargarCsv = () => {
     const blob = new Blob([aCsv(informes)], { type: "text/csv;charset=utf-8" });
@@ -125,6 +128,26 @@ function PaginaInformes() {
             </table>
           </div>
         )}
+      </section>
+    <section className="panel mt-4 p-5">
+        <h2 className="font-display text-lg font-bold">Errores y reintentos de publicación</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {porRed.length === 0
+            ? "Todavía no hay resultados por red registrados."
+            : `${porRed.length} envíos por red · ${conError.length} con error · ${reintentos} intentos acumulados.`}
+        </p>
+        {conError.length > 0 ? (
+          <ul className="mt-3 divide-y divide-border text-sm">
+            {conError.slice(0, 10).map((r) => (
+              <li key={r.id} className="py-2">
+                <p className="font-medium capitalize">
+                  {r.red} · {r.intentos} intento(s)
+                </p>
+                <p className="text-xs text-muted-foreground">{r.error_detalle}</p>
+              </li>
+            ))}
+          </ul>
+        ) : null}
       </section>
     </AppShell>
   );

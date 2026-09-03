@@ -1,5 +1,6 @@
 import { PERMISOS_REQUERIDOS, registrarEvento, type Red } from "./conexiones.server";
 import { descifrar } from "./cripto.server";
+import { registrarLog, registrarResultadoRed, reservarEjecucion } from "./logs.server";
 import { crearClienteServidor } from "./rutina.server";
 
 /** Panamá opera todo el año en UTC-5, sin horario de verano. */
@@ -184,12 +185,28 @@ async function enviar(empresaId: string, pieza: Pieza) {
       referencia_externa: referencia,
       error_publicacion: "",
     });
+    await registrarResultadoRed({
+      empresaId,
+      publicacionId: pieza.id,
+      red,
+      estado: "publicado",
+      referenciaExterna: referencia,
+      intentos: (pieza.intentos_publicacion ?? 0) + 1,
+    });
     const detalle = `Publicado en ${conexion?.cuenta_externa_nombre || red} (ref. ${referencia}).`;
     await registrarEvento(empresaId, red, "conectada", detalle);
     return { ok: true, estado: "publicado", detalle, referencia };
   } catch (e) {
     const detalle = `${red} rechazó la publicación: ${(e as Error).message}`;
     await marcar({ estado: "error", error_publicacion: detalle });
+    await registrarResultadoRed({
+      empresaId,
+      publicacionId: pieza.id,
+      red,
+      estado: "error",
+      intentos: (pieza.intentos_publicacion ?? 0) + 1,
+      errorDetalle: detalle,
+    });
     await registrarEvento(empresaId, red, "error", detalle);
     return { ok: false, estado: "error", detalle };
   }
@@ -219,6 +236,9 @@ export async function ejecutarProgramador(empresaId?: string) {
   }[] = [];
 
   for (const empresa of empresas ?? []) {
+    const clave = `programador:${empresa.id}:${fecha}:${hora}`;
+    if (!(await reservarEjecucion(clave, "programador", empresa.id))) continue;
+    const inicio = Date.now();
     const { programacionDe } = await import("./programacion.server");
     const activas = new Set(
       (await programacionDe(empresa.id)).filter((f) => f.activo).map((f) => f.red as string),
@@ -256,6 +276,14 @@ export async function ejecutarProgramador(empresaId?: string) {
       else if (r.estado === "en_cola") enCola++;
       else errores++;
     }
+
+    await registrarLog({
+      empresaId: empresa.id,
+      proceso: "programador",
+      estado: errores > 0 ? "error" : "ok",
+      detalle: `${publicadas} publicadas, ${enCola} en cola, ${errores} con error, ${esperando} esperando aprobación (${fecha} ${hora}).`,
+      duracionMs: Date.now() - inicio,
+    });
 
     resultados.push({
       empresaId: empresa.id,

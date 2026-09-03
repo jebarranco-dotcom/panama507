@@ -26,6 +26,7 @@ import { correrRutina } from "@/lib/marketing.functions";
 import {
   cuentasQuery,
   informesQuery,
+  leadsQuery,
   mensajesQuery,
   propiedadesQuery,
   publicacionesQuery,
@@ -62,6 +63,7 @@ function Dashboard() {
   const { data: propiedades = [] } = useQuery(propiedadesQuery(empresaId));
   const { data: informes = [] } = useQuery(informesQuery(empresaId));
   const ultimoInforme = informes[0];
+  const { data: leadsRegistrados = [] } = useQuery(leadsQuery(empresaId));
   const tipoCatalogo = estrategiaDe(empresa.slug).catalogo;
   const rutina = useServerFn(correrRutina);
 
@@ -100,12 +102,19 @@ function Dashboard() {
       ),
     )[0];
 
-  const leadsPorEstado = {
-    nuevos: mensajes.filter((m) => m.estado === "nuevo").length,
-    seguimiento: mensajes.filter((m) => m.estado === "en_proceso").length,
-    calificados: mensajes.filter((m) => m.estado === "respondido").length,
-    cerrados: mensajes.filter((m) => m.estado === "cerrado").length,
-  };
+  const leadsPorEstado = leadsRegistrados.length
+    ? {
+        nuevos: leadsRegistrados.filter((l) => l.etapa === "nuevo").length,
+        seguimiento: leadsRegistrados.filter((l) => l.etapa === "seguimiento").length,
+        calificados: leadsRegistrados.filter((l) => l.etapa === "calificado").length,
+        cerrados: leadsRegistrados.filter((l) => l.etapa === "cerrado").length,
+      }
+    : {
+        nuevos: mensajes.filter((m) => m.estado === "nuevo").length,
+        seguimiento: mensajes.filter((m) => m.estado === "en_proceso").length,
+        calificados: mensajes.filter((m) => m.estado === "respondido").length,
+        cerrados: mensajes.filter((m) => m.estado === "cerrado").length,
+      };
 
   const alcancePorSemana = (desde: number, hasta: number) => {
     const limiteSup = new Date(ahora.getTime() - desde * 86400000).toISOString().slice(0, 10);
@@ -214,6 +223,11 @@ function Dashboard() {
 
         <section className="panel p-5">
           <h2 className="font-display text-lg font-bold">Leads y bandeja</h2>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {leadsRegistrados.length
+              ? "Basado en el registro de leads de la empresa."
+              : "Derivado de la bandeja de mensajes hasta que se registren leads."}
+          </p>
           <div className="mt-4 grid grid-cols-2 gap-3">
             <Mini etiqueta="Nuevos" valor={leadsPorEstado.nuevos} />
             <Mini etiqueta="En seguimiento" valor={leadsPorEstado.seguimiento} />

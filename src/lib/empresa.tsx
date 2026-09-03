@@ -16,6 +16,7 @@ export type Empresa = {
   color_acento: string;
   logo_url: string | null;
   activa: boolean;
+  zona_horaria: string;
 };
 
 const CLAVE = "empresa_activa";
@@ -26,7 +27,7 @@ export const empresasQuery = {
     const { data, error } = await supabase
       .from("empresas")
       .select(
-        "id, slug, nombre, giro, tono, whatsapp, zonas, color_primario, color_acento, logo_url, activa",
+        "id, slug, nombre, giro, tono, whatsapp, zonas, color_primario, color_acento, logo_url, activa, zona_horaria",
       )
       .order("nombre");
     if (error) throw error;

@@ -4,6 +4,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { Bandeja } from "@/components/dashboard/Bandeja";
 import { Seguimiento } from "@/components/dashboard/Seguimiento";
+import { SincronizarBandeja } from "@/components/dashboard/SincronizarBandeja";
 import { useEmpresa } from "@/lib/empresa";
 import { mensajesQuery } from "@/lib/queries";
 
@@ -55,6 +56,10 @@ function PaginaMensajeria() {
           valor={cuenta((m) => Boolean(m.proximo_seguimiento))}
         />
         <Tarjeta etiqueta="Cerrados" valor={cuenta((m) => m.estado === "cerrado")} />
+      </div>
+
+      <div className="mt-4">
+        <SincronizarBandeja />
       </div>
 
       <div className="mt-4">

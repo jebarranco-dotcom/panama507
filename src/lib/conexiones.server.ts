@@ -18,12 +18,20 @@ export const PERMISOS_REQUERIDOS: Record<Red, string[]> = {
 };
 
 export const SCOPES_SOLICITADOS: Record<Red, string[]> = {
-  facebook: ["pages_show_list", "pages_read_engagement", "pages_manage_posts"],
+  facebook: [
+    "pages_show_list",
+    "pages_read_engagement",
+    "pages_manage_posts",
+    "pages_messaging",
+    "pages_manage_metadata",
+  ],
   instagram: [
     "pages_show_list",
     "pages_read_engagement",
     "instagram_basic",
     "instagram_content_publish",
+    "instagram_manage_messages",
+    "pages_messaging",
   ],
   tiktok: ["user.info.basic", "video.upload", "video.publish"],
 };

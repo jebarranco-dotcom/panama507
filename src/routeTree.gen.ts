@@ -24,6 +24,7 @@ import { Route as AuthenticatedCredencialesRouteImport } from './routes/_authent
 import { Route as AuthenticatedInformesRouteImport } from './routes/_authenticated/informes'
 import { Route as AuthenticatedMensajeriaRouteImport } from './routes/_authenticated/mensajeria'
 import { Route as AuthenticatedProgramacionRouteImport } from './routes/_authenticated/programacion'
+import { Route as ApiPublicHooksMetaMensajesRouteImport } from './routes/api/public/hooks/meta-mensajes'
 import { Route as ApiPublicHooksPublicarProgramadoRouteImport } from './routes/api/public/hooks/publicar-programado'
 import { Route as ApiPublicHooksRutinaDiariaRouteImport } from './routes/api/public/hooks/rutina-diaria'
 import { Route as ApiPublicOauthMetaCallbackRouteImport } from './routes/api/public/oauth/meta/callback'
@@ -106,6 +107,12 @@ const AuthenticatedProgramacionRoute =
     path: '/programacion',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicHooksMetaMensajesRoute =
+  ApiPublicHooksMetaMensajesRouteImport.update({
+    id: '/api/public/hooks/meta-mensajes',
+    path: '/api/public/hooks/meta-mensajes',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksPublicarProgramadoRoute =
   ApiPublicHooksPublicarProgramadoRouteImport.update({
     id: '/api/public/hooks/publicar-programado',
@@ -146,6 +153,7 @@ export interface FileRoutesByFullPath {
   '/informes': typeof AuthenticatedInformesRoute
   '/mensajeria': typeof AuthenticatedMensajeriaRoute
   '/programacion': typeof AuthenticatedProgramacionRoute
+  '/api/public/hooks/meta-mensajes': typeof ApiPublicHooksMetaMensajesRoute
   '/api/public/hooks/publicar-programado': typeof ApiPublicHooksPublicarProgramadoRoute
   '/api/public/hooks/rutina-diaria': typeof ApiPublicHooksRutinaDiariaRoute
   '/api/public/oauth/meta/callback': typeof ApiPublicOauthMetaCallbackRoute
@@ -166,6 +174,7 @@ export interface FileRoutesByTo {
   '/mensajeria': typeof AuthenticatedMensajeriaRoute
   '/programacion': typeof AuthenticatedProgramacionRoute
   '/': typeof AuthenticatedIndexRoute
+  '/api/public/hooks/meta-mensajes': typeof ApiPublicHooksMetaMensajesRoute
   '/api/public/hooks/publicar-programado': typeof ApiPublicHooksPublicarProgramadoRoute
   '/api/public/hooks/rutina-diaria': typeof ApiPublicHooksRutinaDiariaRoute
   '/api/public/oauth/meta/callback': typeof ApiPublicOauthMetaCallbackRoute
@@ -188,6 +197,7 @@ export interface FileRoutesById {
   '/_authenticated/mensajeria': typeof AuthenticatedMensajeriaRoute
   '/_authenticated/programacion': typeof AuthenticatedProgramacionRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/api/public/hooks/meta-mensajes': typeof ApiPublicHooksMetaMensajesRoute
   '/api/public/hooks/publicar-programado': typeof ApiPublicHooksPublicarProgramadoRoute
   '/api/public/hooks/rutina-diaria': typeof ApiPublicHooksRutinaDiariaRoute
   '/api/public/oauth/meta/callback': typeof ApiPublicOauthMetaCallbackRoute
@@ -210,6 +220,7 @@ export interface FileRouteTypes {
     | '/informes'
     | '/mensajeria'
     | '/programacion'
+    | '/api/public/hooks/meta-mensajes'
     | '/api/public/hooks/publicar-programado'
     | '/api/public/hooks/rutina-diaria'
     | '/api/public/oauth/meta/callback'
@@ -230,6 +241,7 @@ export interface FileRouteTypes {
     | '/mensajeria'
     | '/programacion'
     | '/'
+    | '/api/public/hooks/meta-mensajes'
     | '/api/public/hooks/publicar-programado'
     | '/api/public/hooks/rutina-diaria'
     | '/api/public/oauth/meta/callback'
@@ -251,6 +263,7 @@ export interface FileRouteTypes {
     | '/_authenticated/mensajeria'
     | '/_authenticated/programacion'
     | '/_authenticated/'
+    | '/api/public/hooks/meta-mensajes'
     | '/api/public/hooks/publicar-programado'
     | '/api/public/hooks/rutina-diaria'
     | '/api/public/oauth/meta/callback'
@@ -264,6 +277,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   TermsRoute: typeof TermsRoute
+  ApiPublicHooksMetaMensajesRoute: typeof ApiPublicHooksMetaMensajesRoute
   ApiPublicHooksPublicarProgramadoRoute: typeof ApiPublicHooksPublicarProgramadoRoute
   ApiPublicHooksRutinaDiariaRoute: typeof ApiPublicHooksRutinaDiariaRoute
   ApiPublicOauthMetaCallbackRoute: typeof ApiPublicOauthMetaCallbackRoute
@@ -377,6 +391,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProgramacionRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/hooks/meta-mensajes': {
+      id: '/api/public/hooks/meta-mensajes'
+      path: '/api/public/hooks/meta-mensajes'
+      fullPath: '/api/public/hooks/meta-mensajes'
+      preLoaderRoute: typeof ApiPublicHooksMetaMensajesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/publicar-programado': {
       id: '/api/public/hooks/publicar-programado'
       path: '/api/public/hooks/publicar-programado'
@@ -442,6 +463,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   TermsRoute: TermsRoute,
+  ApiPublicHooksMetaMensajesRoute: ApiPublicHooksMetaMensajesRoute,
   ApiPublicHooksPublicarProgramadoRoute: ApiPublicHooksPublicarProgramadoRoute,
   ApiPublicHooksRutinaDiariaRoute: ApiPublicHooksRutinaDiariaRoute,
   ApiPublicOauthMetaCallbackRoute: ApiPublicOauthMetaCallbackRoute,

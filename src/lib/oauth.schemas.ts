@@ -48,3 +48,8 @@ export const CredencialInput = z.object({
     .max(255)
     .regex(/^\S+$/, "El secreto no debe contener espacios."),
 });
+
+export const BandejaInput = z.object({
+  empresaId: z.string().uuid(),
+  red: z.enum(["facebook", "instagram", "todas"]).default("todas"),
+});

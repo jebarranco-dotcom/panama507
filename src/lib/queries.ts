@@ -119,3 +119,93 @@ export const conexionEventosQuery = (empresaId: string) =>
       return data;
     },
   });
+
+export const leadsQuery = (empresaId: string) =>
+  queryOptions({
+    queryKey: ["leads", empresaId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("leads")
+        .select("*, colaboradores(nombre)")
+        .eq("empresa_id", empresaId)
+        .order("created_at", { ascending: false })
+        .limit(200);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+export const conversacionesQuery = (empresaId: string) =>
+  queryOptions({
+    queryKey: ["conversaciones", empresaId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("conversaciones")
+        .select("*, colaboradores(nombre)")
+        .eq("empresa_id", empresaId)
+        .order("ultimo_mensaje_at", { ascending: false, nullsFirst: false })
+        .limit(100);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+export const tareasQuery = (empresaId: string) =>
+  queryOptions({
+    queryKey: ["tareas_seguimiento", empresaId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("tareas_seguimiento")
+        .select("*, colaboradores(nombre)")
+        .eq("empresa_id", empresaId)
+        .order("vence_at", { ascending: true })
+        .limit(60);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+export const plantillasQuery = (empresaId: string) =>
+  queryOptions({
+    queryKey: ["plantillas_respuesta", empresaId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("plantillas_respuesta")
+        .select("*")
+        .eq("empresa_id", empresaId)
+        .eq("activa", true)
+        .order("categoria");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+export const logsQuery = (empresaId: string) =>
+  queryOptions({
+    queryKey: ["logs_automatizacion", empresaId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("logs_automatizacion")
+        .select("*")
+        .eq("empresa_id", empresaId)
+        .order("created_at", { ascending: false })
+        .limit(25);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+export const publicacionesRedesQuery = (empresaId: string) =>
+  queryOptions({
+    queryKey: ["publicaciones_redes", empresaId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("publicaciones_redes")
+        .select("*")
+        .eq("empresa_id", empresaId)
+        .order("updated_at", { ascending: false })
+        .limit(120);
+      if (error) throw error;
+      return data;
+    },
+  });

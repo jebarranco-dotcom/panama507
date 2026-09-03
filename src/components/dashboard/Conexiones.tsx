@@ -13,7 +13,8 @@ import { cuentasQuery } from "@/lib/queries";
 const REQUISITOS: Record<string, string> = {
   facebook: "Página de Facebook + app de Meta Business con permisos pages_manage_posts.",
   instagram: "Cuenta profesional vinculada a la página y permiso instagram_content_publish.",
-  tiktok: "Cuenta TikTok Business y acceso al Content Posting API.",
+  tiktok:
+    "Cuenta TikTok Business y acceso al Content Posting API. TikTok no ofrece API de mensajes directos, así que su bandeja se atiende dentro de la app de TikTok.",
 };
 
 export function Conexiones() {

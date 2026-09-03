@@ -8,6 +8,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 
+function rutaDeRetorno() {
+  const valor = new URLSearchParams(window.location.search).get("returnTo");
+  if (!valor || !valor.startsWith("/") || valor.startsWith("//")) return "/";
+  return valor;
+}
+
 function Acceso() {
   const navigate = useNavigate();
   const [modo, setModo] = useState<"entrar" | "registrar">("entrar");
@@ -17,7 +23,7 @@ function Acceso() {
 
   useEffect(() => {
     void supabase.auth.getSession().then(({ data }) => {
-      if (data.session) void navigate({ to: "/" });
+      if (data.session) void navigate({ to: rutaDeRetorno() });
     });
   }, [navigate]);
 
@@ -31,7 +37,7 @@ function Acceso() {
           password: clave,
         });
         if (error) throw error;
-        await navigate({ to: "/" });
+        await navigate({ to: rutaDeRetorno() });
       } else {
         const { error } = await supabase.auth.signUp({
           email: correo,

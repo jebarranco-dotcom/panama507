@@ -218,7 +218,7 @@ export async function sincronizarBandeja(
             nombre,
             red,
             usuario_red: usuario,
-            interes: clasificar(entrantes[0].message ?? ""),
+            interes: clasificar(entrantes[0]?.message ?? ""),
             etapa: "nuevo",
             notas: "Lead creado automáticamente desde la bandeja de la red.",
             ultimo_contacto_at: conv.updated_time ?? new Date().toISOString(),

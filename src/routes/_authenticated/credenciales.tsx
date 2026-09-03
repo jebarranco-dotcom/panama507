@@ -353,6 +353,21 @@ function Credenciales() {
           Registra estas URL tal cual en cada plataforma; sin las de retorno la autorización falla y
           sin las de cumplimiento Meta no aprueba la app.
         </p>
+        <div className="mt-3 rounded-lg border border-warning/40 bg-warning/10 p-3 text-xs text-warning">
+          <p className="font-semibold">Importante: dominios de la app en Meta</p>
+          <p className="mt-1">
+            En developers.facebook.com → Configuración → Básica → Dominios de la app, agrega los
+            dominios base (no las URLs completas):
+          </p>
+          <ul className="mt-1 list-disc space-y-0.5 pl-4 font-mono">
+            <li>panama507.lovable.app</li>
+            <li>id-preview--2d59501b-39dd-4b6c-a079-b7c875bf56cc.lovable.app</li>
+          </ul>
+          <p className="mt-1">
+            Si falta alguno, Meta muestra «El dominio de esta URL no está incluido en los dominios
+            de la app» al pulsar Autorizar.
+          </p>
+        </div>
         <div className="mt-3 space-y-2">
           {[
             { etiqueta: "URL de retorno Meta", valor: `${origen}/api/public/oauth/meta/callback` },

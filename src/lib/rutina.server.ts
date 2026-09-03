@@ -347,11 +347,31 @@ Devuelve JSON: {"resumen":"2 a 4 oraciones sobre lo realizado y su resultado","l
 
 /** Rutina completa de una empresa: contenido de hoy y mañana, cola e informe. */
 export async function ejecutarRutinaEmpresa(empresaId?: string) {
-  const contenidoHoy = await generarContenidoDelDia(hoyISO(), empresaId);
-  const contenidoManana = await generarContenidoDelDia(hoyISO(1), empresaId);
-  const publicacion = await publicarPendientes(empresaId);
-  const informe = await generarInformeDiario(hoyISO(), empresaId);
-  return { contenidoHoy, contenidoManana, publicacion, informe };
+  const { registrarLog } = await import("./logs.server");
+  const inicio = Date.now();
+  try {
+    const contenidoHoy = await generarContenidoDelDia(hoyISO(), empresaId);
+    const contenidoManana = await generarContenidoDelDia(hoyISO(1), empresaId);
+    const publicacion = await publicarPendientes(empresaId);
+    const informe = await generarInformeDiario(hoyISO(), empresaId);
+    await registrarLog({
+      empresaId,
+      proceso: "rutina_diaria",
+      estado: "ok",
+      detalle: "Contenido de hoy y mañana generado, cola procesada e informe actualizado.",
+      duracionMs: Date.now() - inicio,
+    });
+    return { contenidoHoy, contenidoManana, publicacion, informe };
+  } catch (e) {
+    await registrarLog({
+      empresaId,
+      proceso: "rutina_diaria",
+      estado: "error",
+      detalle: (e as Error).message,
+      duracionMs: Date.now() - inicio,
+    });
+    throw e;
+  }
 }
 
 /** Rutina diaria para todas las empresas activas (usada por el cron). */

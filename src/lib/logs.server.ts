@@ -4,12 +4,12 @@ export type EstadoLog = "ok" | "error" | "omitido";
 
 /** Registra una ejecución de automatización. Nunca lanza: el log no debe romper la rutina. */
 export async function registrarLog(opciones: {
-  empresaId?: string | null;
+  empresaId?: string | null | undefined;
   proceso: string;
   estado?: EstadoLog;
   detalle?: string;
   duracionMs?: number;
-  claveIdempotencia?: string | null;
+  claveIdempotencia?: string | null | undefined;
 }) {
   try {
     const supabase = crearClienteServidor();

@@ -255,6 +255,79 @@ export type Database = {
           },
         ]
       }
+      conversaciones: {
+        Row: {
+          colaborador_id: string | null
+          created_at: string
+          empresa_id: string
+          estado: string
+          etiquetas: string[]
+          id: string
+          lead_id: string | null
+          participante: string
+          red: string
+          referencia_externa: string
+          tipo: string
+          ultimo_mensaje_at: string | null
+          updated_at: string
+          usuario_participante: string
+        }
+        Insert: {
+          colaborador_id?: string | null
+          created_at?: string
+          empresa_id: string
+          estado?: string
+          etiquetas?: string[]
+          id?: string
+          lead_id?: string | null
+          participante?: string
+          red?: string
+          referencia_externa?: string
+          tipo?: string
+          ultimo_mensaje_at?: string | null
+          updated_at?: string
+          usuario_participante?: string
+        }
+        Update: {
+          colaborador_id?: string | null
+          created_at?: string
+          empresa_id?: string
+          estado?: string
+          etiquetas?: string[]
+          id?: string
+          lead_id?: string | null
+          participante?: string
+          red?: string
+          referencia_externa?: string
+          tipo?: string
+          ultimo_mensaje_at?: string | null
+          updated_at?: string
+          usuario_participante?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversaciones_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "colaboradores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversaciones_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversaciones_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cuentas_sociales: {
         Row: {
           alcance_mensual: number
@@ -381,6 +454,7 @@ export type Database = {
           tono: string
           updated_at: string
           whatsapp: string
+          zona_horaria: string
           zonas: string
         }
         Insert: {
@@ -397,6 +471,7 @@ export type Database = {
           tono?: string
           updated_at?: string
           whatsapp?: string
+          zona_horaria?: string
           zonas?: string
         }
         Update: {
@@ -413,6 +488,7 @@ export type Database = {
           tono?: string
           updated_at?: string
           whatsapp?: string
+          zona_horaria?: string
           zonas?: string
         }
         Relationships: []
@@ -476,14 +552,136 @@ export type Database = {
           },
         ]
       }
+      leads: {
+        Row: {
+          colaborador_id: string | null
+          correo: string
+          created_at: string
+          empresa_id: string
+          etapa: string
+          id: string
+          interes: string
+          nombre: string
+          notas: string
+          propiedad_id: string | null
+          red: string
+          telefono: string
+          ultimo_contacto_at: string | null
+          updated_at: string
+          usuario_red: string
+          valor_estimado: number
+        }
+        Insert: {
+          colaborador_id?: string | null
+          correo?: string
+          created_at?: string
+          empresa_id: string
+          etapa?: string
+          id?: string
+          interes?: string
+          nombre?: string
+          notas?: string
+          propiedad_id?: string | null
+          red?: string
+          telefono?: string
+          ultimo_contacto_at?: string | null
+          updated_at?: string
+          usuario_red?: string
+          valor_estimado?: number
+        }
+        Update: {
+          colaborador_id?: string | null
+          correo?: string
+          created_at?: string
+          empresa_id?: string
+          etapa?: string
+          id?: string
+          interes?: string
+          nombre?: string
+          notas?: string
+          propiedad_id?: string | null
+          red?: string
+          telefono?: string
+          ultimo_contacto_at?: string | null
+          updated_at?: string
+          usuario_red?: string
+          valor_estimado?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "colaboradores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_propiedad_id_fkey"
+            columns: ["propiedad_id"]
+            isOneToOne: false
+            referencedRelation: "propiedades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      logs_automatizacion: {
+        Row: {
+          clave_idempotencia: string | null
+          created_at: string
+          detalle: string
+          duracion_ms: number
+          empresa_id: string | null
+          estado: string
+          id: string
+          proceso: string
+        }
+        Insert: {
+          clave_idempotencia?: string | null
+          created_at?: string
+          detalle?: string
+          duracion_ms?: number
+          empresa_id?: string | null
+          estado?: string
+          id?: string
+          proceso: string
+        }
+        Update: {
+          clave_idempotencia?: string | null
+          created_at?: string
+          detalle?: string
+          duracion_ms?: number
+          empresa_id?: string | null
+          estado?: string
+          id?: string
+          proceso?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "logs_automatizacion_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mensajes: {
         Row: {
           colaborador_id: string | null
+          conversacion_id: string | null
           created_at: string
           empresa_id: string
           estado: string
           id: string
           intencion: string
+          lead_id: string | null
           mensaje: string
           notas: string
           prioridad: string
@@ -497,11 +695,13 @@ export type Database = {
         }
         Insert: {
           colaborador_id?: string | null
+          conversacion_id?: string | null
           created_at?: string
           empresa_id: string
           estado?: string
           id?: string
           intencion?: string
+          lead_id?: string | null
           mensaje?: string
           notas?: string
           prioridad?: string
@@ -515,11 +715,13 @@ export type Database = {
         }
         Update: {
           colaborador_id?: string | null
+          conversacion_id?: string | null
           created_at?: string
           empresa_id?: string
           estado?: string
           id?: string
           intencion?: string
+          lead_id?: string | null
           mensaje?: string
           notas?: string
           prioridad?: string
@@ -540,6 +742,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "mensajes_conversacion_id_fkey"
+            columns: ["conversacion_id"]
+            isOneToOne: false
+            referencedRelation: "conversaciones"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "mensajes_empresa_id_fkey"
             columns: ["empresa_id"]
             isOneToOne: false
@@ -547,10 +756,61 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "mensajes_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "mensajes_propiedad_id_fkey"
             columns: ["propiedad_id"]
             isOneToOne: false
             referencedRelation: "propiedades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plantillas_respuesta: {
+        Row: {
+          activa: boolean
+          categoria: string
+          contenido: string
+          created_at: string
+          empresa_id: string
+          id: string
+          nombre: string
+          red: string
+          updated_at: string
+        }
+        Insert: {
+          activa?: boolean
+          categoria?: string
+          contenido?: string
+          created_at?: string
+          empresa_id: string
+          id?: string
+          nombre?: string
+          red?: string
+          updated_at?: string
+        }
+        Update: {
+          activa?: boolean
+          categoria?: string
+          contenido?: string
+          created_at?: string
+          empresa_id?: string
+          id?: string
+          nombre?: string
+          red?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plantillas_respuesta_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
             referencedColumns: ["id"]
           },
         ]
@@ -768,6 +1028,146 @@ export type Database = {
             columns: ["propiedad_id"]
             isOneToOne: false
             referencedRelation: "propiedades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      publicaciones_redes: {
+        Row: {
+          alcance: number
+          clics: number
+          comentarios: number
+          created_at: string
+          empresa_id: string
+          error_detalle: string
+          estado: string
+          id: string
+          intentos: number
+          likes: number
+          publicacion_id: string
+          publicado_at: string | null
+          red: string
+          referencia_externa: string
+          updated_at: string
+        }
+        Insert: {
+          alcance?: number
+          clics?: number
+          comentarios?: number
+          created_at?: string
+          empresa_id: string
+          error_detalle?: string
+          estado?: string
+          id?: string
+          intentos?: number
+          likes?: number
+          publicacion_id: string
+          publicado_at?: string | null
+          red: string
+          referencia_externa?: string
+          updated_at?: string
+        }
+        Update: {
+          alcance?: number
+          clics?: number
+          comentarios?: number
+          created_at?: string
+          empresa_id?: string
+          error_detalle?: string
+          estado?: string
+          id?: string
+          intentos?: number
+          likes?: number
+          publicacion_id?: string
+          publicado_at?: string | null
+          red?: string
+          referencia_externa?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "publicaciones_redes_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "publicaciones_redes_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "publicaciones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tareas_seguimiento: {
+        Row: {
+          colaborador_id: string | null
+          conversacion_id: string | null
+          created_at: string
+          detalle: string
+          empresa_id: string
+          estado: string
+          id: string
+          lead_id: string | null
+          titulo: string
+          updated_at: string
+          vence_at: string
+        }
+        Insert: {
+          colaborador_id?: string | null
+          conversacion_id?: string | null
+          created_at?: string
+          detalle?: string
+          empresa_id: string
+          estado?: string
+          id?: string
+          lead_id?: string | null
+          titulo?: string
+          updated_at?: string
+          vence_at?: string
+        }
+        Update: {
+          colaborador_id?: string | null
+          conversacion_id?: string | null
+          created_at?: string
+          detalle?: string
+          empresa_id?: string
+          estado?: string
+          id?: string
+          lead_id?: string | null
+          titulo?: string
+          updated_at?: string
+          vence_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tareas_seguimiento_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "colaboradores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tareas_seguimiento_conversacion_id_fkey"
+            columns: ["conversacion_id"]
+            isOneToOne: false
+            referencedRelation: "conversaciones"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tareas_seguimiento_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tareas_seguimiento_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
             referencedColumns: ["id"]
           },
         ]

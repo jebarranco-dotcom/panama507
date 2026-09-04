@@ -28,7 +28,6 @@ import {
   verificarCredenciales,
 } from "@/lib/oauth.functions";
 
-
 type EstadoMeta = {
   registrada: boolean;
   clientId: string;
@@ -40,7 +39,6 @@ type EstadoMeta = {
 
 const PERMISOS = [
   "pages_show_list",
-  "pages_read_engagement",
   "pages_manage_posts",
   "instagram_basic",
   "instagram_content_publish",
@@ -88,10 +86,8 @@ export function AsistenteMeta({
     retry: 1,
   });
 
-
   const redirectUri = `${origen}/api/public/oauth/meta/callback`;
   const listo = estado?.verificada ?? false;
-
 
   const copiar = (valor: string) => {
     void navigator.clipboard.writeText(valor);
@@ -131,7 +127,6 @@ export function AsistenteMeta({
       if (r.ok) toast.success("Listo para autorizar");
       else toast.error("Verificación fallida", { description: r.detalle });
     } catch (e) {
-
       toast.error("No se pudo verificar", { description: (e as Error).message });
     } finally {
       setTrabajando(false);
@@ -277,7 +272,11 @@ export function AsistenteMeta({
               disabled={!puedeAdministrar || trabajando}
               onClick={() => void registrar()}
             >
-              {trabajando ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
+              {trabajando ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Check className="size-4" />
+              )}
               Guardar y continuar
             </Button>
           </div>
@@ -301,7 +300,9 @@ export function AsistenteMeta({
                 ) : (
                   <ShieldQuestion className="size-4" />
                 )}
-                {listo || resultado ? "Reintentar verificación con Meta" : "Verificar credenciales con Meta"}
+                {listo || resultado
+                  ? "Reintentar verificación con Meta"
+                  : "Verificar credenciales con Meta"}
               </Button>
               <Button
                 variant="outline"
@@ -376,7 +377,6 @@ export function AsistenteMeta({
             ) : null}
           </div>
         ) : null}
-
       </div>
 
       <div className="mt-4 flex items-center justify-between gap-2">
@@ -399,12 +399,7 @@ export function AsistenteMeta({
             Ya lo hice <ArrowRight className="size-4" />
           </Button>
         ) : (
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={paso === 4}
-            onClick={() => setPaso(4)}
-          >
+          <Button size="sm" variant="outline" disabled={paso === 4} onClick={() => setPaso(4)}>
             Siguiente <ArrowRight className="size-4" />
           </Button>
         )}

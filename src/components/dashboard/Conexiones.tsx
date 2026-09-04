@@ -11,7 +11,8 @@ import { useEmpresa } from "@/lib/empresa";
 import { cuentasQuery } from "@/lib/queries";
 
 const REQUISITOS: Record<string, string> = {
-  facebook: "Página de Facebook + app de Meta Business con permisos pages_manage_posts.",
+  facebook:
+    "Página de Facebook + app de Meta Business con pages_show_list y pages_manage_posts; las analíticas avanzadas requieren pages_read_engagement.",
   instagram: "Cuenta profesional vinculada a la página y permiso instagram_content_publish.",
   tiktok:
     "Cuenta TikTok Business y acceso al Content Posting API. TikTok no ofrece API de mensajes directos, así que su bandeja se atiende dentro de la app de TikTok.",
@@ -46,8 +47,8 @@ export function Conexiones() {
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Mientras una red esté desconectada, sus piezas quedan en la cola interna listas para
-          publicar en un clic. Al activar la credencial, la publicación se envía automáticamente a su
-          hora.
+          publicar en un clic. Al activar la credencial, la publicación se envía automáticamente a
+          su hora.
         </p>
         <div className="mt-4 space-y-3">
           {cuentas.map((c) => (

@@ -97,12 +97,11 @@ const PASOS = [
     titulo: "Meta Business (Facebook e Instagram)",
     pasos: [
       "Entra a developers.facebook.com con la cuenta que administra la página de la empresa y crea una app tipo Business.",
-      "Ve a Configuración → Básica y en «Dominios de la app» agrega exactamente: panama507.lovable.app. Sin esto Meta rechaza la URL de autorización.",
-      "En Productos agrega Facebook Login for Business. En su configuración, pega exactamente https://panama507.lovable.app/api/public/oauth/meta/callback en «URI de redireccionamiento de OAuth válidos».",
-      "En Permisos y funciones solicita pages_show_list, pages_read_engagement, pages_manage_posts, pages_messaging, pages_manage_metadata, instagram_basic, instagram_content_publish e instagram_manage_messages.",
+      "En Productos agrega Facebook Login for Business y, en su configuración, pega la URL de retorno de Meta en «URI de redireccionamiento de OAuth válidos».",
+      "En Permisos y funciones habilita pages_show_list y pages_manage_posts para publicar; pages_read_engagement es opcional para analíticas avanzadas y puede requerir revisión adicional de Meta. Para Instagram habilita instagram_basic e instagram_content_publish.",
       "Vincula la página de Facebook y la cuenta de Instagram profesional de la empresa en Meta Business Suite.",
       "En Configuración → Básica copia el App ID y el App Secret y pégalos arriba en META_APP_ID y META_APP_SECRET.",
-      "Vuelve a Conexiones y pulsa Autorizar en Facebook y en Instagram.",
+      "Vuelve a Conexiones y autoriza Facebook e Instagram por separado.",
     ],
   },
   {
@@ -120,7 +119,8 @@ const PASOS = [
 
 function Credenciales() {
   const { empresa, empresaId } = useEmpresa();
-  const origen = "https://panama507.lovable.app";
+  const origen =
+    typeof window === "undefined" ? "https://panama507.lovable.app" : window.location.origin;
   const queryClient = useQueryClient();
 
   const {
@@ -352,20 +352,6 @@ function Credenciales() {
           Registra estas URL tal cual en cada plataforma; sin las de retorno la autorización falla y
           sin las de cumplimiento Meta no aprueba la app.
         </p>
-        <div className="mt-3 rounded-lg border border-warning/40 bg-warning/10 p-3 text-xs text-warning">
-          <p className="font-semibold">Importante: dominios de la app en Meta</p>
-          <p className="mt-1">
-            En developers.facebook.com → Configuración → Básica → Dominios de la app, agrega los
-            este dominio base (sin protocolo ni rutas):
-          </p>
-          <ul className="mt-1 list-disc space-y-0.5 pl-4 font-mono">
-            <li>panama507.lovable.app</li>
-          </ul>
-          <p className="mt-1">
-            El callback OAuth usa siempre este dominio publicado, incluso cuando autorizas desde la
-            vista previa. Meta no debe recibir el dominio interno de preview.
-          </p>
-        </div>
         <div className="mt-3 space-y-2">
           {[
             { etiqueta: "URL de retorno Meta", valor: `${origen}/api/public/oauth/meta/callback` },

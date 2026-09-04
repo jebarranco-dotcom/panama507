@@ -10,28 +10,25 @@ export const PROVEEDOR_DE_RED: Record<Red, Proveedor> = {
   tiktok: "tiktok",
 };
 
-/** Permisos que la red debe devolver para considerarla conectada oficialmente. */
+/** Permisos mínimos para considerar conectada una red para publicar contenido.
+ *
+ * `pages_read_engagement` se solicita/usa para analíticas avanzadas, pero Meta
+ * puede exigir revisión adicional antes de habilitarlo. No debe bloquear la
+ * conexión operativa de publicación.
+ */
 export const PERMISOS_REQUERIDOS: Record<Red, string[]> = {
-  facebook: ["pages_show_list", "pages_read_engagement", "pages_manage_posts"],
+  facebook: ["pages_show_list", "pages_manage_posts"],
   instagram: ["instagram_basic", "instagram_content_publish"],
   tiktok: ["video.upload", "video.publish"],
 };
 
 export const SCOPES_SOLICITADOS: Record<Red, string[]> = {
-  facebook: [
-    "pages_show_list",
-    "pages_read_engagement",
-    "pages_manage_posts",
-    "pages_messaging",
-    "pages_manage_metadata",
-  ],
+  facebook: ["pages_show_list", "pages_manage_posts", "pages_messaging", "pages_manage_metadata"],
   instagram: [
     "pages_show_list",
-    "pages_read_engagement",
     "instagram_basic",
     "instagram_content_publish",
     "instagram_manage_messages",
-    "pages_messaging",
   ],
   tiktok: ["user.info.basic", "video.upload", "video.publish"],
 };
@@ -334,7 +331,12 @@ export async function autorizarActivoMeta(
     const detalle =
       "No hay una autorización de Meta vigente: vuelve a autorizar Facebook o Instagram antes de habilitar el activo.";
     await registrarEventoProveedor(empresaId, "meta", "autorizacion_activo_error", detalle);
-    return { estado: "error" as const, detalle, otorgados: [] as string[], faltantes: PERMISOS_REQUERIDOS[red] };
+    return {
+      estado: "error" as const,
+      detalle,
+      otorgados: [] as string[],
+      faltantes: PERMISOS_REQUERIDOS[red],
+    };
   }
   const token = descifrar(filaToken.access_token_cifrado);
   const requeridos = PERMISOS_REQUERIDOS[red];
@@ -350,7 +352,8 @@ export async function autorizarActivoMeta(
       data?: { permission: string; status: string }[];
       error?: { message?: string };
     };
-    if (!permisosRes.ok) throw new Error(permisosJson.error?.message ?? `Error HTTP ${permisosRes.status}`);
+    if (!permisosRes.ok)
+      throw new Error(permisosJson.error?.message ?? `Error HTTP ${permisosRes.status}`);
     otorgados = (permisosJson.data ?? [])
       .filter((p) => p.status === "granted")
       .map((p) => p.permission);
@@ -436,13 +439,16 @@ export async function autorizarActivoMeta(
   await registrarEventoProveedor(
     empresaId,
     "meta",
-    estado === "aprobado" ? "autorizacion_activo_ok" : estado === "pendiente" ? "autorizacion_activo_pendiente" : "autorizacion_activo_error",
+    estado === "aprobado"
+      ? "autorizacion_activo_ok"
+      : estado === "pendiente"
+        ? "autorizacion_activo_pendiente"
+        : "autorizacion_activo_error",
     `${red === "facebook" ? "Facebook" : "Instagram"} · ${detalle}`,
   );
 
   return { estado, detalle, otorgados, faltantes };
 }
-
 
 export type ActivoMeta = {
   paginaId: string;
@@ -472,23 +478,21 @@ export async function elegirActivoMeta(
     ? `Cuenta vinculada: ${cuentaNombre || cuentaId}. Permisos aprobados (${PERMISOS_REQUERIDOS[red].join(", ")}).`
     : `Cuenta vinculada: ${cuentaNombre || cuentaId}. Permisos pendientes: ${faltantes.join(", ")}.`;
 
-  await supabase
-    .from("conexiones_redes")
-    .upsert(
-      {
-        empresa_id: empresaId,
-        red,
-        proveedor: "meta",
-        estado: conectada ? "conectada" : "autorizada",
-        cuenta_externa_id: cuentaId,
-        cuenta_externa_nombre: cuentaNombre,
-        permisos_otorgados: otorgados,
-        permisos_faltantes: faltantes,
-        detalle,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "empresa_id,red" },
-    );
+  await supabase.from("conexiones_redes").upsert(
+    {
+      empresa_id: empresaId,
+      red,
+      proveedor: "meta",
+      estado: conectada ? "conectada" : "autorizada",
+      cuenta_externa_id: cuentaId,
+      cuenta_externa_nombre: cuentaNombre,
+      permisos_otorgados: otorgados,
+      permisos_faltantes: faltantes,
+      detalle,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "empresa_id,red" },
+  );
 
   await supabase
     .from("cuentas_sociales")
@@ -535,7 +539,6 @@ export async function registrarEventoProveedor(
     mensaje,
   });
 }
-
 
 export async function guardarResultado(opciones: {
   empresaId: string;
@@ -611,24 +614,27 @@ export async function guardarResultado(opciones: {
 
 export async function guardarError(empresaId: string, red: Red, mensaje: string) {
   const supabase = crearClienteServidor();
-  await supabase
-    .from("conexiones_redes")
-    .upsert(
-      {
-        empresa_id: empresaId,
-        red,
-        proveedor: PROVEEDOR_DE_RED[red],
-        estado: "error",
-        detalle: mensaje,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "empresa_id,red" },
-    );
+  await supabase.from("conexiones_redes").upsert(
+    {
+      empresa_id: empresaId,
+      red,
+      proveedor: PROVEEDOR_DE_RED[red],
+      estado: "error",
+      detalle: mensaje,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "empresa_id,red" },
+  );
   await registrarEvento(empresaId, red, "error", mensaje);
 }
 
 /** Intercambia el código de Meta por un token de larga duración y lee permisos y cuentas. */
-export async function completarMeta(empresaId: string, red: Red, code: string, redirectUri: string) {
+export async function completarMeta(
+  empresaId: string,
+  red: Red,
+  code: string,
+  redirectUri: string,
+) {
   const cred = await leerCredencial(empresaId, "meta");
   if (!cred) throw new Error("No hay credenciales de la app de Meta registradas para la empresa.");
 
@@ -671,7 +677,11 @@ export async function completarMeta(empresaId: string, red: Red, code: string, r
       `https://graph.facebook.com/v21.0/me/accounts?fields=id,name,instagram_business_account{id,username}&access_token=${token}`,
     )
   ).json()) as {
-    data?: { id: string; name: string; instagram_business_account?: { id: string; username?: string } }[];
+    data?: {
+      id: string;
+      name: string;
+      instagram_business_account?: { id: string; username?: string };
+    }[];
   };
   const pagina = (paginasJson.data ?? [])[0];
 
@@ -706,7 +716,8 @@ export async function completarMeta(empresaId: string, red: Red, code: string, r
 /** Intercambia el código de TikTok y deja constancia del acceso a Content Posting API. */
 export async function completarTikTok(empresaId: string, code: string, redirectUri: string) {
   const cred = await leerCredencial(empresaId, "tiktok");
-  if (!cred) throw new Error("No hay credenciales de la app de TikTok registradas para la empresa.");
+  if (!cred)
+    throw new Error("No hay credenciales de la app de TikTok registradas para la empresa.");
 
   const res = await fetch("https://open.tiktokapis.com/v2/oauth/token/", {
     method: "POST",
@@ -731,7 +742,10 @@ export async function completarTikTok(empresaId: string, code: string, redirectU
   if (!res.ok || !json.access_token) {
     throw new Error(json.error_description ?? json.error ?? "TikTok rechazó el intercambio.");
   }
-  const otorgados = (json.scope ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+  const otorgados = (json.scope ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
 
   let cuentaNombre = "";
   try {

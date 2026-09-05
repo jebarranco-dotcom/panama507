@@ -102,9 +102,6 @@ export const autorizarActivo = createServerFn({ method: "POST" })
     return autorizarActivoMeta(data.empresaId, data.red, data.cuentaId, data.cuentaNombre);
   });
 
-
-
-
 /** Construye la URL de autorización de la red indicada para abrirla en una ventana emergente. */
 export const iniciarOAuth = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -112,9 +109,8 @@ export const iniciarOAuth = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { asegurarAdministrador } = await import("@/lib/permisos.server");
     await asegurarAdministrador(context.supabase, context.userId, data.empresaId);
-    const { PROVEEDOR_DE_RED, SCOPES_SOLICITADOS, leerCredencial, registrarEvento } = await import(
-      "@/lib/conexiones.server"
-    );
+    const { PROVEEDOR_DE_RED, SCOPES_SOLICITADOS, leerCredencial, registrarEvento } =
+      await import("@/lib/conexiones.server");
     const { firmarEstado } = await import("@/lib/cripto.server");
     const { origenPublico } = await import("@/lib/permisos.server");
 
@@ -137,7 +133,6 @@ export const iniciarOAuth = createServerFn({ method: "POST" })
       }
     }
 
-
     const origen = origenPublico(getRequest());
     const redirectUri = `${origen}/api/public/oauth/${proveedor}/callback`;
     const estado = firmarEstado({
@@ -155,6 +150,9 @@ export const iniciarOAuth = createServerFn({ method: "POST" })
     if (proveedor === "meta") {
       autorizar.searchParams.set("client_id", cred.clientId);
       autorizar.searchParams.set("scope", scopes.join(","));
+      // Evita que Meta reutilice un consentimiento/token anterior asociado a
+      // otra página administrada y obliga a revisar nuevamente los activos.
+      autorizar.searchParams.set("auth_type", "reauthorize");
     } else {
       autorizar.searchParams.set("client_key", cred.clientId);
       autorizar.searchParams.set("scope", scopes.join(","));

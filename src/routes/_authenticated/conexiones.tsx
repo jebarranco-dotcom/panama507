@@ -184,11 +184,16 @@ function Conexiones() {
       titulo="Conexión de redes"
       descripcion={`${empresa.nombre}: autoriza cada red por separado. Solo se marca como conectada cuando la red devuelve los permisos y la cuenta requeridos.`}
       acciones={
-        <Button asChild variant="outline">
-          <Link to="/credenciales">
-            <ShieldCheck className="size-4" /> Credenciales de apps
-          </Link>
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={refrescar}>
+            <RefreshCw className="size-4" /> Actualizar estado
+          </Button>
+          <Button asChild variant="outline">
+            <Link to="/credenciales">
+              <ShieldCheck className="size-4" /> Credenciales de apps
+            </Link>
+          </Button>
+        </div>
       }
     >
       <section className="panel p-5">

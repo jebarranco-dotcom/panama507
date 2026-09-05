@@ -683,7 +683,46 @@ export async function completarMeta(
       instagram_business_account?: { id: string; username?: string };
     }[];
   };
-  const pagina = (paginasJson.data ?? [])[0];
+  const paginas = paginasJson.data ?? [];
+
+  // Nunca se toma la primera página disponible: se busca la que corresponde al
+  // identificador registrado de la empresa. Si hay varias y ninguna coincide,
+  // se deja sin activo para que un administrador apruebe la correcta.
+  const normalizar = (v: string) =>
+    v
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]/g, "");
+  const supabaseEmpresa = crearClienteServidor();
+  const [{ data: cuentaFila }, { data: empresaFila }] = await Promise.all([
+    supabaseEmpresa
+      .from("cuentas_sociales")
+      .select("usuario")
+      .eq("empresa_id", empresaId)
+      .eq("red", red)
+      .limit(1)
+      .maybeSingle(),
+    supabaseEmpresa.from("empresas").select("nombre").eq("id", empresaId).limit(1).maybeSingle(),
+  ]);
+  const esperados = [cuentaFila?.usuario ?? "", empresaFila?.nombre ?? ""]
+    .map(normalizar)
+    .filter((v) => v.length >= 4);
+  const coincide = (etiquetas: string[]) =>
+    etiquetas.some((etiqueta) => {
+      const e = normalizar(etiqueta);
+      return e.length >= 4 && esperados.some((x) => e.includes(x) || x.includes(e));
+    });
+
+  const candidatas =
+    red === "facebook"
+      ? paginas.filter((p) => coincide([p.name]))
+      : paginas.filter((p) =>
+          coincide([p.instagram_business_account?.username ?? "", p.name]),
+        );
+  const conIg = paginas.filter((p) => p.instagram_business_account?.id);
+  const universo = red === "facebook" ? paginas : conIg;
+  const pagina = candidatas[0] ?? (universo.length === 1 ? universo[0] : undefined);
 
   let cuentaId = "";
   let cuentaNombre = "";
@@ -691,15 +730,23 @@ export async function completarMeta(
   if (red === "facebook") {
     cuentaId = pagina?.id ?? "";
     cuentaNombre = pagina?.name ?? "";
-    if (!cuentaId) detalleExtra = "La cuenta autorizada no administra ninguna página de Facebook.";
+    if (!cuentaId) {
+      detalleExtra = paginas.length
+        ? `No se identificó automáticamente la página de la empresa entre ${paginas.length} disponible(s) (${paginas
+            .map((p) => p.name)
+            .join(", ")}). Aprueba la página correcta en «Activos de Meta».`
+        : "La cuenta autorizada no administra ninguna página de Facebook.";
+    }
   } else {
     cuentaId = pagina?.instagram_business_account?.id ?? "";
     cuentaNombre = pagina?.instagram_business_account?.username ?? "";
     if (!cuentaId) {
-      detalleExtra =
-        "No se encontró una cuenta de Instagram profesional vinculada a la página de Facebook.";
+      detalleExtra = conIg.length
+        ? `No se identificó automáticamente la cuenta de Instagram de la empresa entre ${conIg.length} disponible(s). Aprueba la cuenta correcta en «Activos de Meta».`
+        : "No se encontró una cuenta de Instagram profesional vinculada a la página de Facebook.";
     }
   }
+
 
   return guardarResultado({
     empresaId,

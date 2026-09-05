@@ -139,17 +139,22 @@ function Conexiones() {
   const cuentaDe = (red: RedOAuth) => cuentas.find((c) => c.red === red);
   const conexionDe = (red: RedOAuth) => conexiones.find((c) => c.red === red);
 
+  const refrescar = useCallback(() => {
+    void queryClient.invalidateQueries({ queryKey: ["conexiones_redes", empresaId] });
+    void queryClient.invalidateQueries({ queryKey: ["conexiones_eventos", empresaId] });
+    void queryClient.invalidateQueries({ queryKey: ["cuentas_sociales", empresaId] });
+  }, [empresaId, queryClient]);
+
   useEffect(() => {
+    // La ventana de autorización vive en el dominio publicado, por eso no se
+    // compara el origen: el aviso solo dispara un refresco, no lleva datos.
     const alMensaje = (evento: MessageEvent) => {
-      if (evento.origin !== window.location.origin) return;
       if ((evento.data as { type?: string })?.type !== "oauth-red") return;
-      void queryClient.invalidateQueries({ queryKey: ["conexiones_redes", empresaId] });
-      void queryClient.invalidateQueries({ queryKey: ["conexiones_eventos", empresaId] });
-      void queryClient.invalidateQueries({ queryKey: ["cuentas_sociales", empresaId] });
+      refrescar();
     };
     window.addEventListener("message", alMensaje);
     return () => window.removeEventListener("message", alMensaje);
-  }, [empresaId, queryClient]);
+  }, [refrescar]);
 
   const conectar = async (red: RedOAuth) => {
     setCargando(red);
@@ -158,6 +163,14 @@ function Conexiones() {
       const { authorizationUrl } = await iniciar({ data: { empresaId, red } });
       if (!ventana) throw new Error("El navegador bloqueó la ventana emergente.");
       ventana.location.href = authorizationUrl;
+      // Respaldo por si el aviso de la ventana emergente no llega al panel.
+      const vigilar = window.setInterval(() => {
+        if (ventana.closed) {
+          window.clearInterval(vigilar);
+          refrescar();
+        }
+      }, 1000);
+      window.setTimeout(() => window.clearInterval(vigilar), 300000);
     } catch (e) {
       ventana?.close();
       toast.error("No se pudo iniciar la autorización", { description: (e as Error).message });

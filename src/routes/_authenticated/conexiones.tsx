@@ -11,7 +11,7 @@ import {
   Loader2,
   ShieldCheck,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { ActivosMeta } from "@/components/ActivosMeta";

@@ -36,7 +36,7 @@ async function manejar({ request }: { request: Request }) {
     return pagina(
       resultado.conectada ? "TikTok conectado oficialmente" : "Autorización registrada",
       resultado.conectada
-        ? "Content Posting API aprobada con video.upload y video.publish. Ya puedes cerrar esta ventana."
+        ? "TikTok autorizado con video.upload. La publicación directa con video.publish requiere aprobación adicional. Ya puedes cerrar esta ventana."
         : `Pendiente de aprobación: ${resultado.faltantes.join(", ") || "revisa el detalle en el panel"}.`,
       resultado.conectada,
     );

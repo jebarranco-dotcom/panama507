@@ -69,7 +69,7 @@ const REQUISITOS: Record<RedOAuth, string[]> = {
   tiktok: [
     "Cuenta convertida a TikTok Business",
     "App en TikTok for Developers con Login Kit habilitado",
-    "Content Posting API aprobada (video.upload y video.publish)",
+    "Content Posting API habilitada (video.upload; publicación directa requiere aprobación)",
   ],
 };
 
@@ -86,7 +86,10 @@ const ETIQUETA_ESTADO: Record<string, { texto: string; clase: string }> = {
     texto: "Pendiente de conexión oficial",
     clase: "border-warning/40 bg-warning/15 text-warning",
   },
-  error: { texto: "Error de autorización", clase: "border-destructive/40 bg-destructive/15 text-destructive" },
+  error: {
+    texto: "Error de autorización",
+    clase: "border-destructive/40 bg-destructive/15 text-destructive",
+  },
   verificacion_ok: {
     texto: "App verificada",
     clase: "border-success/40 bg-success/15 text-success",
@@ -120,8 +123,6 @@ const ETIQUETA_ESTADO: Record<string, { texto: string; clase: string }> = {
     clase: "border-destructive/40 bg-destructive/15 text-destructive",
   },
 };
-
-
 
 function Conexiones() {
   const { empresa, empresaId } = useEmpresa();
@@ -230,7 +231,8 @@ function Conexiones() {
           const conexion = conexionDe(red);
           const proveedor = PROVEEDOR[red];
           const cred = credenciales?.[proveedor];
-          const listo = proveedor === "meta" ? (cred?.verificada ?? false) : (cred?.registrada ?? false);
+          const listo =
+            proveedor === "meta" ? (cred?.verificada ?? false) : (cred?.registrada ?? false);
 
           const puede = credenciales?.puedeAdministrar ?? false;
           const otorgados = conexion?.permisos_otorgados ?? [];
@@ -242,7 +244,9 @@ function Conexiones() {
                 <h3 className="font-display text-base font-bold">{REDES[red].nombre}</h3>
               </div>
               <p className="mt-1 text-xs text-muted-foreground">
-                {conexion?.cuenta_externa_nombre || cuentaDe(red)?.usuario || "Sin identificador registrado"}
+                {conexion?.cuenta_externa_nombre ||
+                  cuentaDe(red)?.usuario ||
+                  "Sin identificador registrado"}
               </p>
 
               <ul className="mt-4 flex-1 space-y-2">
@@ -296,7 +300,6 @@ function Conexiones() {
                     : "Credenciales de app pendientes: registra la app de TikTok for Developers en Credenciales."}
                 </p>
               ) : !puede ? (
-
                 <p className="mt-2 text-xs text-muted-foreground">
                   Solo un administrador o gestor de la empresa puede autorizar redes.
                 </p>
@@ -315,13 +318,11 @@ function Conexiones() {
           estadoFacebook={conexionDe("facebook")?.estado ?? ""}
           estadoInstagram={conexionDe("instagram")?.estado ?? ""}
         />
-
       </div>
 
       <div className="mt-4">
         <PruebaPublicacion />
       </div>
-
 
       <section className="panel mt-4 p-5">
         <h2 className="flex items-center gap-2 font-display text-lg font-bold">

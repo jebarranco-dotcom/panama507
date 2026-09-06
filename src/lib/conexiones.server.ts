@@ -19,7 +19,9 @@ export const PROVEEDOR_DE_RED: Record<Red, Proveedor> = {
 export const PERMISOS_REQUERIDOS: Record<Red, string[]> = {
   facebook: ["pages_show_list", "pages_manage_posts"],
   instagram: ["instagram_basic", "instagram_content_publish"],
-  tiktok: ["video.upload", "video.publish"],
+  // video.publish requiere aprobación de Content Posting API; video.upload
+  // permite conectar la cuenta y enviar contenido como borrador mientras tanto.
+  tiktok: ["video.upload"],
 };
 
 export const SCOPES_SOLICITADOS: Record<Red, string[]> = {
@@ -30,7 +32,9 @@ export const SCOPES_SOLICITADOS: Record<Red, string[]> = {
     "instagram_content_publish",
     "instagram_manage_messages",
   ],
-  tiktok: ["user.info.basic", "video.upload", "video.publish"],
+  // Solicitar únicamente scopes habilitados en la app actual. El scope
+  // video.publish se añade después de la aprobación de publicación directa.
+  tiktok: ["user.info.basic", "video.upload"],
 };
 
 type Credencial = { clientId: string; clientSecret: string };
@@ -717,9 +721,7 @@ export async function completarMeta(
   const candidatas =
     red === "facebook"
       ? paginas.filter((p) => coincide([p.name]))
-      : paginas.filter((p) =>
-          coincide([p.instagram_business_account?.username ?? "", p.name]),
-        );
+      : paginas.filter((p) => coincide([p.instagram_business_account?.username ?? "", p.name]));
   const conIg = paginas.filter((p) => p.instagram_business_account?.id);
   const universo = red === "facebook" ? paginas : conIg;
   const pagina = candidatas[0] ?? (universo.length === 1 ? universo[0] : undefined);
@@ -746,7 +748,6 @@ export async function completarMeta(
         : "No se encontró una cuenta de Instagram profesional vinculada a la página de Facebook.";
     }
   }
-
 
   return guardarResultado({
     empresaId,
@@ -816,6 +817,6 @@ export async function completarTikTok(empresaId: string, code: string, redirectU
     refreshToken: json.refresh_token ?? null,
     expiraEn: json.expires_in ?? null,
     detalleExtra:
-      "Requiere cuenta TikTok Business y aprobación de Content Posting API (video.upload y video.publish).",
+      "Requiere cuenta TikTok Business y Content Posting API habilitada; video.upload permite borradores y video.publish requiere aprobación para publicación directa.",
   });
 }

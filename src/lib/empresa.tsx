@@ -70,8 +70,8 @@ export function EmpresaProvider({ children }: { children: ReactNode }) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background px-6 text-center">
         <p className="max-w-sm text-sm text-muted-foreground">
-          Tu cuenta todavía no tiene acceso a ninguna empresa. Pide al administrador que te
-          asigne a RENTELO FACIL o PANAMA REAL ESTATE.
+          Tu cuenta todavía no tiene acceso a ninguna empresa. Pide al administrador que te asigne a
+          GESTIONES COMERCIALES, RENTELO FACIL o PANAMA REAL ESTATE.
         </p>
       </div>
     );
@@ -85,9 +85,7 @@ export function EmpresaProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <EmpresaContext.Provider
-      value={{ empresa, empresaId: empresa.id, empresas, cambiarEmpresa }}
-    >
+    <EmpresaContext.Provider value={{ empresa, empresaId: empresa.id, empresas, cambiarEmpresa }}>
       {children}
     </EmpresaContext.Provider>
   );

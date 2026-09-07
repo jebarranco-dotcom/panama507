@@ -55,7 +55,11 @@ export function EmpresaProvider({ children }: { children: ReactNode }) {
   const [seleccion, setSeleccion] = useState<string | null>(null);
 
   useEffect(() => {
-    setSeleccion(localStorage.getItem(CLAVE));
+    const desdeUrl = new URLSearchParams(window.location.search).get("empresa");
+    const desdeStorage = localStorage.getItem(CLAVE);
+    const inicial = desdeUrl || desdeStorage;
+    if (desdeUrl) localStorage.setItem(CLAVE, desdeUrl);
+    setSeleccion(inicial);
   }, []);
 
   if (isLoading) {

@@ -14,13 +14,6 @@ import {
 } from "lucide-react";
 import type { ReactNode } from "react";
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useEmpresa } from "@/lib/empresa";
 
@@ -68,18 +61,18 @@ export function AppShell({
 
         <div className="mt-5 px-1">
           <p className="mb-1.5 text-xs font-semibold text-muted-foreground">Empresa activa</p>
-          <Select value={empresa.id} onValueChange={cambiarEmpresa}>
-            <SelectTrigger className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {empresas.map((e) => (
-                <SelectItem key={e.id} value={e.id}>
-                  {e.nombre}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <select
+            aria-label="Empresa activa"
+            className="h-9 w-full cursor-pointer rounded-md border border-input bg-transparent px-3 py-2 text-sm text-sidebar-foreground outline-none focus:ring-1 focus:ring-ring"
+            value={empresa.id}
+            onChange={(event) => cambiarEmpresa(event.target.value)}
+          >
+            {empresas.map((e) => (
+              <option key={e.id} value={e.id} className="bg-background text-foreground">
+                {e.nombre}
+              </option>
+            ))}
+          </select>
         </div>
 
         <nav className="mt-8 flex flex-col gap-1 overflow-y-auto">
@@ -129,18 +122,18 @@ export function AppShell({
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <div className="md:hidden">
-                <Select value={empresa.id} onValueChange={cambiarEmpresa}>
-                  <SelectTrigger className="w-48">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {empresas.map((e) => (
-                      <SelectItem key={e.id} value={e.id}>
-                        {e.nombre}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <select
+                  aria-label="Empresa activa"
+                  className="h-9 w-48 cursor-pointer rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-ring"
+                  value={empresa.id}
+                  onChange={(event) => cambiarEmpresa(event.target.value)}
+                >
+                  {empresas.map((e) => (
+                    <option key={e.id} value={e.id}>
+                      {e.nombre}
+                    </option>
+                  ))}
+                </select>
               </div>
               {acciones}
             </div>

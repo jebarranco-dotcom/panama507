@@ -148,9 +148,25 @@ function Conexiones() {
   }, [empresaId, queryClient]);
 
   useEffect(() => {
-    // La ventana de autorización vive en el dominio publicado, por eso no se
-    // compara el origen: el aviso solo dispara un refresco, no lleva datos.
+    const params = new URLSearchParams(window.location.search);
+    const oauth = params.get("oauth");
+    const red = params.get("red");
+    const oauthError = params.get("oauth_error");
+    if (oauth || oauthError) {
+      console.info("[oauth] Resultado recibido en la misma pestaña", {
+        oauth,
+        red,
+        oauthError,
+        href: window.location.href,
+      });
+      refrescar();
+      if (oauth === "ok") toast.success(`${red ?? "Red"} conectada oficialmente.`);
+      if (oauthError) toast.error("La autorización no se completó", { description: oauthError });
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
     const alMensaje = (evento: MessageEvent) => {
+      console.info("[oauth] Mensaje recibido", { origin: evento.origin, data: evento.data });
       if ((evento.data as { type?: string })?.type !== "oauth-red") return;
       refrescar();
     };
@@ -159,25 +175,33 @@ function Conexiones() {
   }, [refrescar]);
 
   const conectar = async (red: RedOAuth) => {
+    console.info("[oauth] Inicio de autorización", {
+      red,
+      empresaId,
+      origin: window.location.origin,
+      sameTab: true,
+    });
     setCargando(red);
-    const ventana = window.open("", "oauth-red", "width=620,height=760");
     try {
       const { authorizationUrl } = await iniciar({ data: { empresaId, red } });
-      if (!ventana) throw new Error("El navegador bloqueó la ventana emergente.");
-      ventana.location.href = authorizationUrl;
-      // Respaldo por si el aviso de la ventana emergente no llega al panel.
-      const vigilar = window.setInterval(() => {
-        if (ventana.closed) {
-          window.clearInterval(vigilar);
-          refrescar();
-        }
-      }, 1000);
-      window.setTimeout(() => window.clearInterval(vigilar), 300000);
+      const auth = new URL(authorizationUrl);
+      console.info("[oauth] URL de autorización recibida", {
+        red,
+        authorizationHost: auth.host,
+        redirectUri: auth.searchParams.get("redirect_uri"),
+        scopes: auth.searchParams.get("scope"),
+      });
+      window.location.assign(authorizationUrl);
     } catch (e) {
-      ventana?.close();
+      console.error("[oauth] Error al invocar el inicio de autorización", {
+        red,
+        empresaId,
+        error: e,
+      });
       toast.error("No se pudo iniciar la autorización", { description: (e as Error).message });
-    } finally {
       setCargando(null);
+    } finally {
+      // La navegación exitosa desmonta la página; solo el error vuelve aquí.
     }
   };
 

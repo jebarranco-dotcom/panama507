@@ -1,12 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-function pagina(titulo: string, mensaje: string, ok: boolean) {
+function pagina(titulo: string, mensaje: string, ok: boolean, red = "tiktok") {
+  const destino = `/conexiones?${new URLSearchParams({
+    [ok ? "oauth" : "oauth_error"]: ok ? "ok" : mensaje,
+    red,
+  }).toString()}`;
   return new Response(
     `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${titulo}</title>
 <style>body{font-family:system-ui;background:#0b1220;color:#e8edf7;display:grid;place-items:center;height:100vh;margin:0}
 main{max-width:32rem;padding:2rem;text-align:center}h1{font-size:1.15rem}p{color:#a9b6ce;font-size:.9rem;line-height:1.5}</style></head>
 <body><main><h1>${ok ? "✅" : "⚠️"} ${titulo}</h1><p>${mensaje}</p></main>
-<script>try{window.opener&&window.opener.postMessage({type:"oauth-red",ok:${ok}},"*")}catch(e){}setTimeout(function(){window.close()},2500)</script>
+<script>try{window.opener&&window.opener.postMessage({type:"oauth-red",ok:${ok},red:${JSON.stringify(red)}},"*")}catch(e){}setTimeout(function(){window.location.replace(${JSON.stringify(destino)})},1200)</script>
 </body></html>`,
     { status: ok ? 200 : 400, headers: { "content-type": "text/html; charset=utf-8" } },
   );
@@ -19,7 +23,7 @@ async function manejar({ request }: { request: Request }) {
   try {
     estado = verificarEstado(url.searchParams.get("state"));
   } catch (e) {
-    return pagina("Autorización no válida", (e as Error).message, false);
+    return pagina("Autorización no válida", (e as Error).message, false, "tiktok");
   }
   const { completarTikTok, guardarError } = await import("@/lib/conexiones.server");
   const error = url.searchParams.get("error_description") ?? url.searchParams.get("error");
@@ -27,7 +31,7 @@ async function manejar({ request }: { request: Request }) {
   if (error || !code) {
     const mensaje = error ?? "TikTok no devolvió el código de autorización.";
     await guardarError(estado.empresaId, "tiktok", mensaje);
-    return pagina("Autorización cancelada", mensaje, false);
+    return pagina("Autorización cancelada", mensaje, false, "tiktok");
   }
   try {
     const { origenPublico } = await import("@/lib/permisos.server");
@@ -43,7 +47,7 @@ async function manejar({ request }: { request: Request }) {
   } catch (e) {
     const mensaje = (e as Error).message;
     await guardarError(estado.empresaId, "tiktok", mensaje);
-    return pagina("No se pudo completar la conexión", mensaje, false);
+    return pagina("No se pudo completar la conexión", mensaje, false, "tiktok");
   }
 }
 

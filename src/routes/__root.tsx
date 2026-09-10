@@ -129,7 +129,9 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   useEffect(() => {
-    limpiarCandadoChunk();
+    // Liberamos el candado un rato después de una carga estable, para no
+    // encadenar recargas si la versión nueva sigue fallando.
+    const liberar = window.setTimeout(limpiarCandadoChunk, 10_000);
     const alPreload = (evento: Event) => {
       if (recargarPorChunkObsoleto()) evento.preventDefault();
     };

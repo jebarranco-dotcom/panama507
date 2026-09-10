@@ -13,6 +13,7 @@ import { Toaster } from "@/components/ui/sonner";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { esErrorDeChunk, limpiarCandadoChunk, recargarPorChunkObsoleto } from "../lib/recargar-chunk";
 
 function NotFoundComponent() {
   return (
@@ -126,6 +127,22 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
+  useEffect(() => {
+    limpiarCandadoChunk();
+    const alPreload = (evento: Event) => {
+      if (recargarPorChunkObsoleto()) evento.preventDefault();
+    };
+    const alRechazo = (evento: PromiseRejectionEvent) => {
+      if (esErrorDeChunk(evento.reason)) recargarPorChunkObsoleto();
+    };
+    window.addEventListener("vite:preloadError", alPreload);
+    window.addEventListener("unhandledrejection", alRechazo);
+    return () => {
+      window.removeEventListener("vite:preloadError", alPreload);
+      window.removeEventListener("unhandledrejection", alRechazo);
+    };
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

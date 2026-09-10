@@ -13,6 +13,7 @@ import { Toaster } from "@/components/ui/sonner";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { esErrorDeChunk, limpiarCandadoChunk, recargarPorChunkObsoleto } from "../lib/recargar-chunk";
 
 function NotFoundComponent() {
   return (
@@ -40,6 +41,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
   useEffect(() => {
+    if (esErrorDeChunk(error) && recargarPorChunkObsoleto()) return;
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
 
@@ -125,6 +127,25 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
+  useEffect(() => {
+    // Liberamos el candado un rato después de una carga estable, para no
+    // encadenar recargas si la versión nueva sigue fallando.
+    const liberar = window.setTimeout(limpiarCandadoChunk, 10_000);
+    const alPreload = (evento: Event) => {
+      if (recargarPorChunkObsoleto()) evento.preventDefault();
+    };
+    const alRechazo = (evento: PromiseRejectionEvent) => {
+      if (esErrorDeChunk(evento.reason)) recargarPorChunkObsoleto();
+    };
+    window.addEventListener("vite:preloadError", alPreload);
+    window.addEventListener("unhandledrejection", alRechazo);
+    return () => {
+      window.clearTimeout(liberar);
+      window.removeEventListener("vite:preloadError", alPreload);
+      window.removeEventListener("unhandledrejection", alRechazo);
+    };
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

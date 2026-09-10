@@ -141,6 +141,7 @@ function RootComponent() {
     window.addEventListener("vite:preloadError", alPreload);
     window.addEventListener("unhandledrejection", alRechazo);
     return () => {
+      window.clearTimeout(liberar);
       window.removeEventListener("vite:preloadError", alPreload);
       window.removeEventListener("unhandledrejection", alRechazo);
     };

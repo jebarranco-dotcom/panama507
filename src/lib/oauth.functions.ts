@@ -8,6 +8,7 @@ import {
   EmpresaInput,
   IniciarInput,
   ProveedorInput,
+  SistemaInput,
 } from "@/lib/oauth.schemas";
 
 export type ProveedorOAuth = "meta" | "tiktok";
@@ -168,4 +169,26 @@ export const iniciarOAuth = createServerFn({ method: "POST" })
       `Autorización iniciada solicitando: ${scopes.join(", ")}.`,
     );
     return { authorizationUrl: autorizar.toString() };
+  });
+
+/** Páginas y cuentas de Instagram accesibles con el token de sistema de Meta. */
+export const activosSistema = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => EmpresaInput.parse(input))
+  .handler(async ({ data, context }) => {
+    const { asegurarAdministrador } = await import("@/lib/permisos.server");
+    await asegurarAdministrador(context.supabase, context.userId, data.empresaId);
+    const { activosSistemaMeta } = await import("@/lib/token-sistema.server");
+    return activosSistemaMeta(data.empresaId);
+  });
+
+/** Vincula la página/cuenta a la empresa usando el token permanente de sistema. */
+export const conectarSistema = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => SistemaInput.parse(input))
+  .handler(async ({ data, context }) => {
+    const { asegurarAdministrador } = await import("@/lib/permisos.server");
+    await asegurarAdministrador(context.supabase, context.userId, data.empresaId);
+    const { conectarConTokenSistema } = await import("@/lib/token-sistema.server");
+    return conectarConTokenSistema(data.empresaId, data.red, data.paginaId);
   });

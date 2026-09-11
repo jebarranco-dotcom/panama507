@@ -19,6 +19,7 @@ import { ActivosMeta } from "@/components/ActivosMeta";
 import { AppShell } from "@/components/AppShell";
 import { IconoRed } from "@/components/Estado";
 import { PruebaPublicacion } from "@/components/PruebaPublicacion";
+import { TokenSistema } from "@/components/TokenSistema";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -342,6 +343,10 @@ function Conexiones() {
           estadoFacebook={conexionDe("facebook")?.estado ?? ""}
           estadoInstagram={conexionDe("instagram")?.estado ?? ""}
         />
+      </div>
+
+      <div className="mt-4">
+        <TokenSistema puedeAdministrar={credenciales?.puedeAdministrar ?? false} />
       </div>
 
       <div className="mt-4">

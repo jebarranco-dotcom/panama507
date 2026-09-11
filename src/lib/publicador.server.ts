@@ -150,19 +150,14 @@ async function enviar(empresaId: string, pieza: Pieza) {
     return { ok: false, estado: "en_cola", detalle };
   }
 
-  const { data: fila } = await supabase
-    .from("conexiones_tokens")
-    .select("access_token_cifrado")
-    .eq("empresa_id", empresaId)
-    .eq("red", red)
-    .maybeSingle();
-  if (!fila?.access_token_cifrado) {
-    const detalle = `No hay token guardado para ${red}: vuelve a autorizar la red.`;
+  const { tokenPublicacion } = await import("./token-sistema.server");
+  const token = await tokenPublicacion(empresaId, red as "facebook" | "instagram");
+  if (!token) {
+    const detalle = `No hay token guardado para ${red}: vuelve a autorizar la red o configura el token de sistema de Meta.`;
     await marcar({ estado: "en_cola", error_publicacion: detalle });
     return { ok: false, estado: "en_cola", detalle };
   }
 
-  const token = descifrar(fila.access_token_cifrado);
   const mensaje = textoDePieza(pieza);
   try {
     const referencia =

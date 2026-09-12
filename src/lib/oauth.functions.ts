@@ -7,6 +7,7 @@ import {
   CredencialInput,
   EmpresaInput,
   IniciarInput,
+  MetaSystemTokenInput,
   ProveedorInput,
   SistemaInput,
 } from "@/lib/oauth.schemas";
@@ -45,6 +46,18 @@ export const guardarCredenciales = createServerFn({ method: "POST" })
       context.userId,
     );
     return resumenCredenciales(data.empresaId);
+  });
+
+/** Guarda el token Meta System User separado del App Secret y cifrado en servidor. */
+export const guardarMetaSystemToken = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => MetaSystemTokenInput.parse(input))
+  .handler(async ({ data, context }) => {
+    const { asegurarAdministrador } = await import("@/lib/permisos.server");
+    await asegurarAdministrador(context.supabase, context.userId, data.empresaId);
+    const { guardarTokenSistemaMeta } = await import("@/lib/conexiones.server");
+    await guardarTokenSistemaMeta(data.empresaId, data.token, context.userId);
+    return { ok: true };
   });
 
 /** Valida contra la plataforma que las credenciales guardadas sirvan para autorizar. */

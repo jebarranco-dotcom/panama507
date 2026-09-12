@@ -83,11 +83,27 @@ export async function guardarCredencial(
   if (error) throw new Error(error.message);
 }
 
+export async function guardarTokenSistemaMeta(empresaId: string, token: string, userId: string) {
+  const supabase = crearClienteServidor();
+  const { error } = await supabase
+    .from("app_credenciales")
+    .update({
+      system_user_token_cifrado: cifrar(token),
+      actualizado_por: userId,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("empresa_id", empresaId)
+    .eq("proveedor", "meta");
+  if (error) throw new Error(error.message);
+}
+
 export async function resumenCredenciales(empresaId: string) {
   const supabase = crearClienteServidor();
   const { data } = await supabase
     .from("app_credenciales")
-    .select("proveedor, client_id, pista_secreto, updated_at, verificada_at, verificacion_detalle")
+    .select(
+      "proveedor, client_id, pista_secreto, updated_at, verificada_at, verificacion_detalle, system_user_token_cifrado",
+    )
     .eq("empresa_id", empresaId);
   const de = (proveedor: Proveedor) => {
     const fila = (data ?? []).find((f) => f.proveedor === proveedor);
@@ -101,6 +117,7 @@ export async function resumenCredenciales(empresaId: string) {
         verificada: Boolean(fila.verificada_at),
         verificadaAt: fila.verificada_at as string | null,
         detalleVerificacion: fila.verificacion_detalle ?? "",
+        tokenSistemaGuardado: proveedor === "meta" && Boolean(fila.system_user_token_cifrado),
       };
     }
     const global =
@@ -116,6 +133,7 @@ export async function resumenCredenciales(empresaId: string) {
       verificada: false,
       verificadaAt: null as string | null,
       detalleVerificacion: "",
+      tokenSistemaGuardado: false,
     };
   };
   return { meta: de("meta"), tiktok: de("tiktok") };

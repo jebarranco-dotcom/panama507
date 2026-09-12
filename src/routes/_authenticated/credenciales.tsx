@@ -24,6 +24,7 @@ import { useEmpresa } from "@/lib/empresa";
 import {
   estadoCredenciales,
   guardarCredenciales,
+  guardarMetaSystemToken,
   verificarCredenciales,
 } from "@/lib/oauth.functions";
 
@@ -136,10 +137,12 @@ function Credenciales() {
     retry: 1,
   });
   const guardar = useServerFn(guardarCredenciales);
+  const guardarTokenMeta = useServerFn(guardarMetaSystemToken);
   const verificar = useServerFn(verificarCredenciales);
   const [valores, setValores] = useState<Record<string, string>>({});
   const [guardando, setGuardando] = useState<Proveedor | null>(null);
   const [verificando, setVerificando] = useState<Proveedor | null>(null);
+  const [guardandoTokenMeta, setGuardandoTokenMeta] = useState(false);
 
   const puede = estado?.puedeAdministrar ?? false;
 
@@ -182,6 +185,27 @@ function Credenciales() {
       toast.error("No se pudo verificar", { description: (e as Error).message });
     } finally {
       setVerificando(null);
+    }
+  };
+
+  const guardarTokenSistema = async () => {
+    const token = (valores["meta-system-token"] ?? "").trim();
+    if (token.length < 20) {
+      toast.error("Token incompleto", { description: "Pega el META_SYSTEM_USER_TOKEN completo." });
+      return;
+    }
+    setGuardandoTokenMeta(true);
+    try {
+      await guardarTokenMeta({ data: { empresaId, token } });
+      setValores((v) => ({ ...v, "meta-system-token": "" }));
+      await queryClient.invalidateQueries({ queryKey: ["credenciales-oauth", empresaId] });
+      toast.success("Token Meta guardado", {
+        description: "El token quedó cifrado y separado del App Secret.",
+      });
+    } catch (e) {
+      toast.error("No se pudo guardar el token", { description: (e as Error).message });
+    } finally {
+      setGuardandoTokenMeta(false);
     }
   };
 
@@ -307,6 +331,41 @@ function Credenciales() {
                     disabled={!puede}
                   />
                 </div>
+                {proveedor === "meta" ? (
+                  <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
+                    <Label htmlFor="meta-system-token">META_SYSTEM_USER_TOKEN</Label>
+                    <Input
+                      id="meta-system-token"
+                      type="password"
+                      autoComplete="new-password"
+                      placeholder={
+                        info?.tokenSistemaGuardado
+                          ? "Token cifrado guardado; pega uno nuevo para rotarlo"
+                          : "Pega aquí el token de usuario del sistema"
+                      }
+                      value={valores["meta-system-token"] ?? ""}
+                      onChange={(e) =>
+                        setValores((v) => ({ ...v, "meta-system-token": e.target.value }))
+                      }
+                      disabled={!puede}
+                    />
+                    <Button
+                      className="mt-2 w-full"
+                      variant="secondary"
+                      disabled={!puede || guardandoTokenMeta}
+                      onClick={() => void guardarTokenSistema()}
+                    >
+                      {guardandoTokenMeta ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : (
+                        <ShieldCheck className="size-4" />
+                      )}
+                      {info?.tokenSistemaGuardado
+                        ? "Rotar token del sistema"
+                        : "Guardar token del sistema"}
+                    </Button>
+                  </div>
+                ) : null}
                 <Button
                   className="w-full"
                   disabled={!puede || guardando === proveedor}

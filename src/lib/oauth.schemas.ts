@@ -49,10 +49,9 @@ export const CredencialInput = z.object({
     .regex(/^\S+$/, "El secreto no debe contener espacios."),
 });
 
-export const SistemaInput = z.object({
+export const MetaSystemTokenInput = z.object({
   empresaId: z.string().uuid(),
-  red: z.enum(["facebook", "instagram"]),
-  paginaId: z.string().trim().min(1).max(64),
+  token: z.string().trim().min(20).max(4096).regex(/^\S+$/, "El token no debe contener espacios."),
 });
 
 export const BandejaInput = z.object({

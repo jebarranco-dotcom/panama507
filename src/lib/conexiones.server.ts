@@ -26,12 +26,7 @@ export const PERMISOS_REQUERIDOS: Record<Red, string[]> = {
 
 export const SCOPES_SOLICITADOS: Record<Red, string[]> = {
   facebook: ["pages_show_list", "pages_manage_posts", "pages_messaging", "pages_manage_metadata"],
-  instagram: [
-    "pages_show_list",
-    "instagram_basic",
-    "instagram_content_publish",
-    "instagram_manage_messages",
-  ],
+  instagram: ["pages_show_list", "instagram_basic", "instagram_content_publish"],
   // Solicitar únicamente scopes habilitados en la app actual. El scope
   // video.publish se añade después de la aprobación de publicación directa.
   tiktok: ["user.info.basic", "video.upload"],

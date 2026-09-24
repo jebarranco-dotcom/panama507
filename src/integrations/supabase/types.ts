@@ -24,6 +24,7 @@ export type Database = {
           id: string
           pista_secreto: string
           proveedor: string
+          system_user_token_cifrado: string | null
           updated_at: string
           verificacion_detalle: string
           verificada_at: string | null
@@ -37,6 +38,7 @@ export type Database = {
           id?: string
           pista_secreto?: string
           proveedor: string
+          system_user_token_cifrado?: string | null
           updated_at?: string
           verificacion_detalle?: string
           verificada_at?: string | null
@@ -50,6 +52,7 @@ export type Database = {
           id?: string
           pista_secreto?: string
           proveedor?: string
+          system_user_token_cifrado?: string | null
           updated_at?: string
           verificacion_detalle?: string
           verificada_at?: string | null

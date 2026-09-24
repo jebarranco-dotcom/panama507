@@ -1,0 +1,1 @@
+ALTER TABLE public.app_credenciales ADD COLUMN IF NOT EXISTS system_user_token_cifrado text;

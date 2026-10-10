@@ -9,6 +9,7 @@ import {
   Link2,
   LogOut,
   ShieldCheck,
+  Send,
   Sparkles,
   Users,
 } from "lucide-react";

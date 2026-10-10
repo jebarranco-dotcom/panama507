@@ -77,22 +77,17 @@ function PaginaCola() {
   });
 
   return (
-    <AppShell>
+    <AppShell
+      titulo="Cola de publicaciones"
+      descripcion={`${empresa.nombre}: en cola, programadas y publicadas. Reenvía manualmente si el programador no alcanzó una pieza.`}
+    >
       <div className="space-y-5">
-        <header className="flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h1 className="font-display text-2xl font-bold">Cola de publicaciones</h1>
-            <p className="text-sm text-muted-foreground">
-              {empresa.nombre}: estado real de envío. Si el programador automático no alcanzó una
-              pieza, reenvíala manualmente.
-            </p>
-          </div>
+        <div className="flex justify-end">
           <Button size="sm" variant="outline" onClick={() => lote.mutate()} disabled={lote.isPending}>
             {lote.isPending ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
             Procesar cola ahora
           </Button>
-        </header>
-
+        </div>
         {isLoading ? (
           <Loader2 className="size-6 animate-spin text-primary" />
         ) : (

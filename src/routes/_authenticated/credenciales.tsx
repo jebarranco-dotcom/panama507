@@ -52,7 +52,7 @@ export const Route = createFileRoute("/_authenticated/credenciales")({
 });
 
 /** Evita que un fallo puntual del servidor tumbe toda la aplicación. */
-function ErrorCredenciales({ error, reset }: { error: Error; reset: () => void }) {
+function ErrorCredenciales({ error, reset }: { error: Error; reset: () => void; info?: unknown }) {
   return (
     <AppShell
       titulo="Credenciales de apps"

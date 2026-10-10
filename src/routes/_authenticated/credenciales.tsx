@@ -1,3 +1,4 @@
+import type { ErrorComponentProps } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
@@ -52,7 +53,7 @@ export const Route = createFileRoute("/_authenticated/credenciales")({
 });
 
 /** Evita que un fallo puntual del servidor tumbe toda la aplicación. */
-function ErrorCredenciales({ error, reset }: { error: Error; reset: () => void }) {
+function ErrorCredenciales({ error, reset }: ErrorComponentProps) {
   return (
     <AppShell
       titulo="Credenciales de apps"
@@ -62,7 +63,7 @@ function ErrorCredenciales({ error, reset }: { error: Error; reset: () => void }
         <h2 className="font-display text-base font-bold">
           Credenciales no disponibles temporalmente
         </h2>
-        <p className="mt-2 text-xs text-muted-foreground">{error.message}</p>
+        <p className="mt-2 text-xs text-muted-foreground">{(error as Error).message}</p>
         <Button className="mt-3" size="sm" variant="outline" onClick={reset}>
           <RefreshCw className="size-4" /> Reintentar
         </Button>

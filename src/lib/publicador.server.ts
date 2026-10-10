@@ -157,6 +157,31 @@ async function enviar(empresaId: string, pieza: Pieza) {
     return { ok: false, estado: "en_cola", detalle };
   }
 
+  // Toda pieza debe llevar una foto real de la empresa antes de enviarse.
+  if (!pieza.media_url?.trim()) {
+    const { data: empresaFoto } = await supabase
+      .from("empresas")
+      .select("logo_url")
+      .eq("id", empresaId)
+      .maybeSingle();
+    const { data: propFoto } = await supabase
+      .from("propiedades")
+      .select("imagen_url")
+      .eq("empresa_id", empresaId)
+      .not("imagen_url", "is", null)
+      .limit(1)
+      .maybeSingle();
+    const foto = propFoto?.imagen_url || empresaFoto?.logo_url || "";
+    if (!foto) {
+      const detalle =
+        "Falta una foto real de la empresa: agrégala en Cola (Agregar foto) antes de enviar.";
+      await marcar({ estado: "en_cola", error_publicacion: detalle });
+      return { ok: false, estado: "en_cola", detalle };
+    }
+    pieza.media_url = foto;
+    await supabase.from("publicaciones").update({ media_url: foto }).eq("id", pieza.id);
+  }
+
   const mensaje = textoDePieza(pieza);
   try {
     const referencia =

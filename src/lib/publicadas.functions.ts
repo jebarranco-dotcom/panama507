@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { EmpresaInput, FotoInput } from "@/lib/entradas.schemas";
+import { EmpresaInput, FotoInput, HoraColaInput } from "@/lib/entradas.schemas";
 
 /** Lista las publicaciones reales en Facebook e Instagram con su enlace. */
 export const publicadasReales = createServerFn({ method: "POST" })
@@ -26,4 +26,15 @@ export const guardarFoto = createServerFn({ method: "POST" })
       .eq("id", data.publicacionId);
     if (error) throw new Error(error.message);
     return { ok: true };
+  });
+
+/** Hora diaria exacta en que salen los posts de la empresa (hora de Panamá). */
+export const fijarHora = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => HoraColaInput.parse(input))
+  .handler(async ({ data, context }) => {
+    const { asegurarAdministrador } = await import("@/lib/permisos.server");
+    await asegurarAdministrador(context.supabase, context.userId, data.empresaId);
+    const { fijarHoraCola } = await import("@/lib/hora-cola.server");
+    return fijarHoraCola(data.empresaId, data.hora);
   });

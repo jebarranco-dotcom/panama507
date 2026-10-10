@@ -63,3 +63,7 @@ export const GuardarProgramacionInput = z.object({
 export const FotoInput = PiezaInput.extend({
   mediaUrl: z.string().trim().url().max(1000).regex(/^https:\/\//, "La foto debe ser un enlace https público."),
 });
+
+export const HoraColaInput = EmpresaInput.extend({
+  hora: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Usa el formato HH:MM."),
+});

@@ -28,6 +28,7 @@ import { Route as AuthenticatedCredencialesRouteImport } from './routes/_authent
 import { Route as AuthenticatedInformesRouteImport } from './routes/_authenticated/informes'
 import { Route as AuthenticatedMensajeriaRouteImport } from './routes/_authenticated/mensajeria'
 import { Route as AuthenticatedProgramacionRouteImport } from './routes/_authenticated/programacion'
+import { Route as AuthenticatedPublicadasRouteImport } from './routes/_authenticated/publicadas'
 import { Route as ApiPublicHooksMetaMensajesRouteImport } from './routes/api/public/hooks/meta-mensajes'
 import { Route as ApiPublicHooksPublicarProgramadoRouteImport } from './routes/api/public/hooks/publicar-programado'
 import { Route as ApiPublicHooksRutinaDiariaRouteImport } from './routes/api/public/hooks/rutina-diaria'
@@ -131,6 +132,11 @@ const AuthenticatedProgramacionRoute =
     path: '/programacion',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedPublicadasRoute = AuthenticatedPublicadasRouteImport.update({
+  id: '/publicadas',
+  path: '/publicadas',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const ApiPublicHooksMetaMensajesRoute =
   ApiPublicHooksMetaMensajesRouteImport.update({
     id: '/api/public/hooks/meta-mensajes',
@@ -181,6 +187,7 @@ export interface FileRoutesByFullPath {
   '/informes': typeof AuthenticatedInformesRoute
   '/mensajeria': typeof AuthenticatedMensajeriaRoute
   '/programacion': typeof AuthenticatedProgramacionRoute
+  '/publicadas': typeof AuthenticatedPublicadasRoute
   '/api/public/hooks/meta-mensajes': typeof ApiPublicHooksMetaMensajesRoute
   '/api/public/hooks/publicar-programado': typeof ApiPublicHooksPublicarProgramadoRoute
   '/api/public/hooks/rutina-diaria': typeof ApiPublicHooksRutinaDiariaRoute
@@ -205,6 +212,7 @@ export interface FileRoutesByTo {
   '/informes': typeof AuthenticatedInformesRoute
   '/mensajeria': typeof AuthenticatedMensajeriaRoute
   '/programacion': typeof AuthenticatedProgramacionRoute
+  '/publicadas': typeof AuthenticatedPublicadasRoute
   '/': typeof AuthenticatedIndexRoute
   '/api/public/hooks/meta-mensajes': typeof ApiPublicHooksMetaMensajesRoute
   '/api/public/hooks/publicar-programado': typeof ApiPublicHooksPublicarProgramadoRoute
@@ -232,6 +240,7 @@ export interface FileRoutesById {
   '/_authenticated/informes': typeof AuthenticatedInformesRoute
   '/_authenticated/mensajeria': typeof AuthenticatedMensajeriaRoute
   '/_authenticated/programacion': typeof AuthenticatedProgramacionRoute
+  '/_authenticated/publicadas': typeof AuthenticatedPublicadasRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/api/public/hooks/meta-mensajes': typeof ApiPublicHooksMetaMensajesRoute
   '/api/public/hooks/publicar-programado': typeof ApiPublicHooksPublicarProgramadoRoute
@@ -260,6 +269,7 @@ export interface FileRouteTypes {
     | '/informes'
     | '/mensajeria'
     | '/programacion'
+    | '/publicadas'
     | '/api/public/hooks/meta-mensajes'
     | '/api/public/hooks/publicar-programado'
     | '/api/public/hooks/rutina-diaria'
@@ -284,6 +294,7 @@ export interface FileRouteTypes {
     | '/informes'
     | '/mensajeria'
     | '/programacion'
+    | '/publicadas'
     | '/'
     | '/api/public/hooks/meta-mensajes'
     | '/api/public/hooks/publicar-programado'
@@ -310,6 +321,7 @@ export interface FileRouteTypes {
     | '/_authenticated/informes'
     | '/_authenticated/mensajeria'
     | '/_authenticated/programacion'
+    | '/_authenticated/publicadas'
     | '/_authenticated/'
     | '/api/public/hooks/meta-mensajes'
     | '/api/public/hooks/publicar-programado'
@@ -469,6 +481,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProgramacionRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/publicadas': {
+      id: '/_authenticated/publicadas'
+      path: '/publicadas'
+      fullPath: '/publicadas'
+      preLoaderRoute: typeof AuthenticatedPublicadasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/public/hooks/meta-mensajes': {
       id: '/api/public/hooks/meta-mensajes'
       path: '/api/public/hooks/meta-mensajes'
@@ -518,6 +537,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedInformesRoute: typeof AuthenticatedInformesRoute
   AuthenticatedMensajeriaRoute: typeof AuthenticatedMensajeriaRoute
   AuthenticatedProgramacionRoute: typeof AuthenticatedProgramacionRoute
+  AuthenticatedPublicadasRoute: typeof AuthenticatedPublicadasRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
 
@@ -532,6 +552,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedInformesRoute: AuthenticatedInformesRoute,
   AuthenticatedMensajeriaRoute: AuthenticatedMensajeriaRoute,
   AuthenticatedProgramacionRoute: AuthenticatedProgramacionRoute,
+  AuthenticatedPublicadasRoute: AuthenticatedPublicadasRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }
 

@@ -63,7 +63,7 @@ function ErrorCredenciales({ error, reset }: ErrorComponentProps) {
         <h2 className="font-display text-base font-bold">
           Credenciales no disponibles temporalmente
         </h2>
-        <p className="mt-2 text-xs text-muted-foreground">{error.message}</p>
+        <p className="mt-2 text-xs text-muted-foreground">{(error as Error).message}</p>
         <Button className="mt-3" size="sm" variant="outline" onClick={reset}>
           <RefreshCw className="size-4" /> Reintentar
         </Button>

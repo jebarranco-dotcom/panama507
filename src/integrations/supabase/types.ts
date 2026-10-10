@@ -1183,7 +1183,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      programar_hora_publicacion: {
+        Args: { _empresa: string; _hora: string }
+        Returns: string
+      }
     }
     Enums: {
       app_role: "admin" | "gestor" | "asesor"

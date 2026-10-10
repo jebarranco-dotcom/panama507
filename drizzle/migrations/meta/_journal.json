@@ -8,6 +8,13 @@
       "when": 1790236165250,
       "tag": "0000_add_system_user_token",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791662552372,
+      "tag": "0001_programar_hora_publicacion",
+      "breakpoints": true
     }
   ]
 }

@@ -9,6 +9,7 @@ import {
   Link2,
   LogOut,
   ShieldCheck,
+  Send,
   Sparkles,
   Users,
 } from "lucide-react";
@@ -23,6 +24,7 @@ const NAV = [
   { to: "/contenido", label: "Contenido", icon: Sparkles },
   { to: "/borradores", label: "Borradores", icon: ClipboardCheck },
   { to: "/programacion", label: "Programación", icon: CalendarClock },
+  { to: "/cola", label: "Cola", icon: Send },
   { to: "/conexiones", label: "Conexiones", icon: Link2 },
   { to: "/mensajeria", label: "Mensajería", icon: Inbox },
   { to: "/informes", label: "Informes", icon: FileText },

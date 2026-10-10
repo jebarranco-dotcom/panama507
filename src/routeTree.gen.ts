@@ -20,6 +20,7 @@ import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedAnaliticasRouteImport } from './routes/_authenticated/analiticas'
 import { Route as AuthenticatedBorradoresRouteImport } from './routes/_authenticated/borradores'
+import { Route as AuthenticatedColaRouteImport } from './routes/_authenticated/cola'
 import { Route as AuthenticatedColaboradoresRouteImport } from './routes/_authenticated/colaboradores'
 import { Route as AuthenticatedConexionesRouteImport } from './routes/_authenticated/conexiones'
 import { Route as AuthenticatedContenidoRouteImport } from './routes/_authenticated/contenido'
@@ -85,6 +86,11 @@ const AuthenticatedAnaliticasRoute = AuthenticatedAnaliticasRouteImport.update({
 const AuthenticatedBorradoresRoute = AuthenticatedBorradoresRouteImport.update({
   id: '/borradores',
   path: '/borradores',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedColaRoute = AuthenticatedColaRouteImport.update({
+  id: '/cola',
+  path: '/cola',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedColaboradoresRoute =
@@ -167,6 +173,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/analiticas': typeof AuthenticatedAnaliticasRoute
   '/borradores': typeof AuthenticatedBorradoresRoute
+  '/cola': typeof AuthenticatedColaRoute
   '/colaboradores': typeof AuthenticatedColaboradoresRoute
   '/conexiones': typeof AuthenticatedConexionesRoute
   '/contenido': typeof AuthenticatedContenidoRoute
@@ -190,6 +197,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/analiticas': typeof AuthenticatedAnaliticasRoute
   '/borradores': typeof AuthenticatedBorradoresRoute
+  '/cola': typeof AuthenticatedColaRoute
   '/colaboradores': typeof AuthenticatedColaboradoresRoute
   '/conexiones': typeof AuthenticatedConexionesRoute
   '/contenido': typeof AuthenticatedContenidoRoute
@@ -216,6 +224,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/_authenticated/analiticas': typeof AuthenticatedAnaliticasRoute
   '/_authenticated/borradores': typeof AuthenticatedBorradoresRoute
+  '/_authenticated/cola': typeof AuthenticatedColaRoute
   '/_authenticated/colaboradores': typeof AuthenticatedColaboradoresRoute
   '/_authenticated/conexiones': typeof AuthenticatedConexionesRoute
   '/_authenticated/contenido': typeof AuthenticatedContenidoRoute
@@ -243,6 +252,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/analiticas'
     | '/borradores'
+    | '/cola'
     | '/colaboradores'
     | '/conexiones'
     | '/contenido'
@@ -266,6 +276,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/analiticas'
     | '/borradores'
+    | '/cola'
     | '/colaboradores'
     | '/conexiones'
     | '/contenido'
@@ -291,6 +302,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/_authenticated/analiticas'
     | '/_authenticated/borradores'
+    | '/_authenticated/cola'
     | '/_authenticated/colaboradores'
     | '/_authenticated/conexiones'
     | '/_authenticated/contenido'
@@ -401,6 +413,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBorradoresRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/cola': {
+      id: '/_authenticated/cola'
+      path: '/cola'
+      fullPath: '/cola'
+      preLoaderRoute: typeof AuthenticatedColaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/colaboradores': {
       id: '/_authenticated/colaboradores'
       path: '/colaboradores'
@@ -491,6 +510,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAnaliticasRoute: typeof AuthenticatedAnaliticasRoute
   AuthenticatedBorradoresRoute: typeof AuthenticatedBorradoresRoute
+  AuthenticatedColaRoute: typeof AuthenticatedColaRoute
   AuthenticatedColaboradoresRoute: typeof AuthenticatedColaboradoresRoute
   AuthenticatedConexionesRoute: typeof AuthenticatedConexionesRoute
   AuthenticatedContenidoRoute: typeof AuthenticatedContenidoRoute
@@ -504,6 +524,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAnaliticasRoute: AuthenticatedAnaliticasRoute,
   AuthenticatedBorradoresRoute: AuthenticatedBorradoresRoute,
+  AuthenticatedColaRoute: AuthenticatedColaRoute,
   AuthenticatedColaboradoresRoute: AuthenticatedColaboradoresRoute,
   AuthenticatedConexionesRoute: AuthenticatedConexionesRoute,
   AuthenticatedContenidoRoute: AuthenticatedContenidoRoute,

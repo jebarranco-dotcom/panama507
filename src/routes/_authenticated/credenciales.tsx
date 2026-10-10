@@ -1,3 +1,4 @@
+import type { ErrorComponentProps } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
@@ -52,7 +53,7 @@ export const Route = createFileRoute("/_authenticated/credenciales")({
 });
 
 /** Evita que un fallo puntual del servidor tumbe toda la aplicación. */
-function ErrorCredenciales({ error, reset }: { error: Error; reset: () => void; info?: unknown }) {
+function ErrorCredenciales({ error, reset }: ErrorComponentProps) {
   return (
     <AppShell
       titulo="Credenciales de apps"

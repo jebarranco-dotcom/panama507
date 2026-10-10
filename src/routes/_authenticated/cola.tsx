@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { correrProgramador, publicarAhora } from "@/lib/borradores.functions";
 import { useEmpresa } from "@/lib/empresa";
 import { publicacionesQuery } from "@/lib/queries";
+import { guardarFoto } from "@/lib/publicadas.functions";
 
 export const Route = createFileRoute("/_authenticated/cola")({
   head: () => ({
@@ -45,6 +46,15 @@ function PaginaCola() {
   const { data: pubs = [], isLoading } = useQuery(publicacionesQuery(empresaId));
   const reenviar = useServerFn(publicarAhora);
   const correr = useServerFn(correrProgramador);
+  const fotoFn = useServerFn(guardarFoto);
+  const [fotos, setFotos] = useState<Record<string, string>>({});
+  const foto = useMutation({
+    mutationFn: (publicacionId: string) =>
+      fotoFn({ data: { empresaId, publicacionId, mediaUrl: fotos[publicacionId] ?? "" } }),
+    onSuccess: () => toast.success("Foto guardada"),
+    onError: (e: Error) => toast.error("Foto no válida", { description: e.message }),
+    onSettled: () => refrescar(),
+  });
   const [enviando, setEnviando] = useState<string | null>(null);
 
   const refrescar = () => void qc.invalidateQueries({ queryKey: ["publicaciones", empresaId] });
@@ -122,12 +132,27 @@ function PaginaCola() {
                               ID en la red: {p.referencia_externa}
                             </p>
                           ) : null}
+                          {p.media_url ? (
+                            <img src={p.media_url} alt="" className="mt-2 h-24 w-full rounded object-cover" loading="lazy" />
+                          ) : p.estado !== "publicado" ? (
+                            <div className="mt-2 flex gap-1">
+                              <input
+                                className="h-8 min-w-0 flex-1 rounded border border-border bg-background px-2 text-xs"
+                                placeholder="Enlace https de la foto real"
+                                value={fotos[p.id] ?? ""}
+                                onChange={(e) => setFotos((f) => ({ ...f, [p.id]: e.target.value }))}
+                              />
+                              <Button size="sm" variant="outline" onClick={() => foto.mutate(p.id)}>
+                                Agregar foto
+                              </Button>
+                            </div>
+                          ) : null}
                           {p.estado !== "publicado" ? (
                             <Button
                               size="sm"
                               variant="ghost"
                               className="mt-2"
-                              disabled={enviando === p.id}
+                              disabled={enviando === p.id || !p.media_url}
                               onClick={() => reenvio.mutate(p.id)}
                             >
                               {enviando === p.id ? (

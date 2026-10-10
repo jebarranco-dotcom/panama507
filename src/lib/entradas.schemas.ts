@@ -59,3 +59,7 @@ export const GuardarProgramacionInput = z.object({
     .min(1)
     .max(3),
 });
+
+export const FotoInput = PiezaInput.extend({
+  mediaUrl: z.string().trim().url().max(1000).regex(/^https:\/\//, "La foto debe ser un enlace https público."),
+});

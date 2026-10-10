@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { correrProgramador, publicarAhora } from "@/lib/borradores.functions";
 import { useEmpresa } from "@/lib/empresa";
 import { publicacionesQuery } from "@/lib/queries";
-import { guardarFoto } from "@/lib/publicadas.functions";
+import { fijarHora, guardarFoto } from "@/lib/publicadas.functions";
 
 export const Route = createFileRoute("/_authenticated/cola")({
   head: () => ({
@@ -46,6 +46,14 @@ function PaginaCola() {
   const { data: pubs = [], isLoading } = useQuery(publicacionesQuery(empresaId));
   const reenviar = useServerFn(publicarAhora);
   const correr = useServerFn(correrProgramador);
+  const fijarHoraFn = useServerFn(fijarHora);
+  const [hora, setHora] = useState("15:30");
+  const horaMut = useMutation({
+    mutationFn: () => fijarHoraFn({ data: { empresaId, hora } }),
+    onSuccess: () => toast.success(`Los posts saldrán todos los días a las ${hora} (hora de Panamá)`),
+    onError: (e: Error) => toast.error("No se pudo fijar la hora", { description: e.message }),
+    onSettled: () => refrescar(),
+  });
   const fotoFn = useServerFn(guardarFoto);
   const [fotos, setFotos] = useState<Record<string, string>>({});
   const foto = useMutation({
@@ -92,7 +100,21 @@ function PaginaCola() {
       descripcion={`${empresa.nombre}: en cola, programadas y publicadas. Reenvía manualmente si el programador no alcanzó una pieza.`}
     >
       <div className="space-y-5">
-        <div className="flex justify-end">
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <label className="text-sm text-muted-foreground" htmlFor="hora-cola">
+            Hora de salida diaria
+          </label>
+          <input
+            id="hora-cola"
+            type="time"
+            value={hora}
+            onChange={(e) => setHora(e.target.value)}
+            className="h-9 rounded-md border border-border bg-background px-2 text-sm"
+          />
+          <Button size="sm" onClick={() => horaMut.mutate()} disabled={horaMut.isPending || !hora}>
+            {horaMut.isPending ? <Loader2 className="size-4 animate-spin" /> : null}
+            Guardar hora
+          </Button>
           <Button size="sm" variant="outline" onClick={() => lote.mutate()} disabled={lote.isPending}>
             {lote.isPending ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
             Procesar cola ahora

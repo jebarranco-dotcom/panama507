@@ -118,8 +118,7 @@ function Privacidad() {
           gestión comercial y las obligaciones aplicables; después se eliminan o anonimizan.
           Los registros se conservan solo mientras sean necesarios para seguridad, auditoría
           y resolución de incidencias. Los tokens se conservan mientras la conexión autorizada
-          siga siendo necesaria; una solicitud de eliminación comprende su retirada. No se
-          establece aquí un plazo fijo de conservación que no haya sido confirmado.
+          siga siendo necesaria; una solicitud de eliminación comprende su retirada.
         </p>
       </Seccion>
 
